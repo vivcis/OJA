@@ -3,8 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/decadevs/multivendor/database"
-	"github.com/decadevs/multivendor/handlers"
-	"github.com/gin-gonic/gin"
+	"github.com/decadevs/multivendor/router"
 	"github.com/joho/godotenv"
 	"log"
 )
@@ -18,14 +17,8 @@ func main() {
 	}
 
 	database.SetupDB()
+	router, port := router.SetupRouter()
 
-	//default router
-	router := gin.Default()
-
-	router.GET("/ping", handlers.HandlerWelcomeStatement)
-
-	//router.LoadHTMLGlob("templates/*.html")
-
-	port := ":8085"
 	router.Run(port)
+
 }

@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-var Database *gorm.DB
+var Db *gorm.DB
 
 func SetupDB() error {
 	host := os.Getenv("DB_HOST")
@@ -33,7 +33,7 @@ func SetupDB() error {
 		return fmt.Errorf("migration error: %v", err)
 	}
 
-	Database = db
+	Db = db
 
 	return nil
 }

@@ -1,18 +1,10 @@
 package handlers
 
-import (
-	"github.com/decadevs/multivendor/models"
-	"github.com/gin-gonic/gin"
-	"net/http"
-)
+import "github.com/gin-gonic/gin"
 
-func HandlerWelcomeStatement(c *gin.Context) {
-
-	data := &models.User{
-		Username: "Oluwadurotimi",
-	}
-
-	c.HTML(http.StatusOK, "index.html", gin.H{
-		"Message": data,
+func PingHandler(c *gin.Context) {
+	// healthcheck
+	c.JSON(200, gin.H{
+		"message": "pong",
 	})
 }
