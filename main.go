@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/decadevs/multivendor/database"
-	"github.com/decadevs/multivendor/router"
+	"github.com/decadevs/shoparena/database"
+	"github.com/decadevs/shoparena/router"
 	"github.com/joho/godotenv"
 	"log"
 )

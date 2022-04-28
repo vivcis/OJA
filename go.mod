@@ -1,4 +1,4 @@
-module github.com/decadevs/multivendor
+module github.com/decadevs/shoparena
 
 go 1.17
 

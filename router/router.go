@@ -1,7 +1,7 @@
 package router
 
 import (
-	"github.com/decadevs/multivendor/handlers"
+	"github.com/decadevs/shoparena/handlers"
 	"github.com/gin-gonic/gin"
 	"os"
 )

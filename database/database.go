@@ -2,7 +2,7 @@ package database
 
 import (
 	"fmt"
-	"github.com/decadevs/multivendor/models"
+	"github.com/decadevs/shoparena/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"os"
