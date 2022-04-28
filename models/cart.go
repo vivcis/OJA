@@ -1,7 +1,7 @@
 package models
 
 type Cart struct {
-	ID            string
+	ID            uint `gorm:"primarykey"`
 	BuyersID      string
 	Buyer         Buyer
 	Product       []Product `json:"product"`

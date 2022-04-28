@@ -1,7 +1,7 @@
 package models
 
 type Shop struct {
-	ID       string
+	ID       uint   `gorm:"primarykey"`
 	ShopName string `json:"shop_name"`
 	SellerID string `json:"seller_id"`
 	Seller   Seller
