@@ -2,23 +2,20 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/decadevs/shoparena/database"
 	"github.com/decadevs/shoparena/router"
-	"github.com/joho/godotenv"
-	"log"
 )
 
 func main() {
-	fmt.Println("Oja")
+	fmt.Println("Starting... Oja")
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	values := database.InitDBParams()
 
-	database.SetupDB()
+	var PDB = new(database.PostgresDb)
+	PDB.Init(values.Host, values.User, values.Password, values.DbName, values.Port)
 	router, port := router.SetupRouter()
-
+	fmt.Println("connected on port ", port)
 	router.Run(port)
 
 }

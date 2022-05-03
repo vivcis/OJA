@@ -5,6 +5,6 @@ type Cart struct {
 	BuyersID      string
 	Buyer         Buyer
 	Product       []Product `json:"product"`
-	TotalPrice    float64   `json:"total_price"`
-	TotalQuantity uint      `json:"total_quantity"`
+	TotalPrice    string    `json:"total_price"`
+	TotalQuantity string    `json:"total_quantity"`
 }
