@@ -2,8 +2,11 @@ package database
 
 import (
 	"fmt"
+	"log"
+	"os"
 
 	"github.com/decadevs/shoparena/models"
+	"github.com/joho/godotenv"
 )
 
 // DB provides access to the different db
@@ -29,4 +32,33 @@ type ValidationError struct {
 
 func (v ValidationError) Error() string {
 	return fmt.Sprintf("%s: %s", v.Field, v.Message)
+}
+
+type DBParams struct {
+	Host     string
+	User     string
+	Password string
+	DbName   string
+	Port     string
+}
+
+func InitDBParams() DBParams {
+	errEnv := godotenv.Load()
+	if errEnv != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	host := os.Getenv("DB_HOST")
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+	port := os.Getenv("DB_PORT")
+
+	return DBParams{
+		Host:     host,
+		User:     user,
+		Password: password,
+		DbName:   dbName,
+		Port:     port,
+	}
 }

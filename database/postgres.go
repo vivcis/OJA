@@ -3,12 +3,11 @@ package database
 import (
 	"errors"
 	"fmt"
-	"log"
-	"os"
+
 	"time"
 
 	"github.com/decadevs/shoparena/models"
-	"github.com/joho/godotenv"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -20,19 +19,8 @@ type PostgresDb struct {
 }
 
 // Init sets up the mongodb instance
-func (pdb *PostgresDb) Init() error {
+func (pdb *PostgresDb) Init(host, user, password, dbName, port string) error {
 	fmt.Println("connecting to Database.....")
-
-	errEnv := godotenv.Load()
-	if errEnv != nil {
-		log.Fatal("Error loading .env file")
-	}
-
-	host := os.Getenv("DB_HOST")
-	user := os.Getenv("DB_USER")
-	password := os.Getenv("DB_PASSWORD")
-	dbName := os.Getenv("DB_NAME")
-	port := os.Getenv("DB_PORT")
 
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Africa/Lagos", host, user, password, dbName, port)
 	var err error
@@ -47,7 +35,7 @@ func (pdb *PostgresDb) Init() error {
 		fmt.Println("Connected to Database")
 	}
 
-	err = db.AutoMigrate(&models.Product{}, &models.Seller{}, &models.Buyer{}, &models.Shop{})
+	err = db.AutoMigrate(&models.Product{}, &models.Seller{}, &models.Buyer{}, &models.Shop{}, &models.Blacklist{})
 	if err != nil {
 		return fmt.Errorf("migration error: %v", err)
 	}

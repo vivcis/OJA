@@ -8,10 +8,3 @@ func PingHandler(c *gin.Context) {
 		"message": "pong",
 	})
 }
-func PingTestHandler(c *gin.Context) {
-	// healthcheck
-	c.JSON(200, gin.H{
-		"message": "pong",
-	})
-
-}

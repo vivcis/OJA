@@ -19,7 +19,6 @@ func SetupRouter() (*gin.Engine, string) {
 	apirouter := router.Group("/api/v1")
 
 	apirouter.GET("/ping", handlers.PingHandler)
-	apirouter.GET("/test", handlers.PingTestHandler)
 
 	port := ":" + os.Getenv("PORT")
 	if port == ":" {
