@@ -12,14 +12,14 @@ import (
 	"time"
 
 	"github.com/decadevs/shoparena/database"
-	"github.com/decadevs/shoparena/routers"
+	"github.com/decadevs/shoparena/router"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
 	DB     database.PostgresDb
-	Router *routers.Router
+	Router *router.Router
 }
 
 func Start() error {
@@ -35,9 +35,9 @@ func Start() error {
 		return err
 	}
 
-	router, port := routers.SetupRouter(h)
+	route, port := router.SetupRouter(h)
 	fmt.Println("connected on port ", port)
-	err = router.Run(port)
+	err = route.Run(port)
 	if err != nil {
 		log.Printf("Error from SetupRouter :%v", err)
 		return err

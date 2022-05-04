@@ -7,7 +7,7 @@ import (
 	"github.com/decadevs/shoparena/database"
 	"github.com/decadevs/shoparena/handlers"
 	"github.com/decadevs/shoparena/models"
-	"github.com/decadevs/shoparena/routers"
+	"github.com/decadevs/shoparena/router"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -23,7 +23,7 @@ func TestSearch(t *testing.T) {
 	h := &handlers.Handler{
 		DB: mockDB,
 	}
-	route, _ := routers.SetupRouter(h)
+	route, _ := router.SetupRouter(h)
 
 	//testString := "apple"
 	product := []models.Product{
@@ -101,7 +101,7 @@ func TestSearch(t *testing.T) {
 //		panic(err)
 //	}
 //
-//	router, _ = routers.SetupRouter(h)
+//	router, _ = router.SetupRouter(h)
 //
 //	exitCode := m.Run()
 //	os.Exit(exitCode)
