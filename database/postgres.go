@@ -3,18 +3,16 @@ package database
 import (
 	"errors"
 	"fmt"
-
-	"time"
-
 	"github.com/decadevs/shoparena/models"
-
+	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"log"
+	"time"
 )
 
-// MongoDB implements the DB interface
+//PostgresDb implements the DB interface
 type PostgresDb struct {
-	//DB *mgo.Database
 	DB *gorm.DB
 }
 
@@ -44,6 +42,30 @@ func (pdb *PostgresDb) Init(host, user, password, dbName, port string) error {
 
 	return nil
 
+}
+
+// SearchDB Searches all products from DB
+func (pdb *PostgresDb) SearchDB(c *gin.Context) ([]models.Product, error) {
+	var products []models.Product
+	//Db.Find(&products)
+
+	sql := "Select * FROM products"
+
+	//Equivalent to param
+	s := c.Query("s")
+	if s != "" {
+		sql = fmt.Sprintf("%s WHERE shop_name LIKE '%%%s%%' OR product_name LIKE '%%%s%%' "+
+			"OR product_category LIKE '%%%s%%' OR product_details LIKE '%%%s%%' OR product_price LIKE '%%%s%%' "+
+			"OR quantity LIKE '%%%s%%' OR rating LIKE '%%%s%%'", sql, s, s, s, s, s, s, s)
+	}
+
+	err := pdb.DB.Raw(sql).Scan(&products).Error
+	if err != nil {
+		log.Println("Error in search function", err)
+		return nil, err
+	}
+
+	return products, nil
 }
 
 // CreateSeller creates a new Seller in the DB

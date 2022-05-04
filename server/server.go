@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"github.com/decadevs/shoparena/handlers"
 	"log"
 	"net/http"
 	"os"
@@ -11,14 +12,38 @@ import (
 	"time"
 
 	"github.com/decadevs/shoparena/database"
-	"github.com/decadevs/shoparena/router"
+	"github.com/decadevs/shoparena/routers"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
 	DB     database.PostgresDb
-	Router *router.Router
+	Router *routers.Router
+}
+
+func Start() error {
+
+	values := database.InitDBParams()
+
+	//Setting up the Postgres Database
+	var PDB = new(database.PostgresDb)
+	h := &handlers.Handler{DB: PDB}
+	err := PDB.Init(values.Host, values.User, values.Password, values.DbName, values.Port)
+	if err != nil {
+		log.Println("Error trying to Init", err)
+		return err
+	}
+
+	router, port := routers.SetupRouter(h)
+	fmt.Println("connected on port ", port)
+	err = router.Run(port)
+	if err != nil {
+		log.Printf("Error from SetupRouter :%v", err)
+		return err
+	}
+
+	return nil
 }
 
 func (s *Server) defineRoutes(router *gin.Engine) {
