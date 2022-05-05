@@ -184,3 +184,8 @@ func (pdb *PostgresDb) FindAllSellersExcept(except string) ([]models.Seller, err
 	}
 	return sellers, nil
 }
+
+func (pdb *PostgresDb) UpdateUser(user *models.User) error {
+
+	return nil
+}
