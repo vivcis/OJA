@@ -1,10 +1,17 @@
 package router
 
 import (
+	"net/http"
+	"os"
+
 	"github.com/decadevs/shoparena/handlers"
 	"github.com/gin-gonic/gin"
-	"os"
 )
+
+type Router struct {
+	ContentType string
+	handlers    map[string]func(w http.ResponseWriter, r *http.Request)
+}
 
 func SetupRouter() (*gin.Engine, string) {
 	router := gin.Default()
