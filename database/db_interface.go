@@ -3,14 +3,13 @@ package database
 import (
 	"fmt"
 	"github.com/decadevs/shoparena/models"
-	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
 )
 
 // DB provides access to the different db
-//go:generate  mockgen -source=./db_interface.go -destination=./mockfile.go DB -package=mock
+//go:generate  mockgen -source=./db_interface.go -destination=./mocks/db_mock.go DB -package=mocks
 type DB interface {
 	CreateSeller(user *models.Seller) (*models.Seller, error)
 	CreateBuyer(user *models.Buyer) (*models.Buyer, error)
@@ -21,7 +20,7 @@ type DB interface {
 	FindSellerByPhone(phone string) (*models.Seller, error)
 	FindBuyerByPhone(phone string) (*models.Buyer, error)
 	FindAllSellersExcept(except string) ([]models.Seller, error)
-	SearchDB(c *gin.Context) ([]models.Product, error)
+	SearchDB(s string) ([]models.Product, error)
 	TokenInBlacklist(token *string) bool
 	UpdateUser(user *models.User) error
 }

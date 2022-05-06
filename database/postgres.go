@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/decadevs/shoparena/models"
-	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
@@ -45,14 +44,12 @@ func (pdb *PostgresDb) Init(host, user, password, dbName, port string) error {
 }
 
 // SearchDB Searches all products from DB
-func (pdb *PostgresDb) SearchDB(c *gin.Context) ([]models.Product, error) {
+func (pdb *PostgresDb) SearchDB(s string) ([]models.Product, error) {
 	var products []models.Product
 	//Db.Find(&products)
 
 	sql := "Select * FROM products"
 
-	//Equivalent to param
-	s := c.Query("s")
 	if s != "" {
 		sql = fmt.Sprintf("%s WHERE shop_name LIKE '%%%s%%' OR product_name LIKE '%%%s%%' "+
 			"OR product_category LIKE '%%%s%%' OR product_details LIKE '%%%s%%' OR product_price LIKE '%%%s%%' "+

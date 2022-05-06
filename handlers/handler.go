@@ -19,7 +19,9 @@ func PingHandler(c *gin.Context) {
 }
 
 func (h *Handler) SearchDBQuery(c *gin.Context) {
-	products, err := h.DB.SearchDB(c)
+	//Equivalent to param
+	s := c.Query("s")
+	products, err := h.DB.SearchDB(s)
 	if err != nil {
 		log.Println("handler error in search function", err)
 		c.JSON(http.StatusInternalServerError, err.Error())

@@ -2,13 +2,12 @@
 // Source: ./db_interface.go
 
 // Package mock_database is a generated GoMock package.
-package database
+package mock_database
 
 import (
 	reflect "reflect"
 
 	models "github.com/decadevs/shoparena/models"
-	gin "github.com/gin-gonic/gin"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -171,18 +170,18 @@ func (mr *MockDBMockRecorder) FindSellerByUsername(username interface{}) *gomock
 }
 
 // SearchDB mocks base method.
-func (m *MockDB) SearchDB(c *gin.Context) ([]models.Product, error) {
+func (m *MockDB) SearchDB(s string) ([]models.Product, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SearchDB", c)
+	ret := m.ctrl.Call(m, "SearchDB", s)
 	ret0, _ := ret[0].([]models.Product)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SearchDB indicates an expected call of SearchDB.
-func (mr *MockDBMockRecorder) SearchDB(c interface{}) *gomock.Call {
+func (mr *MockDBMockRecorder) SearchDB(s interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchDB", reflect.TypeOf((*MockDB)(nil).SearchDB), c)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchDB", reflect.TypeOf((*MockDB)(nil).SearchDB), s)
 }
 
 // TokenInBlacklist mocks base method.
