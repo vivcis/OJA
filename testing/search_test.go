@@ -2,7 +2,6 @@ package testing
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	mock_database "github.com/decadevs/shoparena/database/mocks"
 	"github.com/decadevs/shoparena/handlers"
@@ -29,36 +28,57 @@ func TestSearch(t *testing.T) {
 		{
 			ShopName:        "the",
 			ProductName:     "apple",
-			ProductPrice:    "15",
+			ProductPrice:    15,
 			ProductCategory: "fruit",
 			ProductImage:    "5678",
 			ProductDetails:  "ewregfhjzn",
-			Rating:          "4",
-			Quantity:        "2",
+			Rating:          4,
+			Quantity:        2,
 		},
 		{
 			ShopName:        "chuk",
 			ProductName:     "carburetor",
-			ProductPrice:    "4000",
+			ProductPrice:    4000,
 			ProductCategory: "spare parts",
-			ProductImage:    "7685",
+			ProductImage:    "7685.com",
 			ProductDetails:  "car parts",
-			Rating:          "2",
-			Quantity:        "20",
+			Rating:          2,
+			Quantity:        20,
+		},
+		{
+			ShopName:        "the",
+			ProductName:     "corn",
+			ProductPrice:    25,
+			ProductCategory: "fruit",
+			ProductImage:    "5678.com",
+			ProductDetails:  "ewregfhjzn",
+			Rating:          4,
+			Quantity:        2,
 		},
 	}
 
-	s := "apple"
+	//s := "apple"
 	p := []models.Product{
 		{
 			ShopName:        "the",
 			ProductName:     "apple",
-			ProductPrice:    "15",
+			ProductPrice:    15,
 			ProductCategory: "fruit",
 			ProductImage:    "5678",
 			ProductDetails:  "ewregfhjzn",
-			Rating:          "4",
-			Quantity:        "2",
+			Rating:          4,
+			Quantity:        2,
+		},
+
+		{
+			ShopName:        "the",
+			ProductName:     "corn",
+			ProductPrice:    25,
+			ProductCategory: "fruit",
+			ProductImage:    "5678.com",
+			ProductDetails:  "ewregfhjzn",
+			Rating:          4,
+			Quantity:        2,
 		},
 	}
 
@@ -73,31 +93,28 @@ func TestSearch(t *testing.T) {
 	}
 
 	t.Run("Testing for error", func(t *testing.T) {
-		mockDB.EXPECT().SearchDB("").Return(nil, errors.New("error exists"))
+		mockDB.EXPECT().SearchProduct("", "", "", "")
 		rw := httptest.NewRecorder()
 		req, _ := http.NewRequest(http.MethodGet, "/api/v1/searchproducts", strings.NewReader(string(bodyJSON)))
 		route.ServeHTTP(rw, req)
+		fmt.Println(rw.Code)
 		assert.Equal(t, http.StatusInternalServerError, rw.Code)
-		assert.Contains(t, rw.Body.String(), "error exists")
-	})
-	t.Run("Testing for empty string", func(t *testing.T) {
-		mockDB.EXPECT().SearchDB("").Return(product, nil)
-		rw := httptest.NewRecorder()
-		req, _ := http.NewRequest(http.MethodGet, "/api/v1/searchproducts", strings.NewReader(string(bodyJSON)))
-		route.ServeHTTP(rw, req)
-		fmt.Println(rw.Body.String())
-		fmt.Println(product)
-		assert.Equal(t, http.StatusFound, rw.Code)
-		assert.Contains(t, rw.Body.String(), string(bodyJSON))
+		assert.Contains(t, rw.Body.String(), "no such product")
+
 	})
 
 	t.Run("Testing for nonempty string", func(t *testing.T) {
-		mockDB.EXPECT().SearchDB(s).Return(p, nil)
+		mockDB.EXPECT().SearchProduct("25", "30", "fruit", "").Return(p, nil)
 		rw := httptest.NewRecorder()
-		req, _ := http.NewRequest(http.MethodGet, "/api/v1/searchproducts", strings.NewReader(string(bodyJSON)))
+		req, err := http.NewRequest(http.MethodGet,
+			"/api/v1/searchproducts?category=fruit&lower-price=25&upper-price=30",
+			strings.NewReader(string(pJSON)))
+		if err != nil {
+			fmt.Printf("errrr here %v \n", err)
+			return
+		}
 		route.ServeHTTP(rw, req)
-		fmt.Println(rw.Body.String())
-		fmt.Println(p)
+		//fmt.Println(rw.Body.String())
 		assert.Equal(t, http.StatusFound, rw.Code)
 		assert.Contains(t, rw.Body.String(), string(pJSON))
 	})

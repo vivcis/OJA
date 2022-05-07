@@ -6,7 +6,7 @@ import (
 	"github.com/decadevs/shoparena/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"log"
+	"strconv"
 	"time"
 )
 
@@ -43,24 +43,106 @@ func (pdb *PostgresDb) Init(host, user, password, dbName, port string) error {
 
 }
 
-// SearchDB Searches all products from DB
-func (pdb *PostgresDb) SearchDB(s string) ([]models.Product, error) {
-	var products []models.Product
+// SearchProduct Searches all products from DB
+func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, category, name string) ([]models.Product, error) {
 	//Db.Find(&products)
 
-	sql := "Select * FROM products"
+	var products []models.Product
+	LPInt, _ := strconv.Atoi(lowerPrice)
+	UPInt, _ := strconv.Atoi(upperPrice)
 
-	if s != "" {
-		sql = fmt.Sprintf("%s WHERE shop_name LIKE '%%%s%%' OR product_name LIKE '%%%s%%' "+
-			"OR product_category LIKE '%%%s%%' OR product_details LIKE '%%%s%%' OR product_price LIKE '%%%s%%' "+
-			"OR quantity LIKE '%%%s%%' OR rating LIKE '%%%s%%'", sql, s, s, s, s, s, s, s)
+	//sql := "Select * FROM products"
+	//sql = fmt.Sprintf("%s WHERE product_name LIKE '%%%s%%'", sql, name)
+
+	if LPInt == 0 && UPInt == 0 && name == "" {
+		err := pdb.DB.Where("product_category = ?", category).Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if LPInt == 0 && name == "" {
+		err := pdb.DB.Where("product_category = ?", category).
+			Where("product_price <= ?", uint(UPInt)).Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if UPInt == 0 && name == "" {
+		err := pdb.DB.Where("product_category = ?", category).
+			Where("product_price >= ?", uint(LPInt)).Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if LPInt != 0 && UPInt != 0 && name == "" {
+		err := pdb.DB.Where("product_category = ?", category).Where("product_price >= ?", uint(LPInt)).
+			Where("product_price <= ?", uint(UPInt)).Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if LPInt == 0 && UPInt == 0 && name != "" {
+		err := pdb.DB.Where("product_category = ?", category).
+			Where("product_name LIKE ?", "%"+name+"%").Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if LPInt == 0 && name != "" {
+		err := pdb.DB.Where("product_category = ?", category).
+			Where("product_price <= ?", uint(UPInt)).
+			Where("product_name LIKE ?", "%"+name+"%").Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if UPInt == 0 && name != "" {
+		err := pdb.DB.Where("product_category = ?", category).
+			Where("product_price >= ?", uint(LPInt)).
+			Where("product_name LIKE ?", "%"+name+"%").Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if category == "" {
+		return nil, errors.New("choose a category")
+
+	} else {
+		err := pdb.DB.Where("product_category = ?", category).Where("product_price >= ?", uint(LPInt)).
+			Where("product_price <= ?", uint(UPInt)).
+			Where("product_name LIKE ?", "%"+name+"%").Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
 	}
 
-	err := pdb.DB.Raw(sql).Scan(&products).Error
-	if err != nil {
-		log.Println("Error in search function", err)
-		return nil, err
+	return products, nil
+}
+
+func (pdb *PostgresDb) FindProductByPrice(lowerPrice, upperPrice string) ([]models.Product, error) {
+
+	var products []models.Product
+
+	LPInt, _ := strconv.Atoi(lowerPrice)
+	UPInt, _ := strconv.Atoi(upperPrice)
+
+	er := pdb.DB.
+		Where("product_price >= ?", uint(LPInt)).
+		Where("product_price <= ?", uint(UPInt)).Find(&products).Error
+	if er != nil {
+		return nil, er
 	}
+
+	//if err := pdb.DB.Where("product_price >= ? AND product_price <= ?", uint(LPInt), uint(UPInt)).Error; err != nil {
+	//	return nil, err
+	//}
+
+	//err := pdb.DB.Raw("Select * FROM products").Scan(&products).Error
+	//if err != nil {
+	//	log.Println("Error in FindProductByPrice function", err)
+	//	return nil, err
+	//}
 
 	return products, nil
 }

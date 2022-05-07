@@ -19,7 +19,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter := router.Group("/api/v1")
 
 	apirouter.GET("/ping", handlers.PingHandler)
-	apirouter.GET("/searchproducts", h.SearchDBQuery)
+	apirouter.GET("/searchproducts", h.SearchProductHandler)
 
 	port := ":" + os.Getenv("PORT")
 	if port == ":" {
