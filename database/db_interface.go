@@ -20,7 +20,6 @@ type DB interface {
 	FindSellerByEmail(email string) (*models.Seller, error)
 	FindSellerByPhone(phone string) (*models.Seller, error)
 	FindSellerByUsername(username string) (*models.Seller, error)
-	FindProductByPrice(lowerPrice, upperPrice string) ([]models.Product, error)
 	SearchProduct(lowerPrice, upperPrice, category, name string) ([]models.Product, error)
 	TokenInBlacklist(token *string) bool
 	UpdateUser(user *models.User) error

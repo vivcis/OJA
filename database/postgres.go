@@ -45,14 +45,10 @@ func (pdb *PostgresDb) Init(host, user, password, dbName, port string) error {
 
 // SearchProduct Searches all products from DB
 func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, category, name string) ([]models.Product, error) {
-	//Db.Find(&products)
 
 	var products []models.Product
 	LPInt, _ := strconv.Atoi(lowerPrice)
 	UPInt, _ := strconv.Atoi(upperPrice)
-
-	//sql := "Select * FROM products"
-	//sql = fmt.Sprintf("%s WHERE product_name LIKE '%%%s%%'", sql, name)
 
 	if LPInt == 0 && UPInt == 0 && name == "" {
 		err := pdb.DB.Where("product_category = ?", category).Find(&products).Error
@@ -116,33 +112,6 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, category, name stri
 			return nil, err
 		}
 	}
-
-	return products, nil
-}
-
-func (pdb *PostgresDb) FindProductByPrice(lowerPrice, upperPrice string) ([]models.Product, error) {
-
-	var products []models.Product
-
-	LPInt, _ := strconv.Atoi(lowerPrice)
-	UPInt, _ := strconv.Atoi(upperPrice)
-
-	er := pdb.DB.
-		Where("product_price >= ?", uint(LPInt)).
-		Where("product_price <= ?", uint(UPInt)).Find(&products).Error
-	if er != nil {
-		return nil, er
-	}
-
-	//if err := pdb.DB.Where("product_price >= ? AND product_price <= ?", uint(LPInt), uint(UPInt)).Error; err != nil {
-	//	return nil, err
-	//}
-
-	//err := pdb.DB.Raw("Select * FROM products").Scan(&products).Error
-	//if err != nil {
-	//	log.Println("Error in FindProductByPrice function", err)
-	//	return nil, err
-	//}
 
 	return products, nil
 }
