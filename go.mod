@@ -9,9 +9,15 @@ require (
 	gorm.io/gorm v1.23.5
 )
 
-require github.com/lib/pq v1.10.5
+require (
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/lib/pq v1.10.5 // indirect
+)
 
 require (
+	github.com/aws/aws-sdk-go v1.44.9
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
