@@ -4,10 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/decadevs/shoparena/models"
-	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"log"
+	"strconv"
 	"time"
 )
 
@@ -44,25 +43,74 @@ func (pdb *PostgresDb) Init(host, user, password, dbName, port string) error {
 
 }
 
-// SearchDB Searches all products from DB
-func (pdb *PostgresDb) SearchDB(c *gin.Context) ([]models.Product, error) {
+// SearchProduct Searches all products from DB
+func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, category, name string) ([]models.Product, error) {
+
 	var products []models.Product
-	//Db.Find(&products)
+	LPInt, _ := strconv.Atoi(lowerPrice)
+	UPInt, _ := strconv.Atoi(upperPrice)
 
-	sql := "Select * FROM products"
+	if LPInt == 0 && UPInt == 0 && name == "" {
+		err := pdb.DB.Where("product_category = ?", category).Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if LPInt == 0 && name == "" {
+		err := pdb.DB.Where("product_category = ?", category).
+			Where("product_price <= ?", uint(UPInt)).Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if UPInt == 0 && name == "" {
+		err := pdb.DB.Where("product_category = ?", category).
+			Where("product_price >= ?", uint(LPInt)).Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if LPInt != 0 && UPInt != 0 && name == "" {
+		err := pdb.DB.Where("product_category = ?", category).Where("product_price >= ?", uint(LPInt)).
+			Where("product_price <= ?", uint(UPInt)).Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if LPInt == 0 && UPInt == 0 && name != "" {
+		err := pdb.DB.Where("product_category = ?", category).
+			Where("product_name LIKE ?", "%"+name+"%").Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if LPInt == 0 && name != "" {
+		err := pdb.DB.Where("product_category = ?", category).
+			Where("product_price <= ?", uint(UPInt)).
+			Where("product_name LIKE ?", "%"+name+"%").Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if UPInt == 0 && name != "" {
+		err := pdb.DB.Where("product_category = ?", category).
+			Where("product_price >= ?", uint(LPInt)).
+			Where("product_name LIKE ?", "%"+name+"%").Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if category == "" {
+		return nil, errors.New("choose a category")
 
-	//Equivalent to param
-	s := c.Query("s")
-	if s != "" {
-		sql = fmt.Sprintf("%s WHERE shop_name LIKE '%%%s%%' OR product_name LIKE '%%%s%%' "+
-			"OR product_category LIKE '%%%s%%' OR product_details LIKE '%%%s%%' OR product_price LIKE '%%%s%%' "+
-			"OR quantity LIKE '%%%s%%' OR rating LIKE '%%%s%%'", sql, s, s, s, s, s, s, s)
-	}
-
-	err := pdb.DB.Raw(sql).Scan(&products).Error
-	if err != nil {
-		log.Println("Error in search function", err)
-		return nil, err
+	} else {
+		err := pdb.DB.Where("product_category = ?", category).Where("product_price >= ?", uint(LPInt)).
+			Where("product_price <= ?", uint(UPInt)).
+			Where("product_name LIKE ?", "%"+name+"%").Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
 	}
 
 	return products, nil

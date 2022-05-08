@@ -18,13 +18,23 @@ func PingHandler(c *gin.Context) {
 	})
 }
 
-func (h *Handler) SearchDBQuery(c *gin.Context) {
-	products, err := h.DB.SearchDB(c)
+func (h *Handler) SearchProductHandler(c *gin.Context) {
+	//Equivalent to param
+	category := c.Query("category")
+	lowerPrice := c.Query("lower-price")
+	upperPrice := c.Query("upper-price")
+	name := c.Query("name")
+
+	product, err := h.DB.SearchProduct(lowerPrice, upperPrice, category, name)
 	if err != nil {
-		log.Println("handler error in search function", err)
+		log.Println("handler error in search product", err)
 		c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	if len(product) == 0 {
+		c.JSON(http.StatusInternalServerError, "no such product")
 		return
 	}
 
-	c.JSON(http.StatusFound, products)
+	c.JSON(http.StatusFound, product)
 }

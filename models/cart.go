@@ -2,9 +2,9 @@ package models
 
 type Cart struct {
 	ID            uint `gorm:"primarykey"`
-	BuyersID      string
+	BuyersID      uint
 	Buyer         Buyer
 	Product       []Product `json:"product"`
-	TotalPrice    string    `json:"total_price"`
-	TotalQuantity string    `json:"total_quantity"`
+	TotalPrice    uint      `json:"total_price"`
+	TotalQuantity uint      `json:"total_quantity"`
 }
