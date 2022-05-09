@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/decadevs/shoparena/models"
@@ -10,9 +11,8 @@ import (
 	"gorm.io/gorm"
 )
 
-// MongoDB implements the DB interface
+//PostgresDb implements the DB interface
 type PostgresDb struct {
-	//DB *mgo.Database
 	DB *gorm.DB
 }
 
@@ -42,6 +42,79 @@ func (pdb *PostgresDb) Init(host, user, password, dbName, port string) error {
 
 	return nil
 
+}
+
+// SearchProduct Searches all products from DB
+func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, category, name string) ([]models.Product, error) {
+
+	var products []models.Product
+	LPInt, _ := strconv.Atoi(lowerPrice)
+	UPInt, _ := strconv.Atoi(upperPrice)
+
+	if LPInt == 0 && UPInt == 0 && name == "" {
+		err := pdb.DB.Where("product_category = ?", category).Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if LPInt == 0 && name == "" {
+		err := pdb.DB.Where("product_category = ?", category).
+			Where("product_price <= ?", uint(UPInt)).Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if UPInt == 0 && name == "" {
+		err := pdb.DB.Where("product_category = ?", category).
+			Where("product_price >= ?", uint(LPInt)).Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if LPInt != 0 && UPInt != 0 && name == "" {
+		err := pdb.DB.Where("product_category = ?", category).Where("product_price >= ?", uint(LPInt)).
+			Where("product_price <= ?", uint(UPInt)).Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if LPInt == 0 && UPInt == 0 && name != "" {
+		err := pdb.DB.Where("product_category = ?", category).
+			Where("product_name LIKE ?", "%"+name+"%").Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if LPInt == 0 && name != "" {
+		err := pdb.DB.Where("product_category = ?", category).
+			Where("product_price <= ?", uint(UPInt)).
+			Where("product_name LIKE ?", "%"+name+"%").Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if UPInt == 0 && name != "" {
+		err := pdb.DB.Where("product_category = ?", category).
+			Where("product_price >= ?", uint(LPInt)).
+			Where("product_name LIKE ?", "%"+name+"%").Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if category == "" {
+		return nil, errors.New("choose a category")
+
+	} else {
+		err := pdb.DB.Where("product_category = ?", category).Where("product_price >= ?", uint(LPInt)).
+			Where("product_price <= ?", uint(UPInt)).
+			Where("product_name LIKE ?", "%"+name+"%").Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	}
+
+	return products, nil
 }
 
 // CreateSeller creates a new Seller in the DB
@@ -161,24 +234,9 @@ func (pdb *PostgresDb) FindAllSellersExcept(except string) ([]models.Seller, err
 	return sellers, nil
 }
 
-// UpdateUser updates user in the collection
-func (pdb *PostgresDb) UpdateUser(username string, update *models.UpdateUser) error {
-	result :=
-		pdb.DB.Model(models.User{}).
-			Where("username = ?", username).
-			Updates(
-				models.User{
-					FirstName:      update.FirstName,
-					LastName:       update.LastName,
-					PhoneNumber:    update.PhoneNumber,
-					Address:        update.Address,
-					Email:          update.Email,
-				},
-			)
-	return result.Error
-}
-
-func (pdb *PostgresDb) UpdateUser1(user *models.User) error {
+//UpdateUser updates both buyers and sellers information 
+func (pdb *PostgresDb) UpdateUser(user *models.User) error {
 	result := pdb.DB.Model(user).Updates(user)
 	return result.Error
 }
+

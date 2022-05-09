@@ -2,27 +2,29 @@ package database
 
 import (
 	"fmt"
-	"log"
-	"os"
-
 	"github.com/decadevs/shoparena/models"
 	"github.com/joho/godotenv"
+	"log"
+	"os"
 )
 
 // DB provides access to the different db
+
 type DB interface {
-	CreateSeller(user *models.Seller) (*models.Seller, error)
 	CreateBuyer(user *models.Buyer) (*models.Buyer, error)
-	FindSellerByUsername(username string) (*models.Seller, error)
+	CreateSeller(user *models.Seller) (*models.Seller, error)
+	FindAllSellersExcept(except string) ([]models.Seller, error)
+	FindBuyerByEmail(email string) (*models.Buyer, error)
+	FindBuyerByPhone(phone string) (*models.Buyer, error)
 	FindBuyerByUsername(username string) (*models.Buyer, error)
 	FindSellerByEmail(email string) (*models.Seller, error)
-	FindBuyerByEmail(email string) (*models.Buyer, error)
 	FindSellerByPhone(phone string) (*models.Seller, error)
-	FindBuyerByPhone(phone string) (*models.Buyer, error)
-	FindAllSellersExcept(except string) ([]models.Seller, error)
-	UpdateUser(id string, update *models.UpdateUser) error
-	UpdateUser1(user *models.User) error
+	//UpdateUser(id string, update *models.UpdateUser) error
+	UpdateUser(user *models.User) error
+	FindSellerByUsername(username string) (*models.Seller, error)
+	SearchProduct(lowerPrice, upperPrice, category, name string) ([]models.Product, error)
 	TokenInBlacklist(token *string) bool
+	
 }
 
 // ValidationError defines error that occur due to validation

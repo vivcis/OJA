@@ -19,10 +19,3 @@ type User struct {
 	Status       bool   `json:"status"`
 }
 
-type UpdateUser struct {
-	FirstName      string `json:"first_name" binding:"required" form:"first_name"`
-	LastName       string `json:"last_name" binding:"required" form:"last_name"`
-	PhoneNumber    string `json:"phone" binding:"required" form:"phone1"`
-	Email          string `json:"email" binding:"required,email" form:"email"`
-	Address        string `json:"address"  form:"address"`
-}
