@@ -16,9 +16,9 @@ import (
 	"github.com/decadevs/shoparena/database"
 	servererrors "github.com/decadevs/shoparena/handlers/serverErrors"
 	"github.com/decadevs/shoparena/models"
-	"github.com/decadevs/shoparena/router"
 	"github.com/gin-gonic/gin"
 	validator "github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 )
 
 func PingHandler(c *gin.Context) {
@@ -26,6 +26,12 @@ func PingHandler(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"message": "pong",
 	})
+}
+
+// Server serves requests to DB with router
+type Server struct {
+	dB database.DB
+	// Router *router.Router
 }
 
 // decode decodes the body of c into v
@@ -54,12 +60,6 @@ func JSON(c *gin.Context, message string, status int, data interface{}, errs []s
 	}
 
 	c.JSON(status, responsedata)
-}
-
-// Server serves requests to DB with router
-type Server struct {
-	dB     database.DB
-	Router *router.Router
 }
 
 func (s *Server) handleUpdateUserDetails() gin.HandlerFunc {
@@ -155,7 +155,8 @@ func (s *Server) handleUploadProfilePic() gin.HandlerFunc {
 					JSON(c, "", http.StatusBadRequest, nil, []string{fileExtension + " image file type is not supported"})
 					return
 				}
-				tempFileName := "profile_pics/" + bson.NewObjectId().Hex() + fileExtension
+				// create a unique file name for the file
+				tempFileName := "profile_pics/" + uuid.NewString() + fileExtension
 
 				session, err := session.NewSession(&aws.Config{
 					Region: aws.String(os.Getenv("AWS_REGION")),
@@ -194,6 +195,7 @@ func (s *Server) handleUploadProfilePic() gin.HandlerFunc {
 	}
 }
 
+// UploadFileToS3 saves a file to aws bucket and returns the url to the file and an error if there's any
 func uploadFileToS3(s *session.Session, file multipart.File, fileName string, size int64) error {
 	// get the file size and read the file content into a buffer
 	buffer := make([]byte, size)
@@ -213,4 +215,31 @@ func uploadFileToS3(s *session.Session, file multipart.File, fileName string, si
 		StorageClass:         aws.String("INTELLIGENT_TIERING"),
 	})
 	return err
+}
+
+// MakeBucket creates a bucket.
+// Inputs:
+//     sess is the current session, which provides configuration for the SDK's service clients
+//     bucket is the name of the bucket
+// Output:
+//     If success, nil
+//     Otherwise, an error from the call to CreateBucket
+func MakeBucket(sess *session.Session, bucket *string) error {
+	svc := s3.New(sess)
+
+	_, err := svc.CreateBucket(&s3.CreateBucketInput{
+		Bucket: bucket,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = svc.WaitUntilBucketExists(&s3.HeadBucketInput{
+		Bucket: bucket,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+ 
 }
