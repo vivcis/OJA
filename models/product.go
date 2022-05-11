@@ -6,12 +6,13 @@ import (
 
 type Product struct {
 	gorm.Model
-	ShopName        string `json:"shop_name"`
-	ProductName     string `json:"product_name"`
-	ProductPrice    uint   `json:"product_price"`
-	ProductCategory string `json:"product_category"`
-	ProductImage    string `json:"product_image"`
-	ProductDetails  string `json:"product_details"`
-	Rating          uint   `json:"rating"`
-	Quantity        uint   `json:"quantity"`
+	SellerId    uint `json:"seller_id"`
+	CategoryId  uint
+	Category    Category
+	Title       string  `json:"title"`
+	Description string  `json:"description"`
+	Price       uint    `json:"price"`
+	Images      []Image `json:"images" gorm:"oneToMany"`
+	Rating      uint    `json:"rating"`
+	Quantity    uint    `json:"quantity"`
 }
