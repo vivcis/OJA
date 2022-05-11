@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/decadevs/shoparena/handlers"
+	"github.com/decadevs/shoparena/updatepasswordhandlers"
 	"github.com/gin-gonic/gin"
 )
 
