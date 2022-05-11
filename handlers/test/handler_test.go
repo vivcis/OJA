@@ -32,8 +32,8 @@ func TestResetPassword(t *testing.T) {
 		ConfirmNewPassword string `json:"confirm_new_password"`
 	}{
 		OldPassword:        "12345678",
-		NewPassword:        "12345678",
-		ConfirmNewPassword: "12345678",
+		NewPassword:        "123456789",
+		ConfirmNewPassword: "123456789",
 	}
 
 	buyer := models.Buyer{
@@ -41,7 +41,6 @@ func TestResetPassword(t *testing.T) {
 			Email:        "chuks@gmail.com",
 			PasswordHash: string(passwordHash),
 		},
-		Cart:   nil,
 		Orders: nil,
 	}
 
@@ -60,8 +59,4 @@ func TestResetPassword(t *testing.T) {
 	route.ServeHTTP(w, req)
 	assert.Contains(t, w.Body.String(), "reset", "password")
 	assert.Equal(t, w.Code, http.StatusOK)
-}
-
-func TestResetPassword_Wrong_Password(t *testing.T) {
-
 }

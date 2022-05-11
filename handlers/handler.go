@@ -46,10 +46,8 @@ func (h *Handler) SearchProductHandler(c *gin.Context) {
 
 func (h *Handler) SendForgotPasswordEMailHandler(c *gin.Context) {
 	// crete a password reset struct and initialize it
-	type forgotPasswordRequest struct {
-		Email string `json:"email"`
-	}
-	var forgotPassword forgotPasswordRequest
+
+	var forgotPassword models.ResetPasswordRequest
 
 	err := c.BindJSON(&forgotPassword)
 	if err != nil {
@@ -197,13 +195,7 @@ func (h *Handler) SellerResetPassword(c *gin.Context) {
 }
 
 func (h *Handler) BuyerResetPassword(c *gin.Context) {
-	type passwordResetReq struct {
-		OldPassword        string `json:"old_password"`
-		NewPassword        string `json:"new_password"`
-		ConfirmNewPassword string `json:"confirm_new_password"`
-	}
-
-	var password passwordResetReq
+	var password models.PasswordResetReq
 
 	email := c.Param("email")
 
