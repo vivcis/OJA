@@ -2,6 +2,8 @@ package services
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -10,6 +12,13 @@ import (
 
 const AccessTokenValidity = time.Minute * 20
 const RefreshTokenValidity = time.Hour * 24
+
+var decode = []byte(os.Getenv("DECODE_SECRET_KEY"))
+
+type Claims struct {
+	UserEmail string `json:"email"`
+	jwt.StandardClaims
+}
 
 // GetTokenFromHeader returns the token string in the authorization header
 func GetTokenFromHeader(c *gin.Context) string {
@@ -55,4 +64,39 @@ func GenerateToken(signMethod *jwt.SigningMethodHMAC, claims jwt.MapClaims, secr
 		return nil, err
 	}
 	return &tokenString, nil
+}
+
+func GenerateNonAuthToken(UserEmail string, secret *string) (string, error) {
+	// Define expiration time
+	expirationTime := time.Now().Add(60 * time.Minute)
+	// define the payload with the expiration time
+	claims := &Claims{
+		UserEmail: UserEmail,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
+	// generate token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// sign token with secret key
+	tokenString, err := token.SignedString(secret)
+
+	return tokenString, err
+}
+func DecodeToken(token string) (string, error) {
+
+	claims := &Claims{}
+
+	tok, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+		return decode, nil
+	})
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+	if tok.Valid {
+		return "", err
+	}
+	return claims.UserEmail, err
 }
