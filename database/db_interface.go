@@ -23,6 +23,14 @@ type DB interface {
 	SearchProduct(lowerPrice, upperPrice, category, name string) ([]models.Product, error)
 	TokenInBlacklist(token *string) bool
 	UpdateUser(user *models.User) error
+	BuyerUpdatePassword(password, newPassword string) (*models.Buyer, error)
+	SellerUpdatePassword(password, newPassword string) (*models.Seller, error)
+	BuyerResetPassword(email, newPassword string) (*models.Buyer, error)
+}
+
+// mailer interface to implement mailing service
+type Mailer interface {
+	SendMail(subject, body, to, Private, Domain string) bool
 }
 
 // ValidationError defines error that occur due to validation
