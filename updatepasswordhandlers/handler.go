@@ -234,6 +234,8 @@ func (h *Handler) BuyerResetPassword(c *gin.Context) {
 	_, err = h.DB.BuyerUpdatePassword(buyer.PasswordHash, string(passwordHash))
 	if err != nil {
 		log.Println(err)
+		c.JSON(500, gin.H{"message": "internal server error"})
+		c.Abort()
 		return
 	}
 	c.JSON(200, gin.H{"message": "successfully reset password"})

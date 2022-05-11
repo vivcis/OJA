@@ -43,8 +43,9 @@ func TestUpdatePassword(t *testing.T) {
 		},
 		Orders: nil,
 	}
-
+	log.Println(1)
 	mockDB.EXPECT().FindBuyerByEmail("chuks@gmail.com").Return(&buyer, nil)
+	log.Println(2)
 	mockDB.EXPECT().BuyerUpdatePassword(string(passwordHash), gomock.Any()).Return(&buyer, nil)
 
 	resetPasswordPayload, err := json.Marshal(resetPassword)
