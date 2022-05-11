@@ -1,11 +1,10 @@
 package router
 
 import (
+	"github.com/decadevs/shoparena/handlers"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
-
-	"github.com/decadevs/shoparena/updatepasswordhandlers"
-	"github.com/gin-gonic/gin"
 )
 
 type Router struct {
