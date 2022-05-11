@@ -20,7 +20,8 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 
 	apirouter.GET("/ping", handlers.PingHandler)
 	apirouter.GET("/searchproducts", h.SearchProductHandler)
-
+	apirouter.PUT("/buyer/resetpassword/:email", h.BuyerResetPassword)
+	apirouter.PUT("/seller/resetpassword/:email", h.SellerResetPassword)
 	port := ":" + os.Getenv("PORT")
 	if port == ":" {
 		port = ":8081"
