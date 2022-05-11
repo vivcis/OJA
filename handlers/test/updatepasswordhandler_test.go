@@ -3,9 +3,9 @@ package test
 import (
 	"encoding/json"
 	mock_database "github.com/decadevs/shoparena/database/mocks"
+	"github.com/decadevs/shoparena/handlers"
 	"github.com/decadevs/shoparena/models"
 	"github.com/decadevs/shoparena/router"
-	"github.com/decadevs/shoparena/updatepasswordhandlers"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/bcrypt"
