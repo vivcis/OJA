@@ -32,7 +32,8 @@ func (pdb *PostgresDb) Init(host, user, password, dbName, port string) error {
 		fmt.Println("Connected to Database")
 	}
 
-	err = db.AutoMigrate(&models.Product{}, &models.Seller{}, &models.Buyer{}, &models.Shop{}, &models.Blacklist{})
+	err = db.AutoMigrate(&models.Category{}, &models.Seller{}, &models.Product{}, &models.Image{},
+		&models.Buyer{}, &models.Cart{}, &models.CartProduct{}, &models.Order{}, &models.Blacklist{})
 	if err != nil {
 		return fmt.Errorf("migration error: %v", err)
 	}
@@ -161,7 +162,7 @@ func (pdb *PostgresDb) FindSellerByUsername(username string) (*models.Seller, er
 	if err := pdb.DB.Where("username = ?", username).First(user).Error; err != nil {
 		return nil, err
 	}
-	if !user.Status {
+	if !user.IsActive {
 		return nil, errors.New("user inactive")
 	}
 	return user, nil
@@ -174,7 +175,7 @@ func (pdb *PostgresDb) FindBuyerByUsername(username string) (*models.Buyer, erro
 	if err := pdb.DB.Where("username = ?", username).First(buyer).Error; err != nil {
 		return nil, err
 	}
-	if !buyer.Status {
+	if !buyer.IsActive {
 		return nil, errors.New("user inactive")
 	}
 	return buyer, nil
@@ -236,4 +237,25 @@ func (pdb *PostgresDb) FindAllSellersExcept(except string) ([]models.Seller, err
 func (pdb *PostgresDb) UpdateUser(user *models.User) error {
 
 	return nil
+}
+func (pdb *PostgresDb) BuyerUpdatePassword(password, newPassword string) (*models.Buyer, error) {
+	buyer := &models.Buyer{}
+	if err := pdb.DB.Model(buyer).Where("password_hash =?", password).Update("password_hash", newPassword).Error; err != nil {
+		return nil, err
+	}
+	return buyer, nil
+}
+func (pdb *PostgresDb) SellerUpdatePassword(password, newPassword string) (*models.Seller, error) {
+	seller := &models.Seller{}
+	if err := pdb.DB.Model(seller).Where("password_hash =?", password).Update("password_hash", newPassword).Error; err != nil {
+		return nil, err
+	}
+	return seller, nil
+}
+func (pdb *PostgresDb) BuyerResetPassword(email, newPassword string) (*models.Buyer, error) {
+	buyer := &models.Buyer{}
+	if err := pdb.DB.Model(buyer).Where("email =?", email).Update("password_hash", newPassword).Error; err != nil {
+		return nil, err
+	}
+	return buyer, nil
 }
