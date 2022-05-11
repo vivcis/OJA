@@ -3,9 +3,9 @@ package test
 import (
 	"encoding/json"
 	mock_database "github.com/decadevs/shoparena/database/mocks"
-	"github.com/decadevs/shoparena/handlers"
 	"github.com/decadevs/shoparena/models"
 	"github.com/decadevs/shoparena/router"
+	"github.com/decadevs/shoparena/updatepasswordhandlers"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/bcrypt"
@@ -16,7 +16,7 @@ import (
 	"testing"
 )
 
-func TestResetPassword(t *testing.T) {
+func TestUpdatePassword(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockDB := mock_database.NewMockDB(ctrl)
