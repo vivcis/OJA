@@ -11,7 +11,7 @@ type User struct {
 	Email           string `json:"email" gorm:"unique"`
 	Username        string `json:"username" gorm:"unique"`
 	Password        string `json:"password,omitempty" gorm:"-"`
-	ConfirmPassword string `json:"password,omitempty" gorm:"-"`
+	ConfirmPassword string `json:"confirm_password,omitempty" gorm:"-"`
 	PasswordHash    string `json:"-"`
 	Address         string `json:"address"`
 	PhoneNumber     string `json:"phone_number"`
