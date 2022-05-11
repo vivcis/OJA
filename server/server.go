@@ -3,8 +3,8 @@ package server
 import (
 	"context"
 	"fmt"
-	"github.com/decadevs/shoparena/handlers"
 	"github.com/decadevs/shoparena/services"
+	"github.com/decadevs/shoparena/updatepasswordhandlers"
 	"log"
 	"net/http"
 	"os"
