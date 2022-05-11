@@ -9,3 +9,7 @@ type ForgotPassword struct {
 	NewPassword        string `json:"new_password"`
 	ConfirmNewPassword string `json:"confirm_new_password"`
 }
+
+type ResetPasswordRequest struct {
+	Email string `json:"email"`
+}
