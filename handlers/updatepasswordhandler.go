@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"log"
-	"net/http"
 	"os"
 )
 
@@ -21,27 +20,6 @@ func PingHandler(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"message": "pong",
 	})
-}
-
-func (h *Handler) SearchProductHandler(c *gin.Context) {
-	//Equivalent to param
-	category := c.Query("category")
-	lowerPrice := c.Query("lower-price")
-	upperPrice := c.Query("upper-price")
-	name := c.Query("name")
-
-	product, err := h.DB.SearchProduct(lowerPrice, upperPrice, category, name)
-	if err != nil {
-		log.Println("handler error in search product", err)
-		c.JSON(http.StatusInternalServerError, err.Error())
-	}
-
-	if len(product) == 0 {
-		c.JSON(http.StatusInternalServerError, "no such product")
-		return
-	}
-
-	c.JSON(http.StatusFound, product)
 }
 
 func (h *Handler) SendForgotPasswordEMailHandler(c *gin.Context) {
