@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 	"time"
@@ -61,12 +62,12 @@ func (h *Handler) UpdateProfileHandler(c *gin.Context){
 
 func (h *Handler) SearchProductHandler(c *gin.Context) {
 	//Equivalent to param
-	category := c.Query("category")
+	categoryName := c.Query("category")
 	lowerPrice := c.Query("lower-price")
 	upperPrice := c.Query("upper-price")
 	name := c.Query("name")
 
-	product, err := h.DB.SearchProduct(lowerPrice, upperPrice, category, name)
+	product, err := h.DB.SearchProduct(lowerPrice, upperPrice, categoryName, name)
 	if err != nil {
 		log.Println("handler error in search product", err)
 		c.JSON(http.StatusInternalServerError, err.Error())
