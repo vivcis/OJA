@@ -18,6 +18,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter := router.Group("/api/v1")
 
 	apirouter.GET("/ping", handlers.PingHandler)
+	apirouter.GET("/seller/:id", h.HandleGetSellerShopByProfileAndProduct())
 	apirouter.GET("/searchproducts", h.SearchProductHandler)
 	apirouter.PUT("/buyer/resetpassword/:email", h.BuyerResetPassword)
 	apirouter.PUT("/seller/resetpassword/:email", h.SellerResetPassword)
