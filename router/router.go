@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/decadevs/shoparena/updatepasswordhandlers"
+	"github.com/decadevs/shoparena/handlers"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,8 +20,11 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 
 	apirouter.GET("/ping", handlers.PingHandler)
 	apirouter.GET("/searchproducts", h.SearchProductHandler)
-	apirouter.PUT("/buyer/resetpassword/:email", h.BuyerResetPassword)
-	apirouter.PUT("/seller/resetpassword/:email", h.SellerResetPassword)
+	apirouter.PUT("/buyer/uppdatepassword/:email", h.BuyerUpdatePasswordHandler)
+	apirouter.PUT("/seller/updatepassword/:email", h.SellerUpdatePasswordHandler)
+	apirouter.POST("/buyer/forgotpassword", h.SendForgotPasswordEMailHandler)
+	apirouter.PUT("/buyer/forgotpassword-reset?reset_token=", h.ForgotPasswordResetHandler)
+
 	port := ":" + os.Getenv("PORT")
 	if port == ":" {
 		port = ":8081"

@@ -66,23 +66,27 @@ func GenerateToken(signMethod *jwt.SigningMethodHMAC, claims jwt.MapClaims, secr
 	return &tokenString, nil
 }
 
-func GenerateNonAuthToken(UserEmail string, secret *string) (string, error) {
+func GenerateNonAuthToken(UserEmail string, secret string) (*string, error) {
 	// Define expiration time
+	log.Println(1)
 	expirationTime := time.Now().Add(60 * time.Minute)
 	// define the payload with the expiration time
+	log.Println(2)
 	claims := &Claims{
 		UserEmail: UserEmail,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
 	}
+	log.Println(3)
 	// generate token
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
+	token := jwt.NewWithClaims(jwt.SigningMethodES512, claims)
+	log.Println(4)
 	// sign token with secret key
 	tokenString, err := token.SignedString(secret)
+	log.Println(tokenString)
+	return &tokenString, err
 
-	return tokenString, err
 }
 func DecodeToken(token string) (string, error) {
 

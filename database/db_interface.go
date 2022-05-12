@@ -30,7 +30,7 @@ type DB interface {
 
 // mailer interface to implement mailing service
 type Mailer interface {
-	SendMail(subject, body, to, Private, Domain string) bool
+	SendMail(subject, body, to, Private, Domain string) error
 }
 
 // ValidationError defines error that occur due to validation

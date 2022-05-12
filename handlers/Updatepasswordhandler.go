@@ -65,9 +65,16 @@ func (h *Handler) SendForgotPasswordEMailHandler(c *gin.Context) {
 
 	// generate token that'll be used to reset the password
 	secretString := os.Getenv("JWTSECRET")
-	resetToken, _ := services.GenerateNonAuthToken(buyer.Email, &secretString)
+	resetToken, err := services.GenerateNonAuthToken(buyer.Email, secretString)
+	if err != nil {
+		log.Println(err)
+		c.JSON(400, gin.H{"message": "something went wrong"})
+		c.Abort()
+		return
+	}
+
 	// the link to be clicked in order to perform password reset
-	link := "http://localhost:5000/api/v1/password-reset?reset_token=" + resetToken
+	link := "http://localhost:5000/api/v1/password-reset?reset_token=" + *resetToken
 	// define the body of the email
 	body := "Here is your reset <a href='" + link + "'>link</a>"
 	html := "<strong>" + body + "</strong>"
@@ -75,14 +82,15 @@ func (h *Handler) SendForgotPasswordEMailHandler(c *gin.Context) {
 	//intialize the email sendout
 	privateAPIKey := os.Getenv("MAILGUN_API_KEY")
 	yourDomain := os.Getenv("DOMAIN_STRING")
-	email := h.Mail.SendMail("forgot Password", html, buyer.Email, privateAPIKey, yourDomain)
+	err = h.Mail.SendMail("forgot Password", html, buyer.Email, privateAPIKey, yourDomain)
 
 	//if email was sent return 200 status code
-	if email == true {
+	if err == nil {
 		c.JSON(200, gin.H{"message": "please check your email for password reset link"})
 		c.Abort()
 		return
 	} else {
+		log.Println(err)
 		c.JSON(500, gin.H{"message": "something went wrong while trying to send you a mail, please try again"})
 		c.Abort()
 		return
@@ -158,7 +166,7 @@ func (h *Handler) ForgotPasswordResetHandler(c *gin.Context) {
 	return
 }
 
-func (h *Handler) SellerResetPassword(c *gin.Context) {
+func (h *Handler) SellerUpdatePasswordHandler(c *gin.Context) {
 	var password models.PasswordResetReq
 	email := c.Param("email")
 	seller, err := h.DB.FindSellerByEmail(email)
@@ -194,7 +202,7 @@ func (h *Handler) SellerResetPassword(c *gin.Context) {
 	c.JSON(200, gin.H{"message": "successfully reset password"})
 }
 
-func (h *Handler) BuyerResetPassword(c *gin.Context) {
+func (h *Handler) BuyerUpdatePasswordHandler(c *gin.Context) {
 	var password models.PasswordResetReq
 
 	email := c.Param("email")

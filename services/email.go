@@ -11,7 +11,7 @@ import (
 type Service struct{}
 
 // SEND EMAIL METHOD THAT  WILL BE USED TO SEND EMAILS TO USERS
-func (s *Service) SendMail(subject, body, recipient, Private, Domain string) bool {
+func (s *Service) SendMail(subject, body, recipient, Private, Domain string) error {
 	privateAPIKey := Private
 	yourDomain := Domain
 
@@ -22,7 +22,7 @@ func (s *Service) SendMail(subject, body, recipient, Private, Domain string) boo
 
 	// Create a new template
 	err := mg.CreateTemplate(ctx, &mailgun.Template{
-		Name: "template!",
+		Name: "new_template",
 		Version: mailgun.TemplateVersion{
 			Template: `'<div class="entry"> <h1>{{.title}}</h1> <div class="body"> {{.body}} </div> </div>'`,
 			Engine:   mailgun.TemplateEngineGo,
@@ -30,27 +30,36 @@ func (s *Service) SendMail(subject, body, recipient, Private, Domain string) boo
 		},
 	})
 	if err != nil {
-		return false
+		return err
 	}
 
 	// Create a new message with template
 	m := mg.NewMessage("Oja Ecommerce <Oja@Decadev.gon>", subject, "")
-	m.SetTemplate("template!")
+	m.SetTemplate("new_template")
 
 	// Add recipients
-	_ = m.AddRecipient(recipient)
+	err = m.AddRecipient(recipient)
+	if err != nil {
+		return err
+	}
 
 	// Add the variables recipient be used by the template
-	_ = m.AddVariable("title", subject)
-	_ = m.AddVariable("body", body)
+	err = m.AddVariable("title", subject)
+	if err != nil {
+		return err
+	}
+	err = m.AddVariable("body", body)
+	if err != nil {
+		return err
+	}
 
 	// Send the message with a 10 second timeout
 	resp, id, err := mg.Send(ctx, m)
 	if err != nil {
 		log.Fatal(err)
-		return false
+		return err
 	}
 
 	fmt.Printf("ID: %s Resp: %s\n", id, resp)
-	return true
+	return err
 }
