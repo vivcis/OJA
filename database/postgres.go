@@ -4,11 +4,9 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
-	"reflect"
 	"strconv"
 	"time"
 
@@ -144,40 +142,28 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name 
 
 // CreateSeller creates a new Seller in the DB
 func (pdb *PostgresDb) CreateSeller(user *models.Seller) (*models.Seller, error) {
-	_, err := pdb.FindSellerByEmail(user.Email)
-	if err == nil {
-		return user, ValidationError{Field: "email", Message: "already in use"}
-	}
-	_, err = pdb.FindSellerByUsername(user.Username)
-	if err == nil {
-		return user, ValidationError{Field: "username", Message: "already in use"}
-	}
-	_, err = pdb.FindSellerByPhone(user.PhoneNumber)
-	if err == nil {
-		return user, ValidationError{Field: "phone", Message: "already in use"}
-	}
+	var err error
 	user.CreatedAt = time.Now()
+	user.IsActive = true
 	err = pdb.DB.Create(user).Error
 	return user, err
 }
 
 // CreateBuyer creates a new Buyer in the DB
 func (pdb *PostgresDb) CreateBuyer(user *models.Buyer) (*models.Buyer, error) {
-	_, err := pdb.FindBuyerByEmail(user.Email)
-	if err == nil {
-		return user, ValidationError{Field: "email", Message: "already in use"}
-	}
-	_, err = pdb.FindBuyerByUsername(user.Username)
-	if err == nil {
-		return user, ValidationError{Field: "username", Message: "already in use"}
-	}
-	_, err = pdb.FindBuyerByPhone(user.PhoneNumber)
-	if err == nil {
-		return user, ValidationError{Field: "phone", Message: "already in use"}
-	}
+	var err error
 	user.CreatedAt = time.Now()
+	user.IsActive = true
 	err = pdb.DB.Create(user).Error
 	return user, err
+}
+
+//CreateBuyerCart creates a new cart for the buyer
+func (pdb *PostgresDb) CreateBuyerCart(cart *models.Cart) (*models.Cart, error) {
+	var err error
+	cart.CreatedAt = time.Now()
+	err = pdb.DB.Create(cart).Error
+	return cart, err
 }
 
 // FindSellerByUsername finds a user by the username
@@ -260,21 +246,53 @@ func (pdb *PostgresDb) FindAllSellersExcept(except string) ([]models.Seller, err
 }
 
 //UpdateUser updates both buyers and sellers information 
-func (pdb *PostgresDb) UpdateUser(user interface{}, email string) error {
+// func (pdb *PostgresDb) UpdateUserProfile(user interface{}, email string) error {
 
-	switch  v := user.(type){
-	case *models.Buyer: 
-		result := pdb.DB.Model(models.Buyer{}).Where("email", email).Updates(v)
-		log.Println("here buyer")
-       return result.Error
-	case *models.Seller:
-		result := pdb.DB.Model(models.Seller{}).Where("email", email).Updates(v)
-		log.Println("here seller")
-		return result.Error
-	default:
-		log.Println("none", reflect.TypeOf(v))
-	}
-		return nil
+// 	switch  v := user.(type){
+// 	case *models.Buyer: 
+// 		result := pdb.DB.Model(models.Buyer{}).Where("email", email).Updates(v)
+// 		log.Println("here buyer")
+//        return result.Error
+// 	case *models.Seller:
+// 		result := pdb.DB.Model(models.Seller{}).Where("email", email).Updates(v)
+// 		log.Println("here seller")
+// 		return result.Error
+// 	default:
+// 		log.Println("none", reflect.TypeOf(v))
+// 	}
+// 		return nil
+// }
+
+func (pdb *PostgresDb) UpdateBuyerProfile(id uint, update *models.UpdateUser) error {
+	result :=
+	     pdb.DB.Model(models.Buyer{}).
+			Where("id = ?", id).
+			Updates(
+				models.User{
+					FirstName:      update.FirstName,
+					LastName:       update.LastName,
+					PhoneNumber:    update.PhoneNumber,
+					Address:        update.Address,
+					Email:          update.Email,
+				},
+			)
+	return result.Error
+}
+
+func (pdb *PostgresDb) UpdateSellerProfile(id uint, update *models.UpdateUser) error {
+	result :=
+	     pdb.DB.Model(models.Seller{}).
+			Where("id = ?", id).
+			Updates(
+				models.User{
+					FirstName:      update.FirstName,
+					LastName:       update.LastName,
+					PhoneNumber:    update.PhoneNumber,
+					Address:        update.Address,
+					Email:          update.Email,
+				},
+			)
+	return result.Error
 }
 
 // UploadFileToS3 saves a file to aws bucket and returns the url to the file and an error if there's any

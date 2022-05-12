@@ -1,4 +1,4 @@
-package testing
+package test
 
 import (
 	"bytes"
@@ -21,6 +21,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
+
 
 func createImg() (*os.File, error) {
     width := 200
@@ -51,7 +52,6 @@ func createImg() (*os.File, error) {
     png.Encode(f, img)
     return f, nil
 }
-
 func prepfile(file *os.File) (*bytes.Buffer, string, error) {
     var b bytes.Buffer
     w := multipart.NewWriter(&b)
@@ -63,13 +63,15 @@ func prepfile(file *os.File) (*bytes.Buffer, string, error) {
     fmt.Println(w.FormDataContentType())
     return &b, w.FormDataContentType(), nil
 }
-func TestUploadImage(t *testing.T) {
+
+func TestUploadprofielpic(t *testing.T) {
     ctrl := gomock.NewController(t)
-    mockDB :=  mock_database.NewMockDB(ctrl)
-    h := &handlers.Handler{
-        // DB:     m,
-        // Router: router2.NewRouter(),
-    }
+    mockDB := mock_database.NewMockDB(ctrl)
+	mockMail := mock_database.NewMockMailer(ctrl)
+    // h := &Handler{
+    //     DB:     mockDB,
+    //     Router: router2.NewRouter(),
+    // }
     accessClaims, _ := services.GenerateClaims("ceciliaorji.co@gmail.com")
     secret := os.Getenv("JWT_SECRET")
     accToken, err := services.GenerateToken(jwt.SigningMethodHS256, accessClaims, &secret)
@@ -81,13 +83,13 @@ func TestUploadImage(t *testing.T) {
         panic(err)
     }
     user := &models.User{Email: "ceciliaorji.co@gmail.com"}
-    //mockDB.EXPECT().FindUserByEmail(user.Email).Return(user, nil)
-    mockDB.EXPECT().FindBuyerByEmail(user.Email).Return(user, nil)
-	mockDB.EXPECT().FindSellerByEmail(user.Email).Return(user, nil)
+    mockDB.EXPECT().FindUserByEmail(user.Email).Return(user, nil)
     mockDB.EXPECT().TokenInBlacklist(accToken).Return(false)
     mockDB.EXPECT().UploadFileToS3(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+
+	h := &handlers.Handler{DB: mockDB, Mail: mockMail}
     route, _ := router.SetupRouter(h)
-    t.Run("TestUploadImage", func(t *testing.T) {
+    t.Run("TestUploadprofielpic", func(t *testing.T) {
         b, content_type, err := prepfile(file)
         if err != nil {
             fmt.Errorf("%v", err)

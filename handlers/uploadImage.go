@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/decadevs/shoparena/models"
 	"github.com/decadevs/shoparena/services"
 	"github.com/gin-gonic/gin"
 )
@@ -21,13 +22,13 @@ func (h *Handler) UploadImageHandler(c *gin.Context) {
 			err := r.ParseMultipartForm(maxSize)
 			if err != nil {
 				log.Printf("parse image error: %v\n", err)
-				c.JSON("", http.StatusBadRequest, nil, []string{"image too large"})
+				c.JSON (http.StatusBadRequest, []string{"image too large"})
 				return
 			}
 			file, fileHeader, err := r.FormFile("profile_picture")
 			if err != nil {
 				log.Println("error getting profile picture", err)
-				c.JSON( "", http.StatusBadRequest, nil, []string{"image not supplied"})
+				c.JSON(http.StatusBadRequest, []string{"image not supplied"})
 				return
 			}
 			defer file.Close()
@@ -36,7 +37,7 @@ func (h *Handler) UploadImageHandler(c *gin.Context) {
 			fmt.Println(fileExtension)
 			if ok {
 				log.Println(fileExtension)
-				c.JSON("", http.StatusBadRequest, nil, []string{fileExtension + " image file type is not supported"})
+				c.JSON( http.StatusBadRequest, []string{fileExtension})
 				return
 			}
 			session, tempFileName, err := services.PreAWS(fileExtension, "profile_picture")
@@ -46,23 +47,23 @@ func (h *Handler) UploadImageHandler(c *gin.Context) {
 			url, err := h.DB.UploadFileToS3(session, file, tempFileName, fileHeader.Size)
 			if err != nil {
 				log.Println(err)
-				c.JSON("", http.StatusInternalServerError, nil, []string{"an error occured while uploading the image"})
+				c.JSON( http.StatusInternalServerError, []string{"an error occured while uploading the image"})
 				return
 			}
 			user.Image = url
 			err = h.DB.UpdateUserImageURL(user.Username, user.Image)
 			if err != nil {
 				log.Println(err)
-				c.JSON("", http.StatusInternalServerError, nil, []string{"an error occured while uploading the image"})
+				c.JSON(http.StatusInternalServerError, []string{"an error occured while uploading the image"})
 				return
 			}
-			c.JSON(c, "successfully created file", http.StatusOK, gin.H{
+			c.JSON( http.StatusOK, gin.H{
 				"imageurl": user.Image,
-			}, nil)
+			})
 			return
 		}
 	}
-	c.JSON(c, "", http.StatusUnauthorized, nil, []string{"unable to retrieve authenticated user"})
+	c.JSON( http.StatusUnauthorized,  []string{"unable to retrieve authenticated user"})
 	
 }
 
