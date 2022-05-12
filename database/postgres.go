@@ -274,6 +274,5 @@ func (pdb *PostgresDb) FindIndividualSellerShop(sellerID string) (*models.Seller
 		return nil, err
 	}
 
-	log.Printf("%+v : %+v", seller)
 	return seller, nil
 }
