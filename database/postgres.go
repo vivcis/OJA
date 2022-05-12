@@ -46,69 +46,84 @@ func (pdb *PostgresDb) Init(host, user, password, dbName, port string) error {
 }
 
 // SearchProduct Searches all products from DB
-func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, category, name string) ([]models.Product, error) {
-
+func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name string) ([]models.Product, error) {
+	categories := models.Category{}
 	var products []models.Product
+
 	LPInt, _ := strconv.Atoi(lowerPrice)
 	UPInt, _ := strconv.Atoi(upperPrice)
 
+	if categoryName == "" {
+		err := pdb.DB.Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+		return products, nil
+	} else {
+		err := pdb.DB.Where("name = ?", categoryName).First(&categories).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	}
+
+	category := categories.ID
+
 	if LPInt == 0 && UPInt == 0 && name == "" {
-		err := pdb.DB.Where("product_category = ?", category).Find(&products).Error
+		err := pdb.DB.Where("category_id = ?", category).Find(&products).Error
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
 		}
 	} else if LPInt == 0 && name == "" {
-		err := pdb.DB.Where("product_category = ?", category).
-			Where("product_price <= ?", uint(UPInt)).Find(&products).Error
+		err := pdb.DB.Where("category_id = ?", category).
+			Where("price <= ?", uint(UPInt)).Find(&products).Error
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
 		}
 	} else if UPInt == 0 && name == "" {
-		err := pdb.DB.Where("product_category = ?", category).
-			Where("product_price >= ?", uint(LPInt)).Find(&products).Error
+		err := pdb.DB.Where("category_id = ?", category).
+			Where("price >= ?", uint(LPInt)).Find(&products).Error
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
 		}
 	} else if LPInt != 0 && UPInt != 0 && name == "" {
-		err := pdb.DB.Where("product_category = ?", category).Where("product_price >= ?", uint(LPInt)).
-			Where("product_price <= ?", uint(UPInt)).Find(&products).Error
+		err := pdb.DB.Where("category_id = ?", category).Where("price >= ?", uint(LPInt)).
+			Where("price <= ?", uint(UPInt)).Find(&products).Error
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
 		}
 	} else if LPInt == 0 && UPInt == 0 && name != "" {
-		err := pdb.DB.Where("product_category = ?", category).
-			Where("product_name LIKE ?", "%"+name+"%").Find(&products).Error
+		err := pdb.DB.Where("category_id = ?", category).
+			Where("title LIKE ?", "%"+name+"%").Find(&products).Error
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
 		}
 	} else if LPInt == 0 && name != "" {
-		err := pdb.DB.Where("product_category = ?", category).
-			Where("product_price <= ?", uint(UPInt)).
-			Where("product_name LIKE ?", "%"+name+"%").Find(&products).Error
+		err := pdb.DB.Where("category_id = ?", category).
+			Where("price <= ?", uint(UPInt)).
+			Where("title LIKE ?", "%"+name+"%").Find(&products).Error
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
 		}
 	} else if UPInt == 0 && name != "" {
-		err := pdb.DB.Where("product_category = ?", category).
-			Where("product_price >= ?", uint(LPInt)).
-			Where("product_name LIKE ?", "%"+name+"%").Find(&products).Error
+		err := pdb.DB.Where("category_id = ?", category).
+			Where("price >= ?", uint(LPInt)).
+			Where("title LIKE ?", "%"+name+"%").Find(&products).Error
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
 		}
-	} else if category == "" {
-		return nil, errors.New("choose a category")
-
 	} else {
-		err := pdb.DB.Where("product_category = ?", category).Where("product_price >= ?", uint(LPInt)).
-			Where("product_price <= ?", uint(UPInt)).
-			Where("product_name LIKE ?", "%"+name+"%").Find(&products).Error
+		err := pdb.DB.Where("category_id = ?", category).Where("price >= ?", uint(LPInt)).
+			Where("price <= ?", uint(UPInt)).
+			Where("title LIKE ?", "%"+name+"%").Find(&products).Error
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
@@ -120,40 +135,28 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, category, name stri
 
 // CreateSeller creates a new Seller in the DB
 func (pdb *PostgresDb) CreateSeller(user *models.Seller) (*models.Seller, error) {
-	_, err := pdb.FindSellerByEmail(user.Email)
-	if err == nil {
-		return user, ValidationError{Field: "email", Message: "already in use"}
-	}
-	_, err = pdb.FindSellerByUsername(user.Username)
-	if err == nil {
-		return user, ValidationError{Field: "username", Message: "already in use"}
-	}
-	_, err = pdb.FindSellerByPhone(user.PhoneNumber)
-	if err == nil {
-		return user, ValidationError{Field: "phone", Message: "already in use"}
-	}
+	var err error
 	user.CreatedAt = time.Now()
+	user.IsActive = true
 	err = pdb.DB.Create(user).Error
 	return user, err
 }
 
 // CreateBuyer creates a new Buyer in the DB
 func (pdb *PostgresDb) CreateBuyer(user *models.Buyer) (*models.Buyer, error) {
-	_, err := pdb.FindBuyerByEmail(user.Email)
-	if err == nil {
-		return user, ValidationError{Field: "email", Message: "already in use"}
-	}
-	_, err = pdb.FindBuyerByUsername(user.Username)
-	if err == nil {
-		return user, ValidationError{Field: "username", Message: "already in use"}
-	}
-	_, err = pdb.FindBuyerByPhone(user.PhoneNumber)
-	if err == nil {
-		return user, ValidationError{Field: "phone", Message: "already in use"}
-	}
+	var err error
 	user.CreatedAt = time.Now()
+	user.IsActive = true
 	err = pdb.DB.Create(user).Error
 	return user, err
+}
+
+//CreateBuyerCart creates a new cart for the buyer
+func (pdb *PostgresDb) CreateBuyerCart(cart *models.Cart) (*models.Cart, error) {
+	var err error
+	cart.CreatedAt = time.Now()
+	err = pdb.DB.Create(cart).Error
+	return cart, err
 }
 
 // FindSellerByUsername finds a user by the username

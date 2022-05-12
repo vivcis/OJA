@@ -27,9 +27,10 @@ type DB interface {
 	SellerUpdatePassword(password, newPassword string) (*models.Seller, error)
 	BuyerResetPassword(email, newPassword string) (*models.Buyer, error)
 	FindIndividualSellerShop(sellerID string) (*models.Seller, error)
+	CreateBuyerCart(cart *models.Cart) (*models.Cart, error)
 }
 
-// mailer interface to implement mailing service
+// Mailer interface to implement mailing service
 type Mailer interface {
 	SendMail(subject, body, to, Private, Domain string) bool
 }
