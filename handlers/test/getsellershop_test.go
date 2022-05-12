@@ -116,10 +116,9 @@ func TestHandleGetSellerShopByProfileAndProduct(t *testing.T) {
 
 	//instantiating the seller model object/struct
 	testSeller := models.Seller{
-		User:      testUser,
-		Product:   products,
-		Rating:    string(rune((rand.Intn(5)))),
-		ProductId: sellerID,
+		User:    testUser,
+		Product: products,
+		Rating:  string(rune((rand.Intn(5)))),
 	}
 
 	bodyJSON, err := json.Marshal(testSeller)
