@@ -1,11 +1,20 @@
 package database
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"log"
+	"mime/multipart"
+	"net/http"
+	"os"
+	"reflect"
 	"strconv"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/decadevs/shoparena/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -235,8 +244,58 @@ func (pdb *PostgresDb) FindAllSellersExcept(except string) ([]models.Seller, err
 }
 
 //UpdateUser updates both buyers and sellers information 
-func (pdb *PostgresDb) UpdateUser(user *models.User) error {
-	result := pdb.DB.Model(user).Updates(user)
-	return result.Error
+func (pdb *PostgresDb) UpdateUser(user interface{}, email string) error {
+
+	switch  v := user.(type){
+	case *models.Buyer: 
+		// buyer := user.(models.Buyer)
+		
+		result := pdb.DB.Model(models.Buyer{}).Where("email", email).Updates(v)
+		log.Println("here buyer")
+       return result.Error
+	case *models.Seller:
+		// seller := user.(models.Seller)
+		result := pdb.DB.Model(models.Seller{}).Where("email", email).Updates(v)
+		log.Println("here seller")
+		return result.Error
+	default:
+		log.Println("none", reflect.TypeOf(v))
+
+	}
+ 
+		return nil
 }
 
+// UploadFileToS3 saves a file to aws bucket and returns the url to the file and an error if there's any
+func (pdb *PostgresDb) UploadFileToS3(h *session.Session, file multipart.File, fileName string, size int64) (string, error) {
+    // get the file size and read the file content into a buffer
+    buffer := make([]byte, size)
+    file.Read(buffer)
+    // config settings: this is where you choose the bucket,
+    // filename, content-type and storage class of the file you're uploading
+    url := "https://s3-eu-west-3.amazonaws.com/arp-rental/" + fileName
+    _, err := s3.New(h).PutObject(&s3.PutObjectInput{
+        Bucket:               aws.String(os.Getenv("S3_BUCKET_NAME")),
+        Key:                  aws.String(fileName),
+        ACL:                  aws.String("public-read"),
+        Body:                 bytes.NewReader(buffer),
+        ContentLength:        aws.Int64(int64(size)),
+        ContentType:          aws.String(http.DetectContentType(buffer)),
+        ContentDisposition:   aws.String("attachment"),
+        ServerSideEncryption: aws.String("AES256"),
+        StorageClass:         aws.String("INTELLIGENT_TIERING"),
+    })
+    return url, err
+}
+
+func (pdb *PostgresDb) UpdateUserImageURL(username, url string) error {
+	result :=
+		pdb.DB.Model(models.User{}).
+			Where("username = ?", username).
+			Updates(
+				models.User{
+					Image: url,
+				},
+			)
+	return result.Error
+}

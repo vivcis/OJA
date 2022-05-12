@@ -2,10 +2,13 @@ package database
 
 import (
 	"fmt"
+	"log"
+	"mime/multipart"
+	"os"
+
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/decadevs/shoparena/models"
 	"github.com/joho/godotenv"
-	"log"
-	"os"
 )
 
 // DB provides access to the different db
@@ -19,8 +22,9 @@ type DB interface {
 	FindBuyerByUsername(username string) (*models.Buyer, error)
 	FindSellerByEmail(email string) (*models.Seller, error)
 	FindSellerByPhone(phone string) (*models.Seller, error)
-	//UpdateUser(id string, update *models.UpdateUser) error
-	UpdateUser(user *models.User) error
+	UploadFileToS3(h *session.Session, file multipart.File, fileName string, size int64) (string, error)
+	UpdateUserImageURL(username, url string) error
+	UpdateUser(user interface{}, email string) error
 	FindSellerByUsername(username string) (*models.Seller, error)
 	SearchProduct(lowerPrice, upperPrice, category, name string) ([]models.Product, error)
 	TokenInBlacklist(token *string) bool

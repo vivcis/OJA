@@ -7,6 +7,9 @@ package mock_database
 import (
 	reflect "reflect"
 
+	"mime/multipart"
+
+	"github.com/aws/aws-sdk-go/aws/session"
 	models "github.com/decadevs/shoparena/models"
 	gomock "github.com/golang/mock/gomock"
 )
@@ -225,4 +228,17 @@ func (m *MockDB) UpdateUser(user *models.User) error {
 func (mr *MockDBMockRecorder) UpdateUser(user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUser", reflect.TypeOf((*MockDB)(nil).UpdateUser), user)
+}
+
+func (m *MockDB) UploadFileToS3(h *session.Session, file multipart.File, fileName string, size int64) (string, error){
+    m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UploadFileToS3", h, file, fileName, size)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockDBMockRecorder) UploadFileToS3(h, file, fileName, size interface{}) *gomock.Call {
+   mr.mock.ctrl.T.Helper()
+   return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadFileToS3", reflect.TypeOf((*MockDB)(nil).UploadFileToS3), h, file, fileName, size)
 }

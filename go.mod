@@ -10,8 +10,8 @@ require (
 )
 
 require (
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/lib/pq v1.10.5 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 )
 
 require (
@@ -23,6 +23,7 @@ require (
 )
 
 require (
+	github.com/aws/aws-sdk-go v1.44.10
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-contrib/sse v0.1.0 // indirect
@@ -30,6 +31,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.10.1
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/google/uuid v1.3.0
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.12.0 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect

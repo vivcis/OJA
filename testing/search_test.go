@@ -20,7 +20,7 @@ func TestSearch(t *testing.T) {
 	defer ctrl.Finish()
 	mockDB := mock_database.NewMockDB(ctrl)
 	h := &handlers.Handler{
-		DB: mockDB,
+		//DB: mockDB,
 	}
 	route, _ := router.SetupRouter(h)
 

@@ -20,7 +20,8 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 
 	apirouter.GET("/ping", handlers.PingHandler)
 	apirouter.GET("/searchproducts", h.SearchProductHandler)
-	apirouter.GET("/updateprofile", h.UpdateProfileHandler)
+	apirouter.PUT("/updateprofile", h.UpdateProfileHandler)
+	apirouter.PUT("/uploadimage", h.UploadImageHandler)
 
 	port := ":" + os.Getenv("PORT")
 	if port == ":" {
