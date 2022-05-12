@@ -119,40 +119,28 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, category, name stri
 
 // CreateSeller creates a new Seller in the DB
 func (pdb *PostgresDb) CreateSeller(user *models.Seller) (*models.Seller, error) {
-	_, err := pdb.FindSellerByEmail(user.Email)
-	if err == nil {
-		return user, ValidationError{Field: "email", Message: "already in use"}
-	}
-	_, err = pdb.FindSellerByUsername(user.Username)
-	if err == nil {
-		return user, ValidationError{Field: "username", Message: "already in use"}
-	}
-	_, err = pdb.FindSellerByPhone(user.PhoneNumber)
-	if err == nil {
-		return user, ValidationError{Field: "phone", Message: "already in use"}
-	}
+	var err error
 	user.CreatedAt = time.Now()
+	user.IsActive = true
 	err = pdb.DB.Create(user).Error
 	return user, err
 }
 
 // CreateBuyer creates a new Buyer in the DB
 func (pdb *PostgresDb) CreateBuyer(user *models.Buyer) (*models.Buyer, error) {
-	_, err := pdb.FindBuyerByEmail(user.Email)
-	if err == nil {
-		return user, ValidationError{Field: "email", Message: "already in use"}
-	}
-	_, err = pdb.FindBuyerByUsername(user.Username)
-	if err == nil {
-		return user, ValidationError{Field: "username", Message: "already in use"}
-	}
-	_, err = pdb.FindBuyerByPhone(user.PhoneNumber)
-	if err == nil {
-		return user, ValidationError{Field: "phone", Message: "already in use"}
-	}
+	var err error
 	user.CreatedAt = time.Now()
+	user.IsActive = true
 	err = pdb.DB.Create(user).Error
 	return user, err
+}
+
+//CreateBuyerCart creates a new cart for the buyer
+func (pdb *PostgresDb) CreateBuyerCart(cart *models.Cart) (*models.Cart, error) {
+	var err error
+	cart.CreatedAt = time.Now()
+	err = pdb.DB.Create(cart).Error
+	return cart, err
 }
 
 // FindSellerByUsername finds a user by the username

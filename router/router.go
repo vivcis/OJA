@@ -21,6 +21,9 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter.GET("/searchproducts", h.SearchProductHandler)
 	apirouter.PUT("/buyer/resetpassword/:email", h.BuyerResetPassword)
 	apirouter.PUT("/seller/resetpassword/:email", h.SellerResetPassword)
+	apirouter.POST("/buyersignup", h.BuyerSignUpHandler)
+	apirouter.POST("/sellersignup", h.SellerSignUpHandler)
+
 	port := ":" + os.Getenv("PORT")
 	if port == ":" {
 		port = ":8081"
