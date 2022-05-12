@@ -1,6 +1,10 @@
 package models
 
+import "gorm.io/gorm"
+
 type Buyer struct {
+	gorm.Model
 	User
-	Product []Product `gorm:"many2many:buyer_products;"`
+	Cart   Cart    `json:"cart"`
+	Orders []Order `json:"orders" gorm:"oneToMany"`
 }

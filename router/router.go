@@ -1,11 +1,10 @@
 package router
 
 import (
-	"net/http"
-	"os"
-
 	"github.com/decadevs/shoparena/handlers"
 	"github.com/gin-gonic/gin"
+	"net/http"
+	"os"
 )
 
 type Router struct {
@@ -21,6 +20,10 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter.GET("/ping", handlers.PingHandler)
 	apirouter.GET("/searchproducts", h.SearchProductHandler)
 	apirouter.GET("/updateprofile", h.UpdateProfileHandler)
+	apirouter.PUT("/buyer/resetpassword/:email", h.BuyerResetPassword)
+	apirouter.PUT("/seller/resetpassword/:email", h.SellerResetPassword)
+	apirouter.POST("/buyersignup", h.BuyerSignUpHandler)
+	apirouter.POST("/sellersignup", h.SellerSignUpHandler)
 
 	port := ":" + os.Getenv("PORT")
 	if port == ":" {
