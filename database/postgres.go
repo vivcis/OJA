@@ -264,21 +264,16 @@ func (pdb *PostgresDb) UpdateUser(user interface{}, email string) error {
 
 	switch  v := user.(type){
 	case *models.Buyer: 
-		// buyer := user.(models.Buyer)
-		
 		result := pdb.DB.Model(models.Buyer{}).Where("email", email).Updates(v)
 		log.Println("here buyer")
        return result.Error
 	case *models.Seller:
-		// seller := user.(models.Seller)
 		result := pdb.DB.Model(models.Seller{}).Where("email", email).Updates(v)
 		log.Println("here seller")
 		return result.Error
 	default:
 		log.Println("none", reflect.TypeOf(v))
-
 	}
- 
 		return nil
 }
 
