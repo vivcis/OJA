@@ -1,11 +1,10 @@
 package router
 
 import (
-	"net/http"
-	"os"
-
 	"github.com/decadevs/shoparena/handlers"
 	"github.com/gin-gonic/gin"
+	"net/http"
+	"os"
 )
 
 type Router struct {
@@ -22,7 +21,8 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter.GET("/searchproducts", h.SearchProductHandler)
 	apirouter.PUT("/updateprofile", h.UpdateProfileHandler)
 	apirouter.PUT("/uploadimage", h.UploadImageHandler)
-
+	apirouter.PUT("/buyer/resetpassword/:email", h.BuyerResetPassword)
+	apirouter.PUT("/seller/resetpassword/:email", h.SellerResetPassword)
 	port := ":" + os.Getenv("PORT")
 	if port == ":" {
 		port = ":8081"

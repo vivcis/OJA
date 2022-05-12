@@ -24,11 +24,19 @@ type DB interface {
 	FindSellerByPhone(phone string) (*models.Seller, error)
 	UploadFileToS3(h *session.Session, file multipart.File, fileName string, size int64) (string, error)
 	UpdateUserImageURL(username, url string) error
-	UpdateUser(user interface{}, email string) error
+	//UpdateUser(user interface{}, email string) error
 	FindSellerByUsername(username string) (*models.Seller, error)
 	SearchProduct(lowerPrice, upperPrice, category, name string) ([]models.Product, error)
 	TokenInBlacklist(token *string) bool
-	
+	UpdateUser(user *models.User) error
+	BuyerUpdatePassword(password, newPassword string) (*models.Buyer, error)
+	SellerUpdatePassword(password, newPassword string) (*models.Seller, error)
+	BuyerResetPassword(email, newPassword string) (*models.Buyer, error)
+}
+
+// mailer interface to implement mailing service
+type Mailer interface {
+	SendMail(subject, body, to, Private, Domain string) bool
 }
 
 // ValidationError defines error that occur due to validation
