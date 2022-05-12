@@ -24,6 +24,8 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter.PUT("/seller/resetpassword/:email", h.SellerResetPassword)
 	apirouter.POST("/buyersignup", h.BuyerSignUpHandler)
 	apirouter.POST("/sellersignup", h.SellerSignUpHandler)
+	apirouter.POST("/loginbuyer", h.LoginBuyerHandler)
+	apirouter.POST("/loginseller", h.LoginSellerHandler)
 
 	port := ":" + os.Getenv("PORT")
 	if port == ":" {
