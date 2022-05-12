@@ -18,6 +18,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter := router.Group("/api/v1")
 
 	apirouter.GET("/ping", handlers.PingHandler)
+	apirouter.GET("/seller/:id", h.HandleGetSellerShopByProfileAndProduct())
 	apirouter.GET("/searchproducts", h.SearchProductHandler)
 	apirouter.PUT("/updateprofile/:id", h.UpdateProfileHandler)
 	apirouter.PUT("/uploadimage", h.UploadImageHandler)
@@ -25,6 +26,8 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter.PUT("/seller/resetpassword/:email", h.SellerResetPassword)
 	apirouter.POST("/buyersignup", h.BuyerSignUpHandler)
 	apirouter.POST("/sellersignup", h.SellerSignUpHandler)
+	apirouter.POST("/loginbuyer", h.LoginBuyerHandler)
+	apirouter.POST("/loginseller", h.LoginSellerHandler)
 
 	port := ":" + os.Getenv("PORT")
 	if port == ":" {

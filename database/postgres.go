@@ -16,6 +16,9 @@ import (
 	"github.com/decadevs/shoparena/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"log"
+	"strconv"
+	"time"
 )
 
 //PostgresDb implements the DB interface
@@ -348,4 +351,17 @@ func (pdb *PostgresDb) BuyerResetPassword(email, newPassword string) (*models.Bu
 		return nil, err
 	}
 	return buyer, nil
+}
+
+//FindIndividualSellerShop return the individual seller and its respective shop gotten by its unique ID
+func (pdb *PostgresDb) FindIndividualSellerShop(sellerID string) (*models.Seller, error) {
+	//create instance of a seller and its respective product, and unmarshal data into them
+	seller := &models.Seller{}
+
+	if err := pdb.DB.Preload("Product").Where("id = ?", sellerID).Find(&seller).Error; err != nil {
+		log.Println("Error in finding", err)
+		return nil, err
+	}
+
+	return seller, nil
 }
