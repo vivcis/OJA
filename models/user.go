@@ -3,7 +3,6 @@ package models
 
 import (
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 	"net/mail"
 )
 
