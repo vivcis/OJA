@@ -45,6 +45,29 @@ func (pdb *PostgresDb) Init(host, user, password, dbName, port string) error {
 
 }
 
+//GET ALL PRODUCTS FROM DB
+func (pdb *PostgresDb) GetAllProducts() []models.Product {
+	var products []models.Product
+	if err := pdb.DB.Find(&products).Error; err != nil {
+		log.Println("Could not find product", err)
+	}
+	return products
+}
+
+//UPDATE PRODUCT BY ID
+func (pdb *PostgresDb) UpdateProductByID(prod models.Product) error {
+	products := models.Product{}
+
+	err := pdb.DB.Model(&products).Where("id = ?", prod.ID).Update("title", prod.Title).
+		Update("description", prod.Description).Update("price", prod.Price).
+		Update("rating", prod.Rating).Update("quantity", prod.Quantity).Error
+	if err != nil {
+		fmt.Println("error in updating in postgres db")
+		return err
+	}
+	return nil
+}
+
 // SearchProduct Searches all products from DB
 func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name string) ([]models.Product, error) {
 	categories := models.Category{}

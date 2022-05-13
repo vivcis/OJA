@@ -27,7 +27,9 @@ type DB interface {
 	SellerUpdatePassword(password, newPassword string) (*models.Seller, error)
 	BuyerResetPassword(email, newPassword string) (*models.Buyer, error)
 	CreateBuyerCart(cart *models.Cart) (*models.Cart, error)
-  FindIndividualSellerShop(sellerID string) (*models.Seller, error)
+	FindIndividualSellerShop(sellerID string) (*models.Seller, error)
+	GetAllProducts() []models.Product
+	UpdateProductByID(prod models.Product) error
 }
 
 // Mailer interface to implement mailing service
