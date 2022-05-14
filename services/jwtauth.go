@@ -18,11 +18,11 @@ func GenerateTokenWithMethod(signMethod *jwt.SigningMethodHMAC, claims jwt.MapCl
 	return &tokenString, nil
 }
 
-func GenerateTokenWithClaims(username string) string {
+func GenerateTokenWithClaims(email string) string {
 	claims := jwt.MapClaims{
 		"exp":      time.Now().Add(time.Hour * 3).Unix(),
 		"iat":      time.Now().Unix(),
-		"username": username,
+		"user_email": email,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

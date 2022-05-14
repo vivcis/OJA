@@ -1,10 +1,12 @@
 package router
 
 import (
-	"github.com/decadevs/shoparena/handlers"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
+
+	"github.com/decadevs/shoparena/handlers"
+	"github.com/decadevs/shoparena/server/middleware"
+	"github.com/gin-gonic/gin"
 )
 
 type Router struct {
@@ -26,6 +28,14 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter.POST("/sellersignup", h.SellerSignUpHandler)
 	apirouter.POST("/loginbuyer", h.LoginBuyerHandler)
 	apirouter.POST("/loginseller", h.LoginSellerHandler)
+
+	//All authorized routes here
+	authorizedRoutesBuyer := apirouter.Group("/")
+	authorizedRoutesSeller := apirouter.Group("/")
+	authorizedRoutesBuyer.Use(middleware.AuthorizeBuyer(h.DB.FindBuyerByEmail, h.DB.TokenInBlacklist))
+	authorizedRoutesSeller.Use(middleware.AuthorizeSeller(h.DB.FindSellerByEmail, h.DB.TokenInBlacklist))
+	authorizedRoutesBuyer.PUT("/updatebuyerprofile/:id", h.UpdateBuyerProfileHandler)
+	authorizedRoutesSeller.PUT("/updatesellerprofile/:id", h.UpdateSellerProfileHandler)
 
 	port := ":" + os.Getenv("PORT")
 	if port == ":" {
