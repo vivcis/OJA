@@ -23,7 +23,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter.PUT("/buyer/uppdatepassword/:email", h.BuyerUpdatePasswordHandler)
 	apirouter.PUT("/seller/updatepassword/:email", h.SellerUpdatePasswordHandler)
 	apirouter.POST("/buyer/forgotpassword", h.SendForgotPasswordEMailHandler)
-	apirouter.PUT("/buyer/forgotpassword-reset?reset_token=", h.ForgotPasswordResetHandler)
+	apirouter.PUT("/buyer/forgotpassword-reset", h.ForgotPasswordResetHandler)
 
 	port := ":" + os.Getenv("PORT")
 	if port == ":" {

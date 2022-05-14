@@ -31,6 +31,8 @@ type DB interface {
 // mailer interface to implement mailing service
 type Mailer interface {
 	SendMail(subject, body, to, Private, Domain string) error
+	GenerateNonAuthToken(UserEmail string, secret string) (*string, error)
+	DecodeToken(token, secret string) (string, error)
 }
 
 // ValidationError defines error that occur due to validation

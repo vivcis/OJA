@@ -3,7 +3,6 @@ package handlers
 import (
 	"github.com/decadevs/shoparena/database"
 	"github.com/decadevs/shoparena/models"
-	"github.com/decadevs/shoparena/services"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"log"
@@ -65,7 +64,7 @@ func (h *Handler) SendForgotPasswordEMailHandler(c *gin.Context) {
 
 	// generate token that'll be used to reset the password
 	secretString := os.Getenv("JWTSECRET")
-	resetToken, err := services.GenerateNonAuthToken(buyer.Email, secretString)
+	resetToken, err := h.Mail.GenerateNonAuthToken(buyer.Email, secretString)
 	if err != nil {
 		log.Println(err)
 		c.JSON(400, gin.H{"message": "something went wrong"})
@@ -74,7 +73,7 @@ func (h *Handler) SendForgotPasswordEMailHandler(c *gin.Context) {
 	}
 
 	// the link to be clicked in order to perform password reset
-	link := "http://localhost:5000/api/v1/password-reset?reset_token=" + *resetToken
+	link := "http://localhost:8085/reset-password?reset_token=" + *resetToken
 	// define the body of the email
 	body := "Here is your reset <a href='" + link + "'>link</a>"
 	html := "<strong>" + body + "</strong>"
@@ -123,7 +122,8 @@ func (h *Handler) ForgotPasswordResetHandler(c *gin.Context) {
 	resetToken, _ := c.GetQuery("reset_token")
 
 	// decodes token to get user email
-	userEmail, err := services.DecodeToken(resetToken)
+	secretString := os.Getenv("JWTSECRET")
+	userEmail, err := h.Mail.DecodeToken(resetToken, secretString)
 	if err != nil {
 		// Return response when we get an error while decoding the token
 		log.Println(err)

@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"fmt"
 	"github.com/mailgun/mailgun-go/v4"
 	"log"
 	"time"
@@ -22,7 +21,7 @@ func (s *Service) SendMail(subject, body, recipient, Private, Domain string) err
 
 	// Create a new template
 	err := mg.CreateTemplate(ctx, &mailgun.Template{
-		Name: "new_template",
+		Name: "i_template",
 		Version: mailgun.TemplateVersion{
 			Template: `'<div class="entry"> <h1>{{.title}}</h1> <div class="body"> {{.body}} </div> </div>'`,
 			Engine:   mailgun.TemplateEngineGo,
@@ -35,7 +34,7 @@ func (s *Service) SendMail(subject, body, recipient, Private, Domain string) err
 
 	// Create a new message with template
 	m := mg.NewMessage("Oja Ecommerce <Oja@Decadev.gon>", subject, "")
-	m.SetTemplate("new_template")
+	m.SetTemplate("i_template")
 
 	// Add recipients
 	err = m.AddRecipient(recipient)
@@ -54,12 +53,11 @@ func (s *Service) SendMail(subject, body, recipient, Private, Domain string) err
 	}
 
 	// Send the message with a 10 second timeout
-	resp, id, err := mg.Send(ctx, m)
+	_, _, err = mg.Send(ctx, m)
 	if err != nil {
 		log.Fatal(err)
 		return err
 	}
 
-	fmt.Printf("ID: %s Resp: %s\n", id, resp)
 	return err
 }
