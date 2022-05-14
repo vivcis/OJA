@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	validator "github.com/go-playground/validator/v10"
+	"github.com/go-playground/validator/v10"
 )
 
-// FieldError wraps around the validator error so it
-// can be used and caught specifically
 type FieldError struct {
 	err validator.FieldError
 }
@@ -34,22 +32,4 @@ func (q FieldError) String() string {
 //NewFieldError returns a field error
 func NewFieldError(err validator.FieldError) FieldError {
 	return FieldError{err: err}
-}
-
-// InActiveUserError defines an inactive user error
-type InActiveUserError struct {
-	err string
-}
-
-// NewInActiveUserError creates a new inactive user error
-func NewInActiveUserError(message string) InActiveUserError {
-	return InActiveUserError{err: message}
-}
-
-// Error returns the error message
-func (i InActiveUserError) Error() string {
-	if i.err == "" {
-		i.err = "user is inactive"
-	}
-	return i.err
 }

@@ -1,11 +1,21 @@
 package database
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"mime/multipart"
+	"net/http"
+	"os"
+	
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/decadevs/shoparena/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"log"
 	"strconv"
 	"time"
 )
@@ -45,69 +55,84 @@ func (pdb *PostgresDb) Init(host, user, password, dbName, port string) error {
 }
 
 // SearchProduct Searches all products from DB
-func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, category, name string) ([]models.Product, error) {
-
+func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name string) ([]models.Product, error) {
+	categories := models.Category{}
 	var products []models.Product
+
 	LPInt, _ := strconv.Atoi(lowerPrice)
 	UPInt, _ := strconv.Atoi(upperPrice)
 
+	if categoryName == "" {
+		err := pdb.DB.Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+		return products, nil
+	} else {
+		err := pdb.DB.Where("name = ?", categoryName).First(&categories).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	}
+
+	category := categories.ID
+
 	if LPInt == 0 && UPInt == 0 && name == "" {
-		err := pdb.DB.Where("product_category = ?", category).Find(&products).Error
+		err := pdb.DB.Where("category_id = ?", category).Find(&products).Error
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
 		}
 	} else if LPInt == 0 && name == "" {
-		err := pdb.DB.Where("product_category = ?", category).
-			Where("product_price <= ?", uint(UPInt)).Find(&products).Error
+		err := pdb.DB.Where("category_id = ?", category).
+			Where("price <= ?", uint(UPInt)).Find(&products).Error
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
 		}
 	} else if UPInt == 0 && name == "" {
-		err := pdb.DB.Where("product_category = ?", category).
-			Where("product_price >= ?", uint(LPInt)).Find(&products).Error
+		err := pdb.DB.Where("category_id = ?", category).
+			Where("price >= ?", uint(LPInt)).Find(&products).Error
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
 		}
 	} else if LPInt != 0 && UPInt != 0 && name == "" {
-		err := pdb.DB.Where("product_category = ?", category).Where("product_price >= ?", uint(LPInt)).
-			Where("product_price <= ?", uint(UPInt)).Find(&products).Error
+		err := pdb.DB.Where("category_id = ?", category).Where("price >= ?", uint(LPInt)).
+			Where("price <= ?", uint(UPInt)).Find(&products).Error
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
 		}
 	} else if LPInt == 0 && UPInt == 0 && name != "" {
-		err := pdb.DB.Where("product_category = ?", category).
-			Where("product_name LIKE ?", "%"+name+"%").Find(&products).Error
+		err := pdb.DB.Where("category_id = ?", category).
+			Where("title LIKE ?", "%"+name+"%").Find(&products).Error
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
 		}
 	} else if LPInt == 0 && name != "" {
-		err := pdb.DB.Where("product_category = ?", category).
-			Where("product_price <= ?", uint(UPInt)).
-			Where("product_name LIKE ?", "%"+name+"%").Find(&products).Error
+		err := pdb.DB.Where("category_id = ?", category).
+			Where("price <= ?", uint(UPInt)).
+			Where("title LIKE ?", "%"+name+"%").Find(&products).Error
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
 		}
 	} else if UPInt == 0 && name != "" {
-		err := pdb.DB.Where("product_category = ?", category).
-			Where("product_price >= ?", uint(LPInt)).
-			Where("product_name LIKE ?", "%"+name+"%").Find(&products).Error
+		err := pdb.DB.Where("category_id = ?", category).
+			Where("price >= ?", uint(LPInt)).
+			Where("title LIKE ?", "%"+name+"%").Find(&products).Error
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
 		}
-	} else if category == "" {
-		return nil, errors.New("choose a category")
-
 	} else {
-		err := pdb.DB.Where("product_category = ?", category).Where("product_price >= ?", uint(LPInt)).
-			Where("product_price <= ?", uint(UPInt)).
-			Where("product_name LIKE ?", "%"+name+"%").Find(&products).Error
+		err := pdb.DB.Where("category_id = ?", category).Where("price >= ?", uint(LPInt)).
+			Where("price <= ?", uint(UPInt)).
+			Where("title LIKE ?", "%"+name+"%").Find(&products).Error
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
@@ -119,40 +144,28 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, category, name stri
 
 // CreateSeller creates a new Seller in the DB
 func (pdb *PostgresDb) CreateSeller(user *models.Seller) (*models.Seller, error) {
-	_, err := pdb.FindSellerByEmail(user.Email)
-	if err == nil {
-		return user, ValidationError{Field: "email", Message: "already in use"}
-	}
-	_, err = pdb.FindSellerByUsername(user.Username)
-	if err == nil {
-		return user, ValidationError{Field: "username", Message: "already in use"}
-	}
-	_, err = pdb.FindSellerByPhone(user.PhoneNumber)
-	if err == nil {
-		return user, ValidationError{Field: "phone", Message: "already in use"}
-	}
+	var err error
 	user.CreatedAt = time.Now()
+	user.IsActive = true
 	err = pdb.DB.Create(user).Error
 	return user, err
 }
 
 // CreateBuyer creates a new Buyer in the DB
 func (pdb *PostgresDb) CreateBuyer(user *models.Buyer) (*models.Buyer, error) {
-	_, err := pdb.FindBuyerByEmail(user.Email)
-	if err == nil {
-		return user, ValidationError{Field: "email", Message: "already in use"}
-	}
-	_, err = pdb.FindBuyerByUsername(user.Username)
-	if err == nil {
-		return user, ValidationError{Field: "username", Message: "already in use"}
-	}
-	_, err = pdb.FindBuyerByPhone(user.PhoneNumber)
-	if err == nil {
-		return user, ValidationError{Field: "phone", Message: "already in use"}
-	}
+	var err error
 	user.CreatedAt = time.Now()
+	user.IsActive = true
 	err = pdb.DB.Create(user).Error
 	return user, err
+}
+
+//CreateBuyerCart creates a new cart for the buyer
+func (pdb *PostgresDb) CreateBuyerCart(cart *models.Cart) (*models.Cart, error) {
+	var err error
+	cart.CreatedAt = time.Now()
+	err = pdb.DB.Create(cart).Error
+	return cart, err
 }
 
 // FindSellerByUsername finds a user by the username
@@ -183,19 +196,19 @@ func (pdb *PostgresDb) FindBuyerByUsername(username string) (*models.Buyer, erro
 
 // FindSellerByEmail finds a user by email
 func (pdb *PostgresDb) FindSellerByEmail(email string) (*models.Seller, error) {
-	user := &models.Seller{}
-	if err := pdb.DB.Where("email = ?", email).First(user).Error; err != nil {
-		return nil, errors.New(email + " does not exist" + " user not found")
+	seller := &models.Seller{}
+	if err := pdb.DB.Where("email = ?", email).First(seller).Error; err != nil {
+		return nil, errors.New(email + " does not exist" + " seller not found")
 	}
 
-	return user, nil
+	return seller, nil
 }
 
 // FindBuyerByEmail finds a user by email
 func (pdb *PostgresDb) FindBuyerByEmail(email string) (*models.Buyer, error) {
 	buyer := &models.Buyer{}
 	if err := pdb.DB.Where("email = ?", email).First(buyer).Error; err != nil {
-		return nil, errors.New(email + " does not exist" + " user not found")
+		return nil, errors.New(email + " does not exist" + " buyer not found")
 	}
 
 	return buyer, nil
@@ -234,9 +247,70 @@ func (pdb *PostgresDb) FindAllSellersExcept(except string) ([]models.Seller, err
 	return sellers, nil
 }
 
-func (pdb *PostgresDb) UpdateUser(user *models.User) error {
+func (pdb *PostgresDb) UpdateBuyerProfile(id uint, update *models.UpdateUser) error {
+	result :=
+	     pdb.DB.Model(models.Buyer{}).
+			Where("id = ?", id).
+			Updates(
+				models.User{
+					FirstName:      update.FirstName,
+					LastName:       update.LastName,
+					PhoneNumber:    update.PhoneNumber,
+					Address:        update.Address,
+					Email:          update.Email,
+				},
+			)
+	return result.Error
+}
 
-	return nil
+func (pdb *PostgresDb) UpdateSellerProfile(id uint, update *models.UpdateUser) error {
+	result :=
+	     pdb.DB.Model(models.Seller{}).
+			Where("id = ?", id).
+			Updates(
+				models.User{
+					FirstName:      update.FirstName,
+					LastName:       update.LastName,
+					PhoneNumber:    update.PhoneNumber,
+					Address:        update.Address,
+					Email:          update.Email,
+				},
+			)
+	return result.Error
+}
+
+// UploadFileToS3 saves a file to aws bucket and returns the url to the file and an error if there's any
+func (pdb *PostgresDb) UploadFileToS3(h *session.Session, file multipart.File, fileName string, size int64) (string, error) {
+    // get the file size and read the file content into a buffer
+    buffer := make([]byte, size)
+    file.Read(buffer)
+    // config settings: this is where you choose the bucket,
+    // filename, content-type and storage class of the file you're uploading
+    url := "https://s3-eu-west-3.amazonaws.com/arp-rental/" + fileName
+    _, err := s3.New(h).PutObject(&s3.PutObjectInput{
+        Bucket:               aws.String(os.Getenv("S3_BUCKET_NAME")),
+        Key:                  aws.String(fileName),
+        ACL:                  aws.String("public-read"),
+        Body:                 bytes.NewReader(buffer),
+        ContentLength:        aws.Int64(int64(size)),
+        ContentType:          aws.String(http.DetectContentType(buffer)),
+        ContentDisposition:   aws.String("attachment"),
+        ServerSideEncryption: aws.String("AES256"),
+        StorageClass:         aws.String("INTELLIGENT_TIERING"),
+    })
+    return url, err
+}
+
+func (pdb *PostgresDb) UpdateUserImageURL(username, url string) error {
+	result :=
+		pdb.DB.Model(models.User{}).
+			Where("username = ?", username).
+			Updates(
+				models.User{
+					Image: url,
+				},
+			)
+	return result.Error
 }
 func (pdb *PostgresDb) BuyerUpdatePassword(password, newPassword string) (*models.Buyer, error) {
 	buyer := &models.Buyer{}
@@ -258,4 +332,17 @@ func (pdb *PostgresDb) BuyerResetPassword(email, newPassword string) (*models.Bu
 		return nil, err
 	}
 	return buyer, nil
+}
+
+//FindIndividualSellerShop return the individual seller and its respective shop gotten by its unique ID
+func (pdb *PostgresDb) FindIndividualSellerShop(sellerID string) (*models.Seller, error) {
+	//create instance of a seller and its respective product, and unmarshal data into them
+	seller := &models.Seller{}
+
+	if err := pdb.DB.Preload("Product").Where("id = ?", sellerID).Find(&seller).Error; err != nil {
+		log.Println("Error in finding", err)
+		return nil, err
+	}
+
+	return seller, nil
 }

@@ -9,7 +9,7 @@ import (
 
 type Service struct{}
 
-// SEND EMAIL METHOD THAT  WILL BE USED TO SEND EMAILS TO USERS
+// SendMail  METHOD THAT  WILL BE USED TO SEND EMAILS TO USERS
 func (s *Service) SendMail(subject, body, recipient, Private, Domain string) error {
 	privateAPIKey := Private
 	yourDomain := Domain
@@ -55,7 +55,7 @@ func (s *Service) SendMail(subject, body, recipient, Private, Domain string) err
 	// Send the message with a 10 second timeout
 	_, _, err = mg.Send(ctx, m)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return err
 	}
 

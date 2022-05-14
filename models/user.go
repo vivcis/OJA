@@ -1,7 +1,9 @@
 package models
 
 import (
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+	"net/mail"
 )
 
 type User struct {
@@ -18,4 +20,29 @@ type User struct {
 	Image           string `json:"image"`
 	IsActive        bool   `json:"status"`
 	Token           string `json:"token"`
+}
+
+type UpdateUser struct {
+	FirstName   string `json:"first_name" binding:"required" form:"first_name"`
+	LastName    string `json:"last_name" binding:"required" form:"last_name"`
+	PhoneNumber string `json:"phone_number" binding:"required" form:"phone1"`
+	Email       string `json:"email" binding:"required,email" form:"email"`
+	Address     string `json:"address"  form:"address"`
+}
+
+func (user *User) HashPassword() error {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	user.PasswordHash = string(hashedPassword)
+	return nil
+}
+
+func (user *User) ValidMailAddress() bool {
+	_, err := mail.ParseAddress(user.Email)
+	if err != nil {
+		return false
+	}
+	return true
 }

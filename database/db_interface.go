@@ -19,16 +19,20 @@ type DB interface {
 	FindBuyerByUsername(username string) (*models.Buyer, error)
 	FindSellerByEmail(email string) (*models.Seller, error)
 	FindSellerByPhone(phone string) (*models.Seller, error)
+	UpdateUserImageURL(username, url string) error
 	FindSellerByUsername(username string) (*models.Seller, error)
 	SearchProduct(lowerPrice, upperPrice, category, name string) ([]models.Product, error)
 	TokenInBlacklist(token *string) bool
-	UpdateUser(user *models.User) error
+	UpdateBuyerProfile(id uint, update *models.UpdateUser) error
+	UpdateSellerProfile(id uint, update *models.UpdateUser) error
 	BuyerUpdatePassword(password, newPassword string) (*models.Buyer, error)
 	SellerUpdatePassword(password, newPassword string) (*models.Seller, error)
 	BuyerResetPassword(email, newPassword string) (*models.Buyer, error)
+	CreateBuyerCart(cart *models.Cart) (*models.Cart, error)
+	FindIndividualSellerShop(sellerID string) (*models.Seller, error)
 }
 
-// mailer interface to implement mailing service
+// Mailer interface to implement mailing service
 type Mailer interface {
 	SendMail(subject, body, to, Private, Domain string) error
 	GenerateNonAuthToken(UserEmail string, secret string) (*string, error)
