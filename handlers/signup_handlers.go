@@ -55,7 +55,7 @@ func (h *Handler) BuyerSignUpHandler(c *gin.Context) {
 	}
 
 	if err = buyer.HashPassword(); err != nil {
-		log.Println(err)
+
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Internal Server Error",
 		})
@@ -141,7 +141,10 @@ func (h *Handler) SellerSignUpHandler(c *gin.Context) {
 	_, err = h.DB.CreateSeller(seller)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
+
 			"Error": "could not create seller",
+			"Error": "success",
+
 		})
 		return
 	}

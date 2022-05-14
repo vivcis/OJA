@@ -5,9 +5,7 @@ import (
 	"os"
 
 	"github.com/decadevs/shoparena/handlers"
-	"github.com/decadevs/shoparena/server/middleware"
 	"github.com/gin-gonic/gin"
-	//"github.com/go-chi/chi/middleware"
 )
 
 type Router struct {
