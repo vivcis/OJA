@@ -20,7 +20,7 @@ func PingHandler(c *gin.Context) {
 	})
 }
 
-func (h *Handler) SellerResetPassword(c *gin.Context) {
+func (h *Handler) SellerUpdatePassword(c *gin.Context) {
 	var password models.PasswordResetReq
 	email := c.Param("email")
 	seller, err := h.DB.FindSellerByEmail(email)
@@ -56,7 +56,7 @@ func (h *Handler) SellerResetPassword(c *gin.Context) {
 	c.JSON(200, gin.H{"message": "successfully reset password"})
 }
 
-func (h *Handler) BuyerResetPassword(c *gin.Context) {
+func (h *Handler) BuyerUpdatePassword(c *gin.Context) {
 	var password models.PasswordResetReq
 
 	email := c.Param("email")
