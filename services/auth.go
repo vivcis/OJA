@@ -86,27 +86,27 @@ func GenerateClaims(email string) (jwt.MapClaims, jwt.MapClaims) {
 }
 
 func CheckSupportedFile(filename string) (string, bool) {
-    supportedFileTypes := map[string]bool{
-        ".png":  true,
-        ".jpeg": true,
-        ".jpg":  true,
-    }
-    fileExtension := filepath.Ext(filename)
-    return fileExtension, !supportedFileTypes[fileExtension]
+	supportedFileTypes := map[string]bool{
+		".png":  true,
+		".jpeg": true,
+		".jpg":  true,
+	}
+	fileExtension := filepath.Ext(filename)
+	return fileExtension, !supportedFileTypes[fileExtension]
 }
 func PreAWS(fileExtension, folder string) (*session.Session, string, error) {
-    tempFileName := folder + "/" + uuid.NewString() + fileExtension
-    session, err := session.NewSession(&aws.Config{
-        Region: aws.String(os.Getenv("AWS_REGION")),
-        Credentials: credentials.NewStaticCredentials(
-            os.Getenv("AWS_SECRET_ID"),
-            os.Getenv("AWS_SECRET_KEY"),
-            os.Getenv("AWS_TOKEN"),
-        ),
-    })
-    return session, tempFileName, err
+	tempFileName := folder + "/" + uuid.NewString() + fileExtension
+	session, err := session.NewSession(&aws.Config{
+		Region: aws.String(os.Getenv("AWS_REGION")),
+		Credentials: credentials.NewStaticCredentials(
+			os.Getenv("AWS_SECRET_ID"),
+			os.Getenv("AWS_SECRET_KEY"),
+			os.Getenv("AWS_TOKEN"),
+		),
+	})
+	return session, tempFileName, err
 }
-func GenerateNonAuthToken(UserEmail string, secret *string) (string, error) {
+func (s *Service) GenerateNonAuthToken(UserEmail string, secret *string) (string, error) {
 	// Define expiration time
 	expirationTime := time.Now().Add(60 * time.Minute)
 	// define the payload with the expiration time
@@ -124,19 +124,17 @@ func GenerateNonAuthToken(UserEmail string, secret *string) (string, error) {
 
 	return tokenString, err
 }
-func DecodeToken(token string) (string, error) {
+func (s *Service) DecodeToken(token, secret string) (string, error) {
 
 	claims := &Claims{}
 
-	tok, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+	_, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
 		return decode, nil
 	})
 	if err != nil {
 		log.Println(err)
 		return "", err
 	}
-	if tok.Valid {
-		return "", err
-	}
+
 	return claims.UserEmail, err
 }
