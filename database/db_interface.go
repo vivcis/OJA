@@ -2,10 +2,10 @@ package database
 
 import (
 	"fmt"
-	"log"
-	"os"
 	"github.com/decadevs/shoparena/models"
 	"github.com/joho/godotenv"
+	"log"
+	"os"
 )
 
 // DB provides access to the different db
@@ -29,12 +29,14 @@ type DB interface {
 	SellerUpdatePassword(password, newPassword string) (*models.Seller, error)
 	BuyerResetPassword(email, newPassword string) (*models.Buyer, error)
 	CreateBuyerCart(cart *models.Cart) (*models.Cart, error)
-    FindIndividualSellerShop(sellerID string) (*models.Seller, error)
+	FindIndividualSellerShop(sellerID string) (*models.Seller, error)
 }
 
 // Mailer interface to implement mailing service
 type Mailer interface {
-	SendMail(subject, body, to, Private, Domain string) bool
+	SendMail(subject, body, to, Private, Domain string) error
+	DecodeToken(token, secret string) (string, error)
+	GenerateNonAuthToken(UserEmail string, secret *string) (string, error)
 }
 
 // ValidationError defines error that occur due to validation
