@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/decadevs/shoparena/models"
@@ -141,10 +140,7 @@ func (h *Handler) SellerSignUpHandler(c *gin.Context) {
 	_, err = h.DB.CreateSeller(seller)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-
 			"Error": "could not create seller",
-			"Error": "success",
-
 		})
 		return
 	}

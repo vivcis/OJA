@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/decadevs/shoparena/handlers"
+	"github.com/decadevs/shoparena/server/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,7 +22,6 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter.GET("/ping", handlers.PingHandler)
 	apirouter.GET("/seller/:id", h.HandleGetSellerShopByProfileAndProduct())
 	apirouter.GET("/searchproducts", h.SearchProductHandler)
-	apirouter.PUT("/uploadimage", h.UploadImageHandler)
 	apirouter.PUT("/buyer/resetpassword/:email", h.BuyerResetPassword)
 	apirouter.PUT("/seller/resetpassword/:email", h.SellerResetPassword)
 	apirouter.POST("/buyersignup", h.BuyerSignUpHandler)
@@ -35,7 +35,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	authorizedRoutesBuyer.Use(middleware.AuthorizeBuyer(h.DB.FindBuyerByEmail, h.DB.TokenInBlacklist))
 	authorizedRoutesSeller.Use(middleware.AuthorizeSeller(h.DB.FindSellerByEmail, h.DB.TokenInBlacklist))
 	authorizedRoutesBuyer.PUT("/updatebuyerprofile/:id", h.UpdateBuyerProfileHandler)
-    authorizedRoutesSeller.PUT("/updatesellerprofile/:id", h.UpdateSellerProfileHandler)
+	authorizedRoutesSeller.PUT("/updatesellerprofile/:id", h.UpdateSellerProfileHandler)
 
 	port := ":" + os.Getenv("PORT")
 	if port == ":" {
