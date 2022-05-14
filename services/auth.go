@@ -72,6 +72,7 @@ func GenerateToken(signMethod *jwt.SigningMethodHMAC, claims jwt.MapClaims, secr
 }
 
 func GenerateClaims(email string) (jwt.MapClaims, jwt.MapClaims) {
+	log.Println("generate  claim function", email)
 	accessClaims := jwt.MapClaims{
 		"user_email": email,
 		"exp":        time.Now().Add(AccessTokenValidity).Unix(),

@@ -7,8 +7,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
-	"strconv"
-	"time"
+	
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -197,19 +196,19 @@ func (pdb *PostgresDb) FindBuyerByUsername(username string) (*models.Buyer, erro
 
 // FindSellerByEmail finds a user by email
 func (pdb *PostgresDb) FindSellerByEmail(email string) (*models.Seller, error) {
-	user := &models.Seller{}
-	if err := pdb.DB.Where("email = ?", email).First(user).Error; err != nil {
-		return nil, errors.New(email + " does not exist" + " user not found")
+	seller := &models.Seller{}
+	if err := pdb.DB.Where("email = ?", email).First(seller).Error; err != nil {
+		return nil, errors.New(email + " does not exist" + " seller not found")
 	}
 
-	return user, nil
+	return seller, nil
 }
 
 // FindBuyerByEmail finds a user by email
 func (pdb *PostgresDb) FindBuyerByEmail(email string) (*models.Buyer, error) {
 	buyer := &models.Buyer{}
 	if err := pdb.DB.Where("email = ?", email).First(buyer).Error; err != nil {
-		return nil, errors.New(email + " does not exist" + " user not found")
+		return nil, errors.New(email + " does not exist" + " buyer not found")
 	}
 
 	return buyer, nil
@@ -247,24 +246,6 @@ func (pdb *PostgresDb) FindAllSellersExcept(except string) ([]models.Seller, err
 	}
 	return sellers, nil
 }
-
-//UpdateUser updates both buyers and sellers information 
-// func (pdb *PostgresDb) UpdateUserProfile(user interface{}, email string) error {
-
-// 	switch  v := user.(type){
-// 	case *models.Buyer: 
-// 		result := pdb.DB.Model(models.Buyer{}).Where("email", email).Updates(v)
-// 		log.Println("here buyer")
-//        return result.Error
-// 	case *models.Seller:
-// 		result := pdb.DB.Model(models.Seller{}).Where("email", email).Updates(v)
-// 		log.Println("here seller")
-// 		return result.Error
-// 	default:
-// 		log.Println("none", reflect.TypeOf(v))
-// 	}
-// 		return nil
-// }
 
 func (pdb *PostgresDb) UpdateBuyerProfile(id uint, update *models.UpdateUser) error {
 	result :=

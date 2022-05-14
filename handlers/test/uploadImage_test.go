@@ -83,7 +83,7 @@ func TestUploadprofielpic(t *testing.T) {
         panic(err)
     }
     user := &models.User{Email: "ceciliaorji.co@gmail.com"}
-    mockDB.EXPECT().FindUserByEmail(user.Email).Return(user, nil)
+    mockDB.EXPECT().FindBuyerByEmail(user.Email).Return(user, nil)
     mockDB.EXPECT().TokenInBlacklist(accToken).Return(false)
     mockDB.EXPECT().UploadFileToS3(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 
