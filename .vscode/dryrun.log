@@ -1,5 +1,0 @@
-make --dry-run --always-make --keep-going --print-directory
-make: Entering directory `/Users/decagon/Documents/shop-arena'
-go run main.go
-make: Leaving directory `/Users/decagon/Documents/shop-arena'
- 
