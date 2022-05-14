@@ -11,7 +11,7 @@ import (
 type Service struct{}
 
 // SEND EMAIL METHOD THAT  WILL BE USED TO SEND EMAILS TO USERS
-func (s *Service) SendMail(subject, body, recipient, Private, Domain string) bool {
+func (s *Service) SendMail(subject, body, recipient, Private, Domain string) error {
 	privateAPIKey := Private
 	yourDomain := Domain
 
@@ -30,7 +30,7 @@ func (s *Service) SendMail(subject, body, recipient, Private, Domain string) boo
 		},
 	})
 	if err != nil {
-		return false
+		return err
 	}
 
 	// Create a new message with template
@@ -38,19 +38,28 @@ func (s *Service) SendMail(subject, body, recipient, Private, Domain string) boo
 	m.SetTemplate("template!")
 
 	// Add recipients
-	_ = m.AddRecipient(recipient)
+	err = m.AddRecipient(recipient)
+	if err != nil {
+		return err
+	}
 
 	// Add the variables recipient be used by the template
-	_ = m.AddVariable("title", subject)
-	_ = m.AddVariable("body", body)
+	err = m.AddVariable("title", subject)
+	if err != nil {
+		return err
+	}
+	err = m.AddVariable("body", body)
+	if err != nil {
+		return err
+	}
 
 	// Send the message with a 10 second timeout
 	resp, id, err := mg.Send(ctx, m)
 	if err != nil {
-		log.Fatal(err)
-		return false
+		log.Println(err)
+		return err
 	}
 
 	fmt.Printf("ID: %s Resp: %s\n", id, resp)
-	return true
+	return err
 }
