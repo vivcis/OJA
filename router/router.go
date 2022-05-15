@@ -28,6 +28,9 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter.POST("/sellersignup", h.SellerSignUpHandler)
 	apirouter.POST("/loginbuyer", h.LoginBuyerHandler)
 	apirouter.POST("/loginseller", h.LoginSellerHandler)
+	apirouter.GET("/buyerorders/:id", h.AllBuyerOrders)
+	apirouter.GET("/sellerorders/:id", h.AllSellerOrders)
+	apirouter.GET("/seller/totalorder/:id", h.SellerTotalOrders)
 
 	//All authorized routes here
 	authorizedRoutesBuyer := apirouter.Group("/")
