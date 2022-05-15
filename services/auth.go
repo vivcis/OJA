@@ -103,7 +103,7 @@ func PreAWS(fileExtension, folder string) (*session.Session, string, error) {
 	})
 	return session, tempFileName, err
 }
-func (s *Service) GenerateNonAuthToken(UserEmail string, secret string) (string, error) {
+func (s *Service) GenerateNonAuthToken(UserEmail string, secret string) (*string, error) {
 
 	// Define expiration time
 	expirationTime := time.Now().Add(60 * time.Minute)
@@ -119,7 +119,7 @@ func (s *Service) GenerateNonAuthToken(UserEmail string, secret string) (string,
 	// sign token with secret key
 	tokenString, err := token.SignedString([]byte(secret))
 	log.Println(tokenString)
-	return tokenString, err
+	return &tokenString, err
 
 }
 func (s *Service) DecodeToken(token, secret string) (string, error) {
