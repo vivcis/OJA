@@ -2,10 +2,11 @@ package database
 
 import (
 	"fmt"
-	"github.com/decadevs/shoparena/models"
-	"github.com/joho/godotenv"
 	"log"
 	"os"
+
+	"github.com/decadevs/shoparena/models"
+	"github.com/joho/godotenv"
 )
 
 // DB provides access to the different db
