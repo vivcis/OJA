@@ -2,10 +2,10 @@ package database
 
 import (
 	"fmt"
-	"log"
-	"os"
 	"github.com/decadevs/shoparena/models"
 	"github.com/joho/godotenv"
+	"log"
+	"os"
 )
 
 // DB provides access to the different db
@@ -29,7 +29,9 @@ type DB interface {
 	SellerUpdatePassword(password, newPassword string) (*models.Seller, error)
 	BuyerResetPassword(email, newPassword string) (*models.Buyer, error)
 	CreateBuyerCart(cart *models.Cart) (*models.Cart, error)
-    FindIndividualSellerShop(sellerID string) (*models.Seller, error)
+	FindIndividualSellerShop(sellerID string) (*models.Seller, error)
+	GetAllSellers() ([]models.Seller, error)
+	GetProductByID(id string) (*models.Product, error)
 }
 
 // Mailer interface to implement mailing service

@@ -3,6 +3,7 @@ module github.com/decadevs/shoparena
 go 1.17
 
 require (
+	github.com/brianvoe/gofakeit/v6 v6.16.0
 	github.com/gin-gonic/gin v1.7.7
 	github.com/golang/mock v1.6.0
 	github.com/joho/godotenv v1.4.0
@@ -14,7 +15,6 @@ require (
 )
 
 require (
-	github.com/brianvoe/gofakeit/v6 v6.16.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect

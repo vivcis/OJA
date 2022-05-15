@@ -7,7 +7,6 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
-	
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -249,15 +248,15 @@ func (pdb *PostgresDb) FindAllSellersExcept(except string) ([]models.Seller, err
 
 func (pdb *PostgresDb) UpdateBuyerProfile(id uint, update *models.UpdateUser) error {
 	result :=
-	     pdb.DB.Model(models.Buyer{}).
+		pdb.DB.Model(models.Buyer{}).
 			Where("id = ?", id).
 			Updates(
 				models.User{
-					FirstName:      update.FirstName,
-					LastName:       update.LastName,
-					PhoneNumber:    update.PhoneNumber,
-					Address:        update.Address,
-					Email:          update.Email,
+					FirstName:   update.FirstName,
+					LastName:    update.LastName,
+					PhoneNumber: update.PhoneNumber,
+					Address:     update.Address,
+					Email:       update.Email,
 				},
 			)
 	return result.Error
@@ -265,15 +264,15 @@ func (pdb *PostgresDb) UpdateBuyerProfile(id uint, update *models.UpdateUser) er
 
 func (pdb *PostgresDb) UpdateSellerProfile(id uint, update *models.UpdateUser) error {
 	result :=
-	     pdb.DB.Model(models.Seller{}).
+		pdb.DB.Model(models.Seller{}).
 			Where("id = ?", id).
 			Updates(
 				models.User{
-					FirstName:      update.FirstName,
-					LastName:       update.LastName,
-					PhoneNumber:    update.PhoneNumber,
-					Address:        update.Address,
-					Email:          update.Email,
+					FirstName:   update.FirstName,
+					LastName:    update.LastName,
+					PhoneNumber: update.PhoneNumber,
+					Address:     update.Address,
+					Email:       update.Email,
 				},
 			)
 	return result.Error
@@ -281,24 +280,24 @@ func (pdb *PostgresDb) UpdateSellerProfile(id uint, update *models.UpdateUser) e
 
 // UploadFileToS3 saves a file to aws bucket and returns the url to the file and an error if there's any
 func (pdb *PostgresDb) UploadFileToS3(h *session.Session, file multipart.File, fileName string, size int64) (string, error) {
-    // get the file size and read the file content into a buffer
-    buffer := make([]byte, size)
-    file.Read(buffer)
-    // config settings: this is where you choose the bucket,
-    // filename, content-type and storage class of the file you're uploading
-    url := "https://s3-eu-west-3.amazonaws.com/arp-rental/" + fileName
-    _, err := s3.New(h).PutObject(&s3.PutObjectInput{
-        Bucket:               aws.String(os.Getenv("S3_BUCKET_NAME")),
-        Key:                  aws.String(fileName),
-        ACL:                  aws.String("public-read"),
-        Body:                 bytes.NewReader(buffer),
-        ContentLength:        aws.Int64(int64(size)),
-        ContentType:          aws.String(http.DetectContentType(buffer)),
-        ContentDisposition:   aws.String("attachment"),
-        ServerSideEncryption: aws.String("AES256"),
-        StorageClass:         aws.String("INTELLIGENT_TIERING"),
-    })
-    return url, err
+	// get the file size and read the file content into a buffer
+	buffer := make([]byte, size)
+	file.Read(buffer)
+	// config settings: this is where you choose the bucket,
+	// filename, content-type and storage class of the file you're uploading
+	url := "https://s3-eu-west-3.amazonaws.com/arp-rental/" + fileName
+	_, err := s3.New(h).PutObject(&s3.PutObjectInput{
+		Bucket:               aws.String(os.Getenv("S3_BUCKET_NAME")),
+		Key:                  aws.String(fileName),
+		ACL:                  aws.String("public-read"),
+		Body:                 bytes.NewReader(buffer),
+		ContentLength:        aws.Int64(int64(size)),
+		ContentType:          aws.String(http.DetectContentType(buffer)),
+		ContentDisposition:   aws.String("attachment"),
+		ServerSideEncryption: aws.String("AES256"),
+		StorageClass:         aws.String("INTELLIGENT_TIERING"),
+	})
+	return url, err
 }
 
 func (pdb *PostgresDb) UpdateUserImageURL(username, url string) error {
@@ -345,4 +344,23 @@ func (pdb *PostgresDb) FindIndividualSellerShop(sellerID string) (*models.Seller
 	}
 
 	return seller, nil
+}
+
+// GetAllSellers returns all the sellers in the updated database
+func (pdb *PostgresDb) GetAllSellers() ([]models.Seller, error) {
+	var seller []models.Seller
+	err := pdb.DB.Model(&models.Seller{}).Find(&seller).Error
+	if err != nil {
+		return nil, err
+	}
+	return seller, nil
+}
+
+// GetProductByID returns a particular product by it's ID
+func (pdb *PostgresDb) GetProductByID(id string) (*models.Product, error) {
+	product := &models.Product{}
+	if err := pdb.DB.Where("ID=?", id).First(product).Error; err != nil {
+		return nil, err
+	}
+	return product, nil
 }
