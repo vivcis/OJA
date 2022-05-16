@@ -8,8 +8,10 @@ import (
 	"github.com/decadevs/shoparena/models"
 	"github.com/decadevs/shoparena/router"
 	"github.com/golang/mock/gomock"
+	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -18,6 +20,10 @@ import (
 )
 
 func TestUpdateProduct(t *testing.T) {
+	err := godotenv.Load("../../.env")
+	if err != nil {
+		log.Println(err.Error())
+	}
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockDB := mock_database.NewMockDB(ctrl)
@@ -25,6 +31,9 @@ func TestUpdateProduct(t *testing.T) {
 		DB: mockDB,
 	}
 	route, _ := router.SetupRouter(h)
+	if err != nil {
+		t.Fail()
+	}
 
 	category := models.Category{
 		Model: gorm.Model{ID: 1},
@@ -47,6 +56,8 @@ func TestUpdateProduct(t *testing.T) {
 		t.Fail()
 	}
 
+	mockDB.EXPECT().TokenInBlacklist(gomock.Any()).Return(false).Times(2)
+	mockDB.EXPECT().UpdateProductByID(product).Return(nil)
 	t.Run("Testing for valid update", func(t *testing.T) {
 		mockDB.EXPECT().UpdateProductByID(product).Return(nil)
 		rw := httptest.NewRecorder()
@@ -61,3 +72,70 @@ func TestUpdateProduct(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rw.Code)
 	})
 }
+
+//
+//func TestUpdateBuyerDetailsHandler(t *testing.T) {
+//	err := godotenv.Load("../../.env")
+//	if err != nil {
+//		log.Println(err.Error())
+//	}
+//	ctrl := gomock.NewController(t)
+//	defer ctrl.Finish()
+//	mockDB := mock_database.NewMockDB(ctrl)
+//	h := &handlers.Handler{DB: mockDB}
+//	route, _ := router.SetupRouter(h)
+//	accClaim, _ := services.GenerateClaims("ceciliaorji@yahoo.com")
+//	secret := os.Getenv("JWT_SECRET")
+//	acc, err := services.GenerateToken(jwt.SigningMethodHS256, accClaim, &secret)
+//	if err != nil {
+//		t.Fail()
+//	}
+//	updateBuyer := &models.UpdateUser{
+//		FirstName:   "Gabby",
+//		Address:     "Edo Tech Park",
+//		PhoneNumber: "123456789",
+//		Email:       "a@a.com",
+//		LastName:    "Gabby",
+//	}
+//	buyer := models.Buyer{
+//		User: models.User{
+//			Model: gorm.Model{
+//				ID: 23,
+//			},
+//			FirstName:   "Orji",
+//			LastName:    "Cecilia",
+//			PhoneNumber: "09052755438",
+//			Email:       "ceciliaorji@yahoo.com",
+//			Address:     "Edo Tech Park",
+//		},
+//		Orders: nil,
+//	}
+//	updatedBuyer, err := json.Marshal(updateBuyer)
+//	if err != nil {
+//		log.Println(err)
+//		t.Fail()
+//	}
+//	mockDB.EXPECT().TokenInBlacklist(gomock.Any()).Return(false).Times(2)
+//	mockDB.EXPECT().FindBuyerByEmail(buyer.Email).Return(&buyer, nil).Times(2)
+//	t.Run("Test for error", func(t *testing.T) {
+//		mockDB.EXPECT().UpdateBuyerProfile(buyer.ID, updateBuyer).Return(errors.New("error exist"))
+//		w := httptest.NewRecorder()
+//		req, _ := http.NewRequest("PUT", "/api/v1/updatebuyerprofile",
+//			strings.NewReader(string(updatedBuyer)))
+//		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *acc))
+//		route.ServeHTTP(w, req)
+//		assert.Equal(t, http.StatusInternalServerError, w.Code)
+//		log.Println(w.Body.String())
+//		assert.Contains(t, w.Body.String(), "update buyer not successful")
+//	})
+//	t.Run("Test for successful update", func(t *testing.T) {
+//		mockDB.EXPECT().UpdateBuyerProfile(buyer.ID, updateBuyer).Return(nil)
+//		w := httptest.NewRecorder()
+//		req, _ := http.NewRequest("PUT", "/api/v1/updatebuyerprofile",
+//			strings.NewReader(string(updatedBuyer)))
+//		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *acc))
+//		route.ServeHTTP(w, req)
+//		assert.Equal(t, http.StatusOK, w.Code)
+//		assert.Contains(t, w.Body.String(), "buyer updated successfully!")
+//	})
+//}
