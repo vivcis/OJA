@@ -26,6 +26,8 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter.POST("/sellersignup", h.SellerSignUpHandler)
 	apirouter.POST("/loginbuyer", h.LoginBuyerHandler)
 	apirouter.POST("/loginseller", h.LoginSellerHandler)
+	apirouter.POST("/createproduct/:sellerid", h.CreateProducts)
+	apirouter.DELETE("/deleteproduct/:id", h.DeleteSellerProduct)
 
 	port := ":" + os.Getenv("PORT")
 	if port == ":" {

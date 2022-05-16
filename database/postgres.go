@@ -276,3 +276,35 @@ func (pdb *PostgresDb) FindIndividualSellerShop(sellerID string) (*models.Seller
 
 	return seller, nil
 }
+
+func (pdb *PostgresDb) CreateProduct(product models.Product) error {
+
+	err := pdb.DB.Create(&product).Error
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
+func (pdb *PostgresDb) GetCategory(category string) (*models.Category, error) {
+	categories := models.Category{}
+
+	err := pdb.DB.Where("name = ?", category).First(&categories).Error
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return &categories, nil
+}
+
+func (pdb *PostgresDb) DeleteProduct(productID uint) error {
+	product := models.Product{}
+
+	err := pdb.DB.Where("id = ?", productID).Delete(&product).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
