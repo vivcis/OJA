@@ -92,7 +92,7 @@ func TestSellerSignUpHandler(t *testing.T) {
 
 	seller := models.Seller{
 		User:   user,
-		Rating: "star",
+		Rating: 5,
 	}
 	mockDb.EXPECT().FindSellerByUsername(user.Username).Return(&seller, nil)
 

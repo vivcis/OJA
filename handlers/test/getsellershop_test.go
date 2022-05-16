@@ -3,6 +3,14 @@ package test
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
+	"net/http"
+	"net/http/httptest"
+	"strconv"
+	"strings"
+	"testing"
+	"time"
+
 	"github.com/brianvoe/gofakeit/v6"
 	mock_database "github.com/decadevs/shoparena/database/mocks"
 	"github.com/decadevs/shoparena/handlers"
@@ -12,13 +20,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
-	"math/rand"
-	"net/http"
-	"net/http/httptest"
-	"strconv"
-	"strings"
-	"testing"
-	"time"
 )
 
 func TestHandleGetSellerShopByProfileAndProduct(t *testing.T) {
@@ -118,7 +119,7 @@ func TestHandleGetSellerShopByProfileAndProduct(t *testing.T) {
 	testSeller := models.Seller{
 		User:    testUser,
 		Product: products,
-		Rating:  string(rune((rand.Intn(5)))),
+		Rating:  5,
 	}
 
 	bodyJSON, err := json.Marshal(testSeller)
