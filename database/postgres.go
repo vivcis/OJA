@@ -7,7 +7,6 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
-	
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -29,29 +28,80 @@ type PostgresDb struct {
 func (pdb *PostgresDb) Init(host, user, password, dbName, port string) error {
 	fmt.Println("connecting to Database.....")
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Africa/Lagos", host, user, password, dbName, port)
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Africa/Lagos",
+		host, user, password, dbName, port)
 	var err error
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return err
 	}
-
 	if db == nil {
 		return fmt.Errorf("database was not initialized")
 	} else {
 		fmt.Println("Connected to Database")
 	}
 
-	err = db.AutoMigrate(&models.Category{}, &models.Seller{}, &models.Product{}, &models.Image{},
+	pdb.DB = db
+	err = pdb.PrePopulateTables()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
+
+}
+
+func (pdb *PostgresDb) PrePopulateTables() error {
+	err := pdb.DB.AutoMigrate(&models.Category{}, &models.Seller{}, &models.Product{}, &models.Image{},
 		&models.Buyer{}, &models.Cart{}, &models.CartProduct{}, &models.Order{}, &models.Blacklist{})
 	if err != nil {
 		return fmt.Errorf("migration error: %v", err)
 	}
+	categories := []models.Category{{Name: "fashion"}, {Name: "electronics"}, {Name: "health & beauty"}, {Name: "baby products"}, {Name: "phones & tablets"}, {Name: "food drinks"}, {Name: "computing"}, {Name: "sporting goods"}, {Name: "others"}}
+	result := pdb.DB.Find(&models.Category{})
+	if result.RowsAffected < 1 {
+		pdb.DB.Create(&categories)
+	}
 
-	pdb.DB = db
+	user := models.User{
+		Model:           gorm.Model{},
+		FirstName:       "John",
+		LastName:        "Doe",
+		Email:           "jdoe@gmail.com",
+		Username:        "JD Baba",
+		Password:        "12345678",
+		ConfirmPassword: "12345678",
+		PasswordHash:    "$2a$12$T2wSf1qgpTyhLOons3u4JOCqCwKDDL4J3UhGdOTEBL/CmAS/RNCPm",
+		Address:         "aso rock",
+		PhoneNumber:     "09091919292",
+		Image:           "https://i.ibb.co/5jwDfyF/Photo-on-24-11-2021-at-20-45.jpg",
+		IsActive:        true,
+		Token:           "",
+	}
+	buyer := models.Buyer{
+		Model:  gorm.Model{},
+		User:   user,
+		Orders: nil,
+	}
+	result = pdb.DB.Where("buyer = ?", "John").Find(&buyer)
 
+	if result.RowsAffected < 1 {
+		pdb.DB.Create(&buyer)
+	}
+
+	seller := models.Seller{
+		Model:   gorm.Model{},
+		User:    user,
+		Product: nil,
+		Orders:  nil,
+		Rating:  5,
+	}
+	result = pdb.DB.Where("seller = ?", "John").Find(&seller)
+
+	if result.RowsAffected < 1 {
+		pdb.DB.Create(&seller)
+	}
 	return nil
-
 }
 
 // SearchProduct Searches all products from DB
@@ -249,15 +299,15 @@ func (pdb *PostgresDb) FindAllSellersExcept(except string) ([]models.Seller, err
 
 func (pdb *PostgresDb) UpdateBuyerProfile(id uint, update *models.UpdateUser) error {
 	result :=
-	     pdb.DB.Model(models.Buyer{}).
+		pdb.DB.Model(models.Buyer{}).
 			Where("id = ?", id).
 			Updates(
 				models.User{
-					FirstName:      update.FirstName,
-					LastName:       update.LastName,
-					PhoneNumber:    update.PhoneNumber,
-					Address:        update.Address,
-					Email:          update.Email,
+					FirstName:   update.FirstName,
+					LastName:    update.LastName,
+					PhoneNumber: update.PhoneNumber,
+					Address:     update.Address,
+					Email:       update.Email,
 				},
 			)
 	return result.Error
@@ -265,15 +315,15 @@ func (pdb *PostgresDb) UpdateBuyerProfile(id uint, update *models.UpdateUser) er
 
 func (pdb *PostgresDb) UpdateSellerProfile(id uint, update *models.UpdateUser) error {
 	result :=
-	     pdb.DB.Model(models.Seller{}).
+		pdb.DB.Model(models.Seller{}).
 			Where("id = ?", id).
 			Updates(
 				models.User{
-					FirstName:      update.FirstName,
-					LastName:       update.LastName,
-					PhoneNumber:    update.PhoneNumber,
-					Address:        update.Address,
-					Email:          update.Email,
+					FirstName:   update.FirstName,
+					LastName:    update.LastName,
+					PhoneNumber: update.PhoneNumber,
+					Address:     update.Address,
+					Email:       update.Email,
 				},
 			)
 	return result.Error
@@ -281,24 +331,24 @@ func (pdb *PostgresDb) UpdateSellerProfile(id uint, update *models.UpdateUser) e
 
 // UploadFileToS3 saves a file to aws bucket and returns the url to the file and an error if there's any
 func (pdb *PostgresDb) UploadFileToS3(h *session.Session, file multipart.File, fileName string, size int64) (string, error) {
-    // get the file size and read the file content into a buffer
-    buffer := make([]byte, size)
-    file.Read(buffer)
-    // config settings: this is where you choose the bucket,
-    // filename, content-type and storage class of the file you're uploading
-    url := "https://s3-eu-west-3.amazonaws.com/arp-rental/" + fileName
-    _, err := s3.New(h).PutObject(&s3.PutObjectInput{
-        Bucket:               aws.String(os.Getenv("S3_BUCKET_NAME")),
-        Key:                  aws.String(fileName),
-        ACL:                  aws.String("public-read"),
-        Body:                 bytes.NewReader(buffer),
-        ContentLength:        aws.Int64(int64(size)),
-        ContentType:          aws.String(http.DetectContentType(buffer)),
-        ContentDisposition:   aws.String("attachment"),
-        ServerSideEncryption: aws.String("AES256"),
-        StorageClass:         aws.String("INTELLIGENT_TIERING"),
-    })
-    return url, err
+	// get the file size and read the file content into a buffer
+	buffer := make([]byte, size)
+	file.Read(buffer)
+	// config settings: this is where you choose the bucket,
+	// filename, content-type and storage class of the file you're uploading
+	url := "https://s3-eu-west-3.amazonaws.com/arp-rental/" + fileName
+	_, err := s3.New(h).PutObject(&s3.PutObjectInput{
+		Bucket:               aws.String(os.Getenv("S3_BUCKET_NAME")),
+		Key:                  aws.String(fileName),
+		ACL:                  aws.String("public-read"),
+		Body:                 bytes.NewReader(buffer),
+		ContentLength:        aws.Int64(int64(size)),
+		ContentType:          aws.String(http.DetectContentType(buffer)),
+		ContentDisposition:   aws.String("attachment"),
+		ServerSideEncryption: aws.String("AES256"),
+		StorageClass:         aws.String("INTELLIGENT_TIERING"),
+	})
+	return url, err
 }
 
 func (pdb *PostgresDb) UpdateUserImageURL(username, url string) error {

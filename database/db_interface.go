@@ -64,11 +64,11 @@ func InitDBParams() DBParams {
 		log.Fatal("Error loading .env file")
 	}
 
-	host := os.Getenv("DB_HOST")
+	host := os.Getenv("PDB_HOST")
 	user := os.Getenv("DB_USER")
 	password := os.Getenv("DB_PASSWORD")
 	dbName := os.Getenv("DB_NAME")
-	port := os.Getenv("DB_PORT")
+	port := os.Getenv("PDB_PORT")
 
 	return DBParams{
 		Host:     host,

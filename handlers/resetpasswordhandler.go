@@ -112,7 +112,7 @@ func (h *Handler) ForgotPasswordResetHandler(c *gin.Context) {
 	_, err = h.DB.BuyerResetPassword(buyer.Email, string(newPasswordHash))
 	if err != nil {
 		// Return response if we are not able to update user password
-		c.JSON(500, gin.H{"message": "Somehting happened while updating your password try again"})
+		c.JSON(500, gin.H{"message": "Something happened while updating your password try again"})
 		c.Abort()
 		return
 	}
