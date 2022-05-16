@@ -7,6 +7,8 @@ import (
 	"github.com/decadevs/shoparena/handlers"
 	"github.com/decadevs/shoparena/models"
 	"github.com/decadevs/shoparena/router"
+	"github.com/decadevs/shoparena/services"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/golang/mock/gomock"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
@@ -14,6 +16,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -31,6 +34,9 @@ func TestUpdateProduct(t *testing.T) {
 		DB: mockDB,
 	}
 	route, _ := router.SetupRouter(h)
+	accClaim, _ := services.GenerateClaims("victorihemadu@gmail.com")
+	secret := os.Getenv("JWT_SECRET")
+	acc, err := services.GenerateToken(jwt.SigningMethodHS256, accClaim, &secret)
 	if err != nil {
 		t.Fail()
 	}
@@ -51,13 +57,28 @@ func TestUpdateProduct(t *testing.T) {
 		Quantity:    4903,
 	}
 
+	seller := models.Seller{
+		User: models.User{
+			Model: gorm.Model{
+				ID: 23,
+			},
+			FirstName:   "Victor",
+			LastName:    "Ihemadu",
+			PhoneNumber: "08160967596",
+			Email:       "victorihemadu@gmail.com",
+			Address:     "Edo Tech Park",
+		},
+		Orders: nil,
+	}
+
 	bodyJSON, err := json.Marshal(product)
 	if err != nil {
 		t.Fail()
 	}
 
-	mockDB.EXPECT().TokenInBlacklist(gomock.Any()).Return(false).Times(2)
-	mockDB.EXPECT().UpdateProductByID(product).Return(nil)
+	mockDB.EXPECT().TokenInBlacklist(gomock.Any()).Return(false)
+	mockDB.EXPECT().FindSellerByEmail(seller.Email).Return(&seller, nil)
+
 	t.Run("Testing for valid update", func(t *testing.T) {
 		mockDB.EXPECT().UpdateProductByID(product).Return(nil)
 		rw := httptest.NewRecorder()
@@ -68,6 +89,7 @@ func TestUpdateProduct(t *testing.T) {
 			fmt.Printf("errrr here %v \n", err)
 			return
 		}
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *acc))
 		route.ServeHTTP(rw, req)
 		assert.Equal(t, http.StatusOK, rw.Code)
 	})
@@ -84,9 +106,7 @@ func TestUpdateProduct(t *testing.T) {
 //	mockDB := mock_database.NewMockDB(ctrl)
 //	h := &handlers.Handler{DB: mockDB}
 //	route, _ := router.SetupRouter(h)
-//	accClaim, _ := services.GenerateClaims("ceciliaorji@yahoo.com")
-//	secret := os.Getenv("JWT_SECRET")
-//	acc, err := services.GenerateToken(jwt.SigningMethodHS256, accClaim, &secret)
+
 //	if err != nil {
 //		t.Fail()
 //	}
