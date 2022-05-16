@@ -7,7 +7,7 @@ import (
 )
 
 // decode decodes the body of c into v
-func (h *Handler) decode(c *gin.Context, v interface{}) []string {
+func (h *Handler) Decode(c *gin.Context, v interface{}) []string {
 	if err := c.ShouldBindJSON(v); err != nil {
 		var errs []string
 		verr, ok := err.(validator.ValidationErrors)

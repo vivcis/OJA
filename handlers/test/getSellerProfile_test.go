@@ -2,42 +2,56 @@ package test
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
-	"strconv"
+	"os"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
-
 	mock_database "github.com/decadevs/shoparena/database/mocks"
 	"github.com/decadevs/shoparena/handlers"
 	"github.com/decadevs/shoparena/models"
 	"github.com/decadevs/shoparena/router"
+	"github.com/decadevs/shoparena/services"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/golang/mock/gomock"
-	"github.com/pkg/errors"
+	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
 
-func TestHandleGetSellerShopByProfileAndProduct(t *testing.T) {
-
+func TestGetSellerProfile(t *testing.T) {
+    err := godotenv.Load("../../.env")
+	if err != nil {
+		log.Println(err.Error())
+	}
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
+
 	mockDB := mock_database.NewMockDB(ctrl)
 	h := &handlers.Handler{
 		DB: mockDB,
 	}
 
 	route, _ := router.SetupRouter(h)
+	accClaim, _ := services.GenerateClaims("cecilia@yahoo.com")
+
+	secret := os.Getenv("JWT_SECRET")
+	acc, err := services.GenerateToken(jwt.SigningMethodHS256, accClaim, &secret)
+	if err != nil {
+		t.Fail()
+	}
 
 	//Declaring the FAKE testing variables
 	sellerFirstName := gofakeit.FirstName()
 	sellerLastName := gofakeit.LastName()
-	sellerEmail := gofakeit.Email()
+	sellerEmail := "cecilia@yahoo.com"
 	sellerUserName := gofakeit.Username()
 	sellerPhone := gofakeit.Phone()
 	sellerImage := gofakeit.ImageURL(200, 500)
@@ -48,7 +62,7 @@ func TestHandleGetSellerShopByProfileAndProduct(t *testing.T) {
 	price := uint(productPrice)
 	productCat := gofakeit.CarModel()
 	sellerID := uint(gofakeit.Number(0, 10))
-	testShopID := strconv.Itoa(int(sellerID))
+	//testShopID := strconv.Itoa(int(sellerID))
 	token := ""
 	productImage := gofakeit.ImageURL(200, 500)
 
@@ -128,25 +142,30 @@ func TestHandleGetSellerShopByProfileAndProduct(t *testing.T) {
 		t.Fail()
 	}
 
-	t.Run("Testing for Error", func(t *testing.T) {
-		mockDB.EXPECT().FindIndividualSellerShop(testShopID).Return(nil, errors.New("Error Exist"))
-		rw := httptest.NewRecorder()
-		req, _ := http.NewRequest(http.MethodGet, "/api/v1/seller/"+strconv.Itoa(int(sellerID)), strings.NewReader(string(bodyJSON)))
-		route.ServeHTTP(rw, req)
-		fmt.Println(rw.Body.String())
-		//fmt.Println(products)
-		assert.Equal(t, http.StatusNotFound, rw.Code)
-		assert.Contains(t, rw.Body.String(), "Error Exist")
+	t.Run("Test for error", func(t *testing.T) {
+		mockDB.EXPECT().TokenInBlacklist(gomock.Any()).Return(false)
+		mockDB.EXPECT().FindSellerByEmail(testSeller.Email).Return(nil, errors.New("an error occured"))
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", "/api/v1/getsellerprofile",
+			strings.NewReader(string(bodyJSON)))
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *acc))
+		route.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusNotFound, w.Code)
+		assert.Contains(t, w.Body.String(), "not found")
 	})
 
-	t.Run("Testing for success", func(t *testing.T) {
-		mockDB.EXPECT().FindIndividualSellerShop(testShopID).Return(&testSeller, nil)
-		rw := httptest.NewRecorder()
-		req, _ := http.NewRequest(http.MethodGet, "/api/v1/seller/"+strconv.Itoa(int(sellerID)), strings.NewReader(string(bodyJSON)))
-		route.ServeHTTP(rw, req)
-		fmt.Println(rw.Body.String())
-		assert.Equal(t, http.StatusOK, rw.Code)
-		assert.Contains(t, rw.Body.String(), "Found Seller")
-	})
+	t.Run("Test for successful profile retrieval", func(t *testing.T) {
+		mockDB.EXPECT().TokenInBlacklist(gomock.Any()).Return(false)
+		mockDB.EXPECT().FindSellerByEmail(sellerEmail).Return(&testSeller, nil)
 
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", "/api/v1/getsellerprofile",
+			strings.NewReader(string(bodyJSON)))
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *acc))
+		route.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Contains(t, w.Body.String(), "seller details retrieved correctly")
+	})
 }
