@@ -25,6 +25,7 @@ import (
 
 func TestUpdateBuyerDetailsHandler(t *testing.T) {
 	err := godotenv.Load("../../.env")
+	os.Setenv("JWT_SECRET", "shoparena234mnb")
 	if err != nil {
 		log.Println(err.Error())
 	}
