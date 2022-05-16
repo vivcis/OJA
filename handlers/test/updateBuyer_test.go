@@ -16,19 +16,18 @@ import (
 	"github.com/decadevs/shoparena/models"
 	"github.com/decadevs/shoparena/router"
 	"github.com/decadevs/shoparena/services"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/golang/mock/gomock"
-	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
 
+func TestMain(m *testing.M) {
+	os.Setenv("JWT_SECRET", "shoparena234das")
+	code := m.Run()
+	os.Exit(code)
+}
+
 func TestUpdateBuyerDetailsHandler(t *testing.T) {
-	err := godotenv.Load("../../.env")
-	os.Setenv("JWT_SECRET", "shoparena234mnb")
-	if err != nil {
-		log.Println(err.Error())
-	}
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
