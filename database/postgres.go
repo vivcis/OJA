@@ -346,11 +346,16 @@ func (pdb *PostgresDb) FindIndividualSellerShop(sellerID string) (*models.Seller
 	return seller, nil
 }
 
-func (pdb *PostgresDb) GetAllBuyerOrder(buyerId uint) (models.Buyer, error) {
-	buyer := models.Buyer{}
-	if err := pdb.DB.Preload("orders").Where("buyer_id=?", buyerId).Find(&buyer).Error; err != nil {
+//GetAllBuyerOrder gets all buyer orders
+func (pdb *PostgresDb) GetAllBuyerOrder(buyerId uint) (*models.Buyer, error) {
+	buyer := &models.Buyer{}
+	log.Println("the buyer id", buyerId)
+	if err := pdb.DB.Preload("Orders").Where("buyer_id = ?", buyerId).Find(&buyer).Error; err != nil {
+		log.Println("nibo ?", buyerId)
 		log.Println("Could not find product", err)
 		return buyer, err
 	}
+	log.Println("the buyer id", buyerId)
+	log.Println("the buyer", buyer)
 	return buyer, nil
 }

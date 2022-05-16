@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	//"github.com/decadevs/shoparena/models"
@@ -12,10 +13,13 @@ func (h *Handler) AllBuyerOrders(c *gin.Context) {
 	buyerId := c.Param("id")
 	buyerIdStr, _ := strconv.Atoi(buyerId)
 
-	buyerWithOrder := h.DB.GetAllBuyerOrder(uint(buyerIdStr))
+	buyerWithOrder, err := h.DB.GetAllBuyerOrder(uint(buyerIdStr))
+	if err != nil {
+		log.Println(err)
+	}
 
 	c.JSON(http.StatusFound, gin.H{
-		"All Products": buyerWithOrder,
+		"Orders": buyerWithOrder,
 	})
 }
 
