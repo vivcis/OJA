@@ -68,14 +68,14 @@ func (h *Handler) BuyerSignUpHandler(c *gin.Context) {
 		})
 		return
 	}
-	// cart := &models.Cart{BuyerID: buyer.ID}
-	// _, err = h.DB.CreateBuyerCart(cart)
-	// if err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{
-	// 		"Error": error.Error(err),
-	// 	})
-	// 	return
-	// }
+	cart := &models.Cart{BuyerID: buyer.ID}
+	_, err = h.DB.CreateBuyerCart(cart)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"Error": error.Error(err),
+		})
+		return
+	}
 
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "Sign Up Successful",
