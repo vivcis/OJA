@@ -17,23 +17,9 @@ import (
 	"testing"
 )
 
-"encoding/json"
-	"fmt"
-	mock_database "github.com/decadevs/shoparena/database/mocks"
-	"github.com/decadevs/shoparena/handlers"
-	"github.com/decadevs/shoparena/models"
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
-	"log"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
-)
-
 func TestDeleteProduct(t *testing.T) {
 	err := godotenv.Load("./.env")
-	if err != nil{
+	if err != nil {
 		log.Println("Unable to load env")
 	}
 	ctrl := gomock.NewController(t)
@@ -43,7 +29,7 @@ func TestDeleteProduct(t *testing.T) {
 		DB: mockDB,
 	}
 	route, _ := router.SetupRouter(h)
-	services.
+
 	product := models.Product{
 
 		SellerId:    1,
