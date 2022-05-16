@@ -3,7 +3,10 @@ package database
 import (
 	"fmt"
 	"log"
+	"mime/multipart"
 	"os"
+
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/decadevs/shoparena/models"
 	"github.com/joho/godotenv"
 )
@@ -25,6 +28,7 @@ type DB interface {
 	TokenInBlacklist(token *string) bool
 	UpdateBuyerProfile(id uint, update *models.UpdateUser) error
 	UpdateSellerProfile(id uint, update *models.UpdateUser) error
+	UploadFileToS3(h *session.Session, file multipart.File, fileName string, size int64) (string, error)
 	BuyerUpdatePassword(password, newPassword string) (*models.Buyer, error)
 	SellerUpdatePassword(password, newPassword string) (*models.Seller, error)
 	BuyerResetPassword(email, newPassword string) (*models.Buyer, error)

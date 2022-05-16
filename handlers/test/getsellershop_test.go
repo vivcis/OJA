@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
+
 	mock_database "github.com/decadevs/shoparena/database/mocks"
 	"github.com/decadevs/shoparena/handlers"
 	"github.com/decadevs/shoparena/models"
