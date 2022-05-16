@@ -16,6 +16,7 @@ import (
 	"github.com/decadevs/shoparena/models"
 	"github.com/decadevs/shoparena/router"
 	"github.com/decadevs/shoparena/services"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
