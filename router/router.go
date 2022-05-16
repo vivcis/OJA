@@ -22,6 +22,8 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter.GET("/ping", handlers.PingHandler)
 	apirouter.GET("/seller/:id", h.HandleGetSellerShopByProfileAndProduct())
 	apirouter.GET("/searchproducts", h.SearchProductHandler)
+	apirouter.GET("/sellers", h.GetSellers)
+	apirouter.GET("/product/:id", h.GetProductById)
 	apirouter.PUT("/buyer/resetpassword/:email", h.BuyerResetPassword)
 	apirouter.PUT("/seller/resetpassword/:email", h.SellerResetPassword)
 	apirouter.POST("/buyersignup", h.BuyerSignUpHandler)
