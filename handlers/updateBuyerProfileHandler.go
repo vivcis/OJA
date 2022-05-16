@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (h *Handler) GetUserFromContext2(c *gin.Context) (*models.Buyer, error) {
+func (h *Handler) GetBuyerFromContext(c *gin.Context) (*models.Buyer, error) {
 	userI, exists := c.Get("user")
 	if !exists {
 		return nil, fmt.Errorf("error getting user from context")
@@ -24,7 +24,7 @@ func (h *Handler) GetUserFromContext2(c *gin.Context) (*models.Buyer, error) {
 
 func (h *Handler) UpdateBuyerProfileHandler(c *gin.Context) {
 
-	buyer, err := h.GetUserFromContext2(c)
+	buyer, err := h.GetBuyerFromContext(c)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, []string{"internal server error"})

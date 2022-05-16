@@ -34,6 +34,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	authorizedRoutesBuyer.Use(middleware.AuthorizeBuyer(h.DB.FindBuyerByEmail, h.DB.TokenInBlacklist))
 	{
 		authorizedRoutesBuyer.PUT("/updatebuyerprofile", h.UpdateBuyerProfileHandler)
+		authorizedRoutesBuyer.GET("/getbuyerprofile", h.GetBuyerProfileHandler)
 		
 	}
 
@@ -41,6 +42,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	authorizedRoutesSeller.Use(middleware.AuthorizeSeller(h.DB.FindSellerByEmail, h.DB.TokenInBlacklist))
 	{
 		authorizedRoutesSeller.PUT("/updatesellerprofile", h.UpdateSellerProfileHandler)
+		authorizedRoutesSeller.GET("/getsellerprofile", h.GetSellerProfileHandler)
 		
 	}
 	
