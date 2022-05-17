@@ -5,11 +5,8 @@ import (
 	"log"
 	"mime/multipart"
 	"os"
-<<<<<<< HEAD
 
-=======
 	"github.com/aws/aws-sdk-go/aws/session"
->>>>>>> 955b0e9e8cf069180b51dd21846c0ac8278066f7
 	"github.com/decadevs/shoparena/models"
 	"github.com/joho/godotenv"
 )
@@ -37,10 +34,8 @@ type DB interface {
 	BuyerResetPassword(email, newPassword string) (*models.Buyer, error)
 	CreateBuyerCart(cart *models.Cart) (*models.Cart, error)
 	FindIndividualSellerShop(sellerID string) (*models.Seller, error)
-	
 	GetAllSellers() ([]models.Seller, error)
 	GetProductByID(id string) (*models.Product, error)
-
 }
 
 // Mailer interface to implement mailing service
