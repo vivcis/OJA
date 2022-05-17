@@ -33,12 +33,21 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 
 	//All authorized routes here
 	authorizedRoutesBuyer := apirouter.Group("/")
-	authorizedRoutesSeller := apirouter.Group("/")
 	authorizedRoutesBuyer.Use(middleware.AuthorizeBuyer(h.DB.FindBuyerByEmail, h.DB.TokenInBlacklist))
-	authorizedRoutesSeller.Use(middleware.AuthorizeSeller(h.DB.FindSellerByEmail, h.DB.TokenInBlacklist))
-	authorizedRoutesBuyer.PUT("/updatebuyerprofile/:id", h.UpdateBuyerProfileHandler)
-	authorizedRoutesSeller.PUT("/updatesellerprofile/:id", h.UpdateSellerProfileHandler)
+	{
+		authorizedRoutesBuyer.PUT("/updatebuyerprofile", h.UpdateBuyerProfileHandler)
+		authorizedRoutesBuyer.GET("/getbuyerprofile", h.GetBuyerProfileHandler)
+		
+	}
 
+	authorizedRoutesSeller := apirouter.Group("/")
+	authorizedRoutesSeller.Use(middleware.AuthorizeSeller(h.DB.FindSellerByEmail, h.DB.TokenInBlacklist))
+	{
+		authorizedRoutesSeller.PUT("/updatesellerprofile", h.UpdateSellerProfileHandler)
+		authorizedRoutesSeller.GET("/getsellerprofile", h.GetSellerProfileHandler)
+		
+	}
+	
 	port := ":" + os.Getenv("PORT")
 	if port == ":" {
 		port = ":8081"
