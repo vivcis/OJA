@@ -46,6 +46,8 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 		authorizedRoutesSeller.PUT("/updatesellerprofile", h.UpdateSellerProfileHandler)
 		authorizedRoutesSeller.GET("/getsellerprofile", h.GetSellerProfileHandler)
 		authorizedRoutesSeller.GET("/seller/shop", h.HandleGetSellerShopByProfileAndProduct())
+		authorizedRoutesSeller.GET("/seller/total/product/count", h.GetTotalProductCountForSeller)
+		authorizedRoutesSeller.GET("/seller/product", h.SellerIndividualProduct)
 
 	}
 

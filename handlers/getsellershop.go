@@ -41,7 +41,7 @@ func (h *Handler) HandleGetSellerShopByProfileAndProduct() gin.HandlerFunc {
 		//5. return a json object of seller profile and product if found
 		c.IndentedJSON(http.StatusOK, gin.H{
 			"Message":     "Found Seller Shop by Profile and Product",
-			"Seller Shop": Seller,
+			"Seller_Shop": Seller,
 		})
 
 	}

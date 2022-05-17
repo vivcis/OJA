@@ -364,3 +364,16 @@ func (pdb *PostgresDb) GetProductByID(id string) (*models.Product, error) {
 	}
 	return product, nil
 }
+
+//GET INDIVIDUAL SELLER PRODUCT
+func (pdb *PostgresDb) FindSellerProduct(sellerID string) ([]models.Product, error) {
+
+	product := []models.Product{}
+
+	if err := pdb.DB.Preload("Category").Where("seller_id = ?", sellerID).Find(&product).Error; err != nil {
+		log.Println("Error finding seller product", err)
+		return nil, err
+	}
+	return product, nil
+
+}
