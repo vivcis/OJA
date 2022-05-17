@@ -38,6 +38,7 @@ type DB interface {
 	FindSellerProduct(sellerID string) ([]models.Product, error)
 	GetAllBuyerOrder(buyerId uint) ([]models.Order, error)
 	GetAllSellerOrder(sellerId uint) ([]models.Order, error)
+	GetAllSellerOrderCount(sellerId uint) (int, error)
 }
 
 // Mailer interface to implement mailing service

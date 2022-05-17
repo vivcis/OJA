@@ -346,6 +346,7 @@ func (pdb *PostgresDb) FindIndividualSellerShop(sellerID string) (*models.Seller
 	return seller, nil
 }
 
+//GetAllBuyerOrder fetches all buyer orders
 func (pdb *PostgresDb) GetAllBuyerOrder(buyerId uint) ([]models.Order, error) {
 	var buyerOrder []models.Order
 	if err := pdb.DB.Where("buyer_id =?", buyerId).
@@ -354,7 +355,6 @@ func (pdb *PostgresDb) GetAllBuyerOrder(buyerId uint) ([]models.Order, error) {
 		Preload("Product").
 		Preload("Product.Category").
 		Find(&buyerOrder).
-		Limit(2).
 		Error; err != nil {
 		log.Println("could not find order", err)
 		return nil, err
@@ -363,6 +363,7 @@ func (pdb *PostgresDb) GetAllBuyerOrder(buyerId uint) ([]models.Order, error) {
 	return buyerOrder, nil
 }
 
+// GetAllSellerOrder fetches all buyer orders
 func (pdb *PostgresDb) GetAllSellerOrder(sellerId uint) ([]models.Order, error) {
 	var sellerOrder []models.Order
 	if err := pdb.DB.Where("seller_id= ?", sellerId).Preload("Seller").
@@ -370,11 +371,26 @@ func (pdb *PostgresDb) GetAllSellerOrder(sellerId uint) ([]models.Order, error) 
 		Preload("Product").
 		Preload("Product.Category").
 		Find(&sellerOrder).
-		Limit(2).
 		Error; err != nil {
 		return nil, err
 	}
 	return sellerOrder, nil
+}
+
+// GetAllSellerOrderCount fetches all buyer orders
+func (pdb *PostgresDb) GetAllSellerOrderCount(sellerId uint) (int, error) {
+	var sellerOrder []models.Order
+	if err := pdb.DB.Where("seller_id= ?", sellerId).Preload("Seller").
+		Preload("Buyer").
+		Preload("Product").
+		Preload("Product.Category").
+		Find(&sellerOrder).
+		Error; err != nil {
+		return 0, err
+	}
+	count := len(sellerOrder)
+
+	return count, nil
 }
 
 // GetAllSellers returns all the sellers in the updated database
