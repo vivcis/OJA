@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"log"
 	"net/http"
+
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -28,12 +29,12 @@ func TestCreateProduct(t *testing.T) {
 	product := models.Product{
 
 		SellerId:    1,
-		CategoryId:  1,
-		Title:       "Material",
+		CategoryId:  2,
+		Title:       "plumbing",
 		Description: "Building",
-		Price:       670,
-		Rating:      10,
-		Quantity:    80,
+		Price:       6700,
+		Rating:      5,
+		Quantity:    3,
 	}
 
 	bodyJSON, err := json.Marshal(product)
@@ -41,6 +42,7 @@ func TestCreateProduct(t *testing.T) {
 		log.Println(err)
 		t.Fail()
 	}
+	mockDB.EXPECT()
 
 	t.Run("testing for created update", func(t *testing.T) {
 		mockDB.EXPECT().CreateProduct(product).Return(nil)
@@ -54,6 +56,6 @@ func TestCreateProduct(t *testing.T) {
 		t.Log(err)
 		route.ServeHTTP(rw, req)
 		assert.Equal(t, http.StatusCreated, rw.Code)
-		assert.Contains(t, rw.Body.String(), "product", "successfully")
+		assert.Contains(t, rw.Body.String(), product.Description)
 	})
 }

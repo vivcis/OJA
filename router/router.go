@@ -31,7 +31,6 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter.POST("/loginbuyer", h.LoginBuyerHandler)
 	apirouter.POST("/loginseller", h.LoginSellerHandler)
 	apirouter.POST("/createproduct/:sellerid", h.CreateProducts)
-	apirouter.DELETE("/deleteproduct/:id", h.DeleteSellerProduct)
 
 	//All authorized routes here
 	authorizedRoutesBuyer := apirouter.Group("/")
@@ -40,6 +39,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	authorizedRoutesSeller.Use(middleware.AuthorizeSeller(h.DB.FindSellerByEmail, h.DB.TokenInBlacklist))
 	authorizedRoutesBuyer.PUT("/updatebuyerprofile/:id", h.UpdateBuyerProfileHandler)
 	authorizedRoutesSeller.PUT("/updatesellerprofile/:id", h.UpdateSellerProfileHandler)
+	authorizedRoutesSeller.DELETE("/deleteproduct/:id", h.DeleteSellerProduct)
 
 	port := ":" + os.Getenv("PORT")
 	if port == ":" {

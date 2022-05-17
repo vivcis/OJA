@@ -6,6 +6,9 @@ import (
 	"strconv"
 )
 
+//func (h *Handler) GetUserFromContext(c *gin.Context) {
+//	useI, ok := c.Get("user")
+//}
 func (h *Handler) DeleteSellerProduct(c *gin.Context) {
 	productID := c.Param("id")
 	productIdInt, _ := strconv.Atoi(productID)
