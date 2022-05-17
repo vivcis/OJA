@@ -1,10 +1,16 @@
 package handlers
 
 import (
+	"github.com/decadevs/shoparena/database"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
+
+type Handler struct {
+	DB     database.DB
+	Mailer database.Mailer
+}
 
 func (h *Handler) GetSellers(c *gin.Context) {
 
