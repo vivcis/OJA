@@ -55,6 +55,7 @@ func TestGetProductById(t *testing.T) {
 		Images:      sliceImages,
 		Rating:      6,
 		Quantity:    1000,
+
 	}
 	bodyJSON, err := json.Marshal(product)
 	if err != nil {

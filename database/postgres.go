@@ -378,6 +378,7 @@ func (pdb *PostgresDb) DeleteProduct(productID uint) error {
 	return nil
 }
 
+
 // GetAllSellers returns all the sellers in the updated database
 func (pdb *PostgresDb) GetAllSellers() ([]models.Seller, error) {
 	var seller []models.Seller
@@ -395,5 +396,32 @@ func (pdb *PostgresDb) GetProductByID(id string) (*models.Product, error) {
 		return nil, err
 	}
 	return product, nil
+
+}
+
+//GET INDIVIDUAL SELLER PRODUCT
+func (pdb *PostgresDb) FindSellerProduct(sellerID string) ([]models.Product, error) {
+
+	product := []models.Product{}
+
+	if err := pdb.DB.Preload("Category").Where("seller_id = ?", sellerID).Find(&product).Error; err != nil {
+		log.Println("Error finding seller product", err)
+		return nil, err
+	}
+	return product, nil
+
+}
+
+//GET PAID PRODUCTS FROM DATABASE
+func (pdb *PostgresDb) FindPaidProduct(sellerID string) ([]models.CartProduct, error) {
+
+	cartProduct := []models.CartProduct{}
+
+	if err := pdb.DB.Where("order_status = ?", true).Where("seller_id = ?", sellerID).Find(&cartProduct).Error; err != nil {
+		log.Println("Error finding products paid", err)
+		return nil, err
+	}
+
+	return cartProduct, nil
 
 }

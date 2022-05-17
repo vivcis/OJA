@@ -3,17 +3,17 @@ package test
 import (
 	"encoding/json"
 	"fmt"
-	"math/rand"
-	"net/http"
-	"net/http/httptest"
-	"strconv"
-	"strings"
-	"testing"
-	"time"
-	"github.com/pkg/errors"
+	"github.com/brianvoe/gofakeit/v6"
+	mock_database "github.com/decadevs/shoparena/database/mocks"
+	"github.com/decadevs/shoparena/handlers"
+	"github.com/decadevs/shoparena/models"
+	"github.com/decadevs/shoparena/router"
 	"github.com/decadevs/shoparena/services"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/golang/mock/gomock"
 	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
@@ -22,21 +22,15 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"github.com/brianvoe/gofakeit/v6"
-	mock_database "github.com/decadevs/shoparena/database/mocks"
-	"github.com/decadevs/shoparena/handlers"
-	"github.com/decadevs/shoparena/models"
-	"github.com/decadevs/shoparena/router"
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
-func TestHandleGetSellerShopByProfileAndProduct(t *testing.T) {
+func TestGetTotalSoldProductCountSeller(t *testing.T) {
 
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+
+	//creates a new mock instance
 	mockDB := mock_database.NewMockDB(ctrl)
+
 	h := &handlers.Handler{DB: mockDB}
 
 	route, _ := router.SetupRouter(h)
@@ -50,7 +44,11 @@ func TestHandleGetSellerShopByProfileAndProduct(t *testing.T) {
 		t.Fail()
 	}
 
-	//Declaring FAKE testing variables
+	////Declaring FAKE testing variables
+	cartID := uint(gofakeit.Number(1, 10))
+	productID := uint(gofakeit.Number(1, 10))
+	sellerID := uint(0)
+	Id := uint(gofakeit.Number(1, 10))
 	sellerFirstName := gofakeit.FirstName()
 	sellerLastName := gofakeit.LastName()
 	sellerUserName := gofakeit.Username()
@@ -58,18 +56,22 @@ func TestHandleGetSellerShopByProfileAndProduct(t *testing.T) {
 	sellerImage := gofakeit.ImageURL(200, 500)
 	sellerStatus := gofakeit.Bool()
 
+	productPrice := gofakeit.Price(1200, 1000000)
+	totalPrice := uint(productPrice)
+	totalQuantity := uint(gofakeit.Number(1, 10))
+	orderStatus := gofakeit.Bool()
+	productImage := gofakeit.ImageURL(200, 500)
+	rating := uint(rand.Intn(5))
+
+	token := ""
 	productName := gofakeit.CarModel()
-	productPrice := gofakeit.Price(2500, 5000)
+
 	price := uint(productPrice)
 	productCat := gofakeit.CarModel()
-	sellerID := uint(gofakeit.Number(0, 10))
-	testShopID := strconv.Itoa(0)
-	token := ""
-	productImage := gofakeit.ImageURL(200, 500)
 
 	//instantiating the gorm model object/struct
 	testGormModel := gorm.Model{
-		ID:        sellerID,
+		ID:        Id,
 		CreatedAt: time.Time{},
 		UpdatedAt: time.Time{},
 	}
@@ -88,24 +90,6 @@ func TestHandleGetSellerShopByProfileAndProduct(t *testing.T) {
 	}
 
 	sliceOfImg := []models.Image{image}
-
-	//instantiating the user model object/struct
-	testUser := models.User{
-		testGormModel,
-		sellerFirstName,
-		sellerLastName,
-		sellerEmail,
-		sellerUserName,
-		"",
-		"",
-		sellerPhone,
-		"",
-		"",
-		sellerImage,
-		sellerStatus,
-		token,
-	}
-
 	products := []models.Product{
 		{testGormModel,
 			sellerID,
@@ -131,41 +115,94 @@ func TestHandleGetSellerShopByProfileAndProduct(t *testing.T) {
 		},
 	}
 
+	//instantiating the user model object/struct
+	testUser := models.User{
+		testGormModel,
+		sellerFirstName,
+		sellerLastName,
+		sellerEmail,
+		sellerUserName,
+		"",
+		"",
+		sellerPhone,
+		"",
+		"",
+		sellerImage,
+		sellerStatus,
+		token,
+	}
+
 	//instantiating the seller model object/struct
 	testSeller := models.Seller{
 		User:    testUser,
 		Product: products,
-		Rating:  5,
+		Rating:  int(rating),
 	}
 
-	bodyJSON, err := json.Marshal(testSeller)
+	//instantiating the seller model object/struct
+	testCartProductOne := models.CartProduct{
+		testGormModel,
+		cartID,
+		productID,
+		totalPrice,
+		totalQuantity,
+		orderStatus,
+		sellerID,
+	}
+
+	testCartProductTwo := models.CartProduct{
+		testGormModel,
+		cartID,
+		productID,
+		totalPrice,
+		totalQuantity,
+		orderStatus,
+		sellerID,
+	}
+
+	testCartProductThree := models.CartProduct{
+		testGormModel,
+		cartID,
+		productID,
+		totalPrice,
+		totalQuantity,
+		orderStatus,
+		sellerID,
+	}
+
+	sliceOfCartProduct := []models.CartProduct{testCartProductOne, testCartProductTwo, testCartProductThree}
+
+	bodyJSON, err := json.Marshal(sliceOfCartProduct)
 	if err != nil {
 		t.Fail()
 	}
 
+	convSellerId := strconv.Itoa(0)
+	
+	//authentication and authorisation
 	mockDB.EXPECT().TokenInBlacklist(gomock.Any()).Return(false).Times(2)
 	mockDB.EXPECT().FindSellerByEmail(testSeller.Email).Return(&testSeller, nil).Times(2)
 
 	t.Run("Testing for Bad/Wrong Request", func(t *testing.T) {
-		mockDB.EXPECT().FindIndividualSellerShop(testShopID).Return(nil, errors.New("Error Exist"))
+		mockDB.EXPECT().FindPaidProduct(convSellerId).Return(nil, errors.New("Error Exist "))
 		rw := httptest.NewRecorder()
-		req, _ := http.NewRequest(http.MethodGet, "/api/v1/seller/shop", strings.NewReader(string(bodyJSON)))
+		req, _ := http.NewRequest(http.MethodGet, "/api/v1/seller/total/product/sold", strings.NewReader(string(bodyJSON)))
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *acc))
 		route.ServeHTTP(rw, req)
 		fmt.Println(rw.Body.String())
 		assert.Equal(t, http.StatusBadRequest, rw.Code)
-		assert.Contains(t, rw.Body.String(), "Error Exist")
+		assert.Contains(t, rw.Body.String(), "Error Exist is finding sold product")
 	})
 
-	t.Run("Testing for success", func(t *testing.T) {
-		mockDB.EXPECT().FindIndividualSellerShop(testShopID).Return(&testSeller, nil)
+	t.Run("Testing for Successful Request", func(t *testing.T) {
+		mockDB.EXPECT().FindPaidProduct(convSellerId).Return(sliceOfCartProduct, nil)
 		rw := httptest.NewRecorder()
-		req, _ := http.NewRequest(http.MethodGet, "/api/v1/seller/shop", strings.NewReader(string(bodyJSON)))
+		req, _ := http.NewRequest(http.MethodGet, "/api/v1/seller/total/product/sold", strings.NewReader(string(bodyJSON)))
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *acc))
 		route.ServeHTTP(rw, req)
 		fmt.Println(rw.Body.String())
 		assert.Equal(t, http.StatusOK, rw.Code)
-		assert.Contains(t, rw.Body.String(), "Found Seller")
+		assert.Contains(t, rw.Body.String(), "Total Product Sold")
 	})
 
 }

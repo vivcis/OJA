@@ -2,9 +2,11 @@ package database
 
 import (
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/decadevs/shoparena/models"
 	"github.com/joho/godotenv"
 	"log"
+	"mime/multipart"
 	"os"
 )
 
@@ -25,16 +27,14 @@ type DB interface {
 	TokenInBlacklist(token *string) bool
 	UpdateBuyerProfile(id uint, update *models.UpdateUser) error
 	UpdateSellerProfile(id uint, update *models.UpdateUser) error
-	BuyerUpdatePassword(password, newPassword string) (*models.Buyer, error)
-	SellerUpdatePassword(password, newPassword string) (*models.Seller, error)
-	BuyerResetPassword(email, newPassword string) (*models.Buyer, error)
-	CreateBuyerCart(cart *models.Cart) (*models.Cart, error)
-	FindIndividualSellerShop(sellerID string) (*models.Seller, error)
+	UploadFileToS3(h *session.Session, file multipart.File, fileName string, size int64) (string, error)
 	CreateProduct(product models.Product) error
 	GetCategory(category string) (*models.Category, error)
 	DeleteProduct(productID uint) error
 	GetAllSellers() ([]models.Seller, error)
 	GetProductByID(id string) (*models.Product, error)
+	FindSellerProduct(sellerID string) ([]models.Product, error)
+	FindPaidProduct(sellerID string) ([]models.CartProduct, error)
 }
 
 // Mailer interface to implement mailing service

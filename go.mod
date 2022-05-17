@@ -1,5 +1,6 @@
 module github.com/decadevs/shoparena
 
+// +heroku goVersion go1.17
 go 1.17
 
 require (
@@ -17,10 +18,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 	gorm.io/driver/postgres v1.3.5
 	gorm.io/gorm v1.23.5
-
-)
-
-require (
 	github.com/aws/aws-sdk-go v1.44.10
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/cors v1.3.1
