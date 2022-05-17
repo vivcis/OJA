@@ -377,7 +377,13 @@ func (pdb *PostgresDb) GetAllBuyerOrder(buyerId uint) ([]models.Order, error) {
 
 func (pdb *PostgresDb) GetAllSellerOrder(sellerId uint) ([]models.Order, error) {
 	var sellerOrder []models.Order
-	if err := pdb.DB.Where("seller_id= ?", sellerId).Preload("Seller").Error; err != nil {
+	if err := pdb.DB.Where("seller_id= ?", sellerId).Preload("Seller").
+		Preload("Buyer").
+		Preload("Product").
+		Preload("Product.Category").
+		Find(&sellerOrder).
+		Limit(2).
+		Error; err != nil {
 		return nil, err
 	}
 	return sellerOrder, nil
