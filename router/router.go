@@ -20,7 +20,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter := router.Group("/api/v1")
 
 	apirouter.GET("/ping", handlers.PingHandler)
-	apirouter.GET("/seller/:id", h.HandleGetSellerShopByProfileAndProduct())
+
 	apirouter.GET("/searchproducts", h.SearchProductHandler)
 	apirouter.GET("/sellers", h.GetSellers)
 	apirouter.GET("/product/:id", h.GetProductById)
@@ -37,7 +37,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	{
 		authorizedRoutesBuyer.PUT("/updatebuyerprofile", h.UpdateBuyerProfileHandler)
 		authorizedRoutesBuyer.GET("/getbuyerprofile", h.GetBuyerProfileHandler)
-		
+
 	}
 
 	authorizedRoutesSeller := apirouter.Group("/")
@@ -45,9 +45,10 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	{
 		authorizedRoutesSeller.PUT("/updatesellerprofile", h.UpdateSellerProfileHandler)
 		authorizedRoutesSeller.GET("/getsellerprofile", h.GetSellerProfileHandler)
-		
+		authorizedRoutesSeller.GET("/seller/shop", h.HandleGetSellerShopByProfileAndProduct())
+
 	}
-	
+
 	port := ":" + os.Getenv("PORT")
 	if port == ":" {
 		port = ":8081"
