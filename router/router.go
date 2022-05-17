@@ -1,11 +1,11 @@
 package router
 
 import (
-	"github.com/decadevs/shoparena/server/middleware"
 	"net/http"
 	"os"
 
 	"github.com/decadevs/shoparena/handlers"
+	"github.com/decadevs/shoparena/server/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,7 +20,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter := router.Group("/api/v1")
 
 	apirouter.GET("/ping", handlers.PingHandler)
-	apirouter.GET("/seller/:id", h.HandleGetSellerShopByProfileAndProduct())
+
 	apirouter.GET("/searchproducts", h.SearchProductHandler)
 	apirouter.GET("/sellers", h.GetSellers)
 	apirouter.GET("/product/:id", h.GetProductById)
@@ -30,7 +30,6 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter.POST("/sellersignup", h.SellerSignUpHandler)
 	apirouter.POST("/loginbuyer", h.LoginBuyerHandler)
 	apirouter.POST("/loginseller", h.LoginSellerHandler)
-	apirouter.GET("/products", h.GetAllProducts)
 
 	//All authorized routes here
 	authorizedRoutesBuyer := apirouter.Group("/")
@@ -46,7 +45,9 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	{
 		authorizedRoutesSeller.PUT("/updatesellerprofile", h.UpdateSellerProfileHandler)
 		authorizedRoutesSeller.GET("/getsellerprofile", h.GetSellerProfileHandler)
-		authorizedRoutesSeller.PUT("/update/product/", h.UpdateProduct)
+		authorizedRoutesSeller.GET("/seller/shop", h.HandleGetSellerShopByProfileAndProduct())
+		authorizedRoutesSeller.GET("/seller/total/product/count", h.GetTotalProductCountForSeller)
+		authorizedRoutesSeller.GET("/seller/product", h.SellerIndividualProduct)
 
 	}
 

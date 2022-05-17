@@ -218,3 +218,11 @@ func (h *Handler) BuyerResetPassword(c *gin.Context) {
 	}
 	c.JSON(200, gin.H{"message": "successfully reset password"})
 }
+
+func (h *Handler) GetTotalProductCountForSeller(context *gin.Context) {
+
+}
+
+func (h *Handler) SellerIndividualProduct(context *gin.Context) {
+
+}
