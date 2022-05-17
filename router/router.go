@@ -46,7 +46,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	{
 		authorizedRoutesSeller.PUT("/updatesellerprofile", h.UpdateSellerProfileHandler)
 		authorizedRoutesSeller.GET("/getsellerprofile", h.GetSellerProfileHandler)
-		authorizedRoutesSeller.PUT("/update/product/:id", h.UpdateProduct)
+		authorizedRoutesSeller.PUT("/update/product/", h.UpdateProduct)
 
 	}
 

@@ -6,14 +6,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
-	"strconv"
 )
 
 //UPDATE PRODUCT BY ID
 func (h *Handler) UpdateProduct(c *gin.Context) {
-	prod := c.Param("id")
-	prodID, _ := strconv.Atoi(prod)
-	prodIdUint := uint(prodID)
+	user, _ := c.Get("user")
+	seller := user.(*models.Seller)
+	prodID := seller.ID
 
 	var product = models.Product{}
 
@@ -23,7 +22,7 @@ func (h *Handler) UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	product.ID = prodIdUint
+	product.ID = prodID
 
 	fmt.Println(product.Title, product.Price)
 
