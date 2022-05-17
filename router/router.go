@@ -20,8 +20,10 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter := router.Group("/api/v1")
 
 	apirouter.GET("/ping", handlers.PingHandler)
-	apirouter.GET("/seller/:id", h.HandleGetSellerShopByProfileAndProduct())
+
 	apirouter.GET("/searchproducts", h.SearchProductHandler)
+	apirouter.GET("/sellers", h.GetSellers)
+	apirouter.GET("/product/:id", h.GetProductById)
 	apirouter.PUT("/buyer/resetpassword/:email", h.BuyerResetPassword)
 	apirouter.PUT("/seller/resetpassword/:email", h.SellerResetPassword)
 	apirouter.POST("/buyersignup", h.BuyerSignUpHandler)
@@ -34,11 +36,21 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	//All authorized routes here
 	authorizedRoutesBuyer := apirouter.Group("/")
 	authorizedRoutesSeller := apirouter.Group("/")
-	authorizedRoutesBuyer.Use(middleware.AuthorizeBuyer(h.DB.FindBuyerByEmail, h.DB.TokenInBlacklist))
 	authorizedRoutesSeller.Use(middleware.AuthorizeSeller(h.DB.FindSellerByEmail, h.DB.TokenInBlacklist))
-	authorizedRoutesBuyer.PUT("/updatebuyerprofile/", h.UpdateBuyerProfileHandler)
-	authorizedRoutesSeller.PUT("/updatesellerprofile/", h.UpdateSellerProfileHandler)
-	authorizedRoutesBuyer.GET("/buyerorders/", h.AllBuyerOrders)
+	authorizedRoutesBuyer.Use(middleware.AuthorizeBuyer(h.DB.FindBuyerByEmail, h.DB.TokenInBlacklist))
+	{
+		authorizedRoutesBuyer.PUT("/updatebuyerprofile", h.UpdateBuyerProfileHandler)
+		authorizedRoutesBuyer.GET("/getbuyerprofile", h.GetBuyerProfileHandler)
+		authorizedRoutesBuyer.PUT("/updatebuyerprofile/", h.UpdateBuyerProfileHandler)
+		authorizedRoutesSeller.PUT("/updatesellerprofile/", h.UpdateSellerProfileHandler)
+		authorizedRoutesBuyer.GET("/buyerorders/", h.AllBuyerOrders)
+		authorizedRoutesSeller.PUT("/updatesellerprofile", h.UpdateSellerProfileHandler)
+		authorizedRoutesSeller.GET("/getsellerprofile", h.GetSellerProfileHandler)
+		authorizedRoutesSeller.GET("/seller/shop", h.HandleGetSellerShopByProfileAndProduct())
+		authorizedRoutesSeller.GET("/seller/total/product/count", h.GetTotalProductCountForSeller)
+		authorizedRoutesSeller.GET("/seller/product", h.SellerIndividualProduct)
+
+	}
 
 	port := ":" + os.Getenv("PORT")
 	if port == ":" {

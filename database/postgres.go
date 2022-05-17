@@ -346,18 +346,6 @@ func (pdb *PostgresDb) FindIndividualSellerShop(sellerID string) (*models.Seller
 	return seller, nil
 }
 
-func (pdb *PostgresDb) GetAllBuyerOrders(buyerId uint) (*models.Buyer, error) {
-
-	buyer := &models.Buyer{}
-
-	if err := pdb.DB.Preload("Orders").Where("id = ?", buyerId).Find(&buyer).Error; err != nil {
-		log.Println("Error in finding", err)
-		return nil, err
-	}
-
-	return buyer, nil
-}
-
 func (pdb *PostgresDb) GetAllBuyerOrder(buyerId uint) ([]models.Order, error) {
 	var buyerOrder []models.Order
 	if err := pdb.DB.Where("buyer_id =?", buyerId).
@@ -387,4 +375,36 @@ func (pdb *PostgresDb) GetAllSellerOrder(sellerId uint) ([]models.Order, error) 
 		return nil, err
 	}
 	return sellerOrder, nil
+}
+
+// GetAllSellers returns all the sellers in the updated database
+func (pdb *PostgresDb) GetAllSellers() ([]models.Seller, error) {
+	var seller []models.Seller
+	err := pdb.DB.Model(&models.Seller{}).Find(&seller).Error
+	if err != nil {
+		return nil, err
+	}
+	return seller, nil
+}
+
+// GetProductByID returns a particular product by its ID
+func (pdb *PostgresDb) GetProductByID(id string) (*models.Product, error) {
+	product := &models.Product{}
+	if err := pdb.DB.Where("ID=?", id).First(product).Error; err != nil {
+		return nil, err
+	}
+	return product, nil
+}
+
+//GET INDIVIDUAL SELLER PRODUCT
+func (pdb *PostgresDb) FindSellerProduct(sellerID string) ([]models.Product, error) {
+
+	product := []models.Product{}
+
+	if err := pdb.DB.Preload("Category").Where("seller_id = ?", sellerID).Find(&product).Error; err != nil {
+		log.Println("Error finding seller product", err)
+		return nil, err
+	}
+	return product, nil
+
 }
