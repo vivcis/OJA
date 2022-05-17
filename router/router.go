@@ -1,11 +1,11 @@
 package router
 
 import (
+	"github.com/decadevs/shoparena/server/middleware"
 	"net/http"
 	"os"
 
 	"github.com/decadevs/shoparena/handlers"
-	"github.com/decadevs/shoparena/server/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -34,12 +34,21 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 
 	//All authorized routes here
 	authorizedRoutesBuyer := apirouter.Group("/")
-	authorizedRoutesSeller := apirouter.Group("/")
 	authorizedRoutesBuyer.Use(middleware.AuthorizeBuyer(h.DB.FindBuyerByEmail, h.DB.TokenInBlacklist))
+	{
+		authorizedRoutesBuyer.PUT("/updatebuyerprofile", h.UpdateBuyerProfileHandler)
+		authorizedRoutesBuyer.GET("/getbuyerprofile", h.GetBuyerProfileHandler)
+
+	}
+
+	authorizedRoutesSeller := apirouter.Group("/")
 	authorizedRoutesSeller.Use(middleware.AuthorizeSeller(h.DB.FindSellerByEmail, h.DB.TokenInBlacklist))
-	authorizedRoutesBuyer.PUT("/updatebuyerprofile/:id", h.UpdateBuyerProfileHandler)
-	authorizedRoutesSeller.PUT("/updatesellerprofile/:id", h.UpdateSellerProfileHandler)
-	authorizedRoutesSeller.PUT("/update/product/:id", h.UpdateProduct)
+	{
+		authorizedRoutesSeller.PUT("/updatesellerprofile", h.UpdateSellerProfileHandler)
+		authorizedRoutesSeller.GET("/getsellerprofile", h.GetSellerProfileHandler)
+		authorizedRoutesSeller.PUT("/update/product/:id", h.UpdateProduct)
+
+	}
 
 	port := ":" + os.Getenv("PORT")
 	if port == ":" {
