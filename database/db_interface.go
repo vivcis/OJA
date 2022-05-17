@@ -2,13 +2,12 @@ package database
 
 import (
 	"fmt"
-	"log"
-	"mime/multipart"
-	"os"
-
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/decadevs/shoparena/models"
 	"github.com/joho/godotenv"
+	"log"
+	"mime/multipart"
+	"os"
 )
 
 // DB provides access to the different db
@@ -36,6 +35,8 @@ type DB interface {
 	FindIndividualSellerShop(sellerID string) (*models.Seller, error)
 	GetAllSellers() ([]models.Seller, error)
 	GetProductByID(id string) (*models.Product, error)
+	FindSellerProduct(sellerID string) ([]models.Product, error)
+	FindPaidProduct(sellerID string) ([]models.CartProduct, error)
 }
 
 // Mailer interface to implement mailing service
