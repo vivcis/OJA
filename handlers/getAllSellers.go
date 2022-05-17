@@ -8,8 +8,8 @@ import (
 )
 
 type Handler struct {
-	DB     database.DB
-	Mailer database.Mailer
+	DB   database.DB
+	Mail database.Mailer
 }
 
 func (h *Handler) GetSellers(c *gin.Context) {
