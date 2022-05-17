@@ -377,3 +377,17 @@ func (pdb *PostgresDb) FindSellerProduct(sellerID string) ([]models.Product, err
 	return product, nil
 
 }
+
+//GET PAID PRODUCTS FROM DATABASE
+func (pdb *PostgresDb) FindPaidProduct(sellerID string) ([]models.CartProduct, error) {
+
+	cartProduct := []models.CartProduct{}
+
+	if err := pdb.DB.Where("order_status = ?", true).Where("seller_id = ?", sellerID).Find(&cartProduct).Error; err != nil {
+		log.Println("Error finding products paid", err)
+		return nil, err
+	}
+
+	return cartProduct, nil
+
+}

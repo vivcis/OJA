@@ -36,6 +36,7 @@ type DB interface {
 	GetAllSellers() ([]models.Seller, error)
 	GetProductByID(id string) (*models.Product, error)
 	FindSellerProduct(sellerID string) ([]models.Product, error)
+	FindPaidProduct(sellerID string) ([]models.CartProduct, error)
 }
 
 // Mailer interface to implement mailing service
