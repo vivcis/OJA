@@ -30,7 +30,8 @@ type DB interface {
 	BuyerResetPassword(email, newPassword string) (*models.Buyer, error)
 	CreateBuyerCart(cart *models.Cart) (*models.Cart, error)
 	FindIndividualSellerShop(sellerID string) (*models.Seller, error)
-	GetAllBuyerOrder(buyerId uint) (*models.Buyer, error)
+	GetAllBuyerOrder(buyerId uint) ([]models.Order, error)
+	GetAllSellerOrder(sellerId uint) ([]models.Order, error)
 }
 
 // Mailer interface to implement mailing service

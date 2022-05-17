@@ -346,16 +346,39 @@ func (pdb *PostgresDb) FindIndividualSellerShop(sellerID string) (*models.Seller
 	return seller, nil
 }
 
-//GetAllBuyerOrder gets all buyer orders
-func (pdb *PostgresDb) GetAllBuyerOrder(buyerId uint) (*models.Buyer, error) {
+func (pdb *PostgresDb) GetAllBuyerOrders(buyerId uint) (*models.Buyer, error) {
+
 	buyer := &models.Buyer{}
-	log.Println("the buyer id", buyerId)
-	if err := pdb.DB.Preload("Orders").Where("buyer_id = ?", buyerId).Find(&buyer).Error; err != nil {
-		log.Println("nibo ?", buyerId)
-		log.Println("Could not find product", err)
-		return buyer, err
+
+	if err := pdb.DB.Preload("Orders").Where("id = ?", buyerId).Find(&buyer).Error; err != nil {
+		log.Println("Error in finding", err)
+		return nil, err
 	}
-	log.Println("the buyer id", buyerId)
-	log.Println("the buyer", buyer)
+
 	return buyer, nil
+}
+
+func (pdb *PostgresDb) GetAllBuyerOrder(buyerId uint) ([]models.Order, error) {
+	var buyerOrder []models.Order
+	if err := pdb.DB.Where("buyer_id =?", buyerId).
+		Preload("Seller").
+		Preload("Buyer").
+		Preload("Product").
+		Preload("Product.Category").
+		Find(&buyerOrder).
+		Limit(2).
+		Error; err != nil {
+		log.Println("could not find order", err)
+		return nil, err
+	}
+
+	return buyerOrder, nil
+}
+
+func (pdb *PostgresDb) GetAllSellerOrder(sellerId uint) ([]models.Order, error) {
+	var sellerOrder []models.Order
+	if err := pdb.DB.Where("seller_id= ?", sellerId).Preload("Seller").Error; err != nil {
+		return nil, err
+	}
+	return sellerOrder, nil
 }

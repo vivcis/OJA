@@ -28,7 +28,6 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter.POST("/sellersignup", h.SellerSignUpHandler)
 	apirouter.POST("/loginbuyer", h.LoginBuyerHandler)
 	apirouter.POST("/loginseller", h.LoginSellerHandler)
-	apirouter.GET("/buyerorders/:id", h.AllBuyerOrders)
 	apirouter.GET("/sellerorders/:id", h.AllSellerOrders)
 	apirouter.GET("/seller/totalorder/:id", h.SellerTotalOrders)
 
@@ -37,8 +36,9 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	authorizedRoutesSeller := apirouter.Group("/")
 	authorizedRoutesBuyer.Use(middleware.AuthorizeBuyer(h.DB.FindBuyerByEmail, h.DB.TokenInBlacklist))
 	authorizedRoutesSeller.Use(middleware.AuthorizeSeller(h.DB.FindSellerByEmail, h.DB.TokenInBlacklist))
-	authorizedRoutesBuyer.PUT("/updatebuyerprofile/:id", h.UpdateBuyerProfileHandler)
-	authorizedRoutesSeller.PUT("/updatesellerprofile/:id", h.UpdateSellerProfileHandler)
+	authorizedRoutesBuyer.PUT("/updatebuyerprofile/", h.UpdateBuyerProfileHandler)
+	authorizedRoutesSeller.PUT("/updatesellerprofile/", h.UpdateSellerProfileHandler)
+	authorizedRoutesBuyer.GET("/buyerorders/", h.AllBuyerOrders)
 
 	port := ":" + os.Getenv("PORT")
 	if port == ":" {

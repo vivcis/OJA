@@ -1,25 +1,30 @@
 package handlers
 
 import (
-	"log"
+	"github.com/decadevs/shoparena/models"
 	"net/http"
 
 	//"github.com/decadevs/shoparena/models"
 	"github.com/gin-gonic/gin"
-	"strconv"
 )
 
 func (h *Handler) AllBuyerOrders(c *gin.Context) {
-	buyerId := c.Param("id")
-	buyerIdStr, _ := strconv.Atoi(buyerId)
+	user, present := c.Get("user")
+	if !present {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "you are not logged in"})
+	}
 
-	buyerWithOrder, err := h.DB.GetAllBuyerOrder(uint(buyerIdStr))
+	buyer := user.(*models.Buyer)
+
+	buyerWithOrder, err := h.DB.GetAllBuyerOrder(buyer.ID)
 	if err != nil {
-		log.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "error getting order(s)",
+		})
 	}
 
 	c.JSON(http.StatusFound, gin.H{
-		"Orders": buyerWithOrder,
+		"Buyer Order": buyerWithOrder,
 	})
 }
 
