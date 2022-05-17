@@ -20,12 +20,14 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter.GET("/ping", handlers.PingHandler)
 	apirouter.GET("/seller/:id", h.HandleGetSellerShopByProfileAndProduct())
 	apirouter.GET("/searchproducts", h.SearchProductHandler)
-	apirouter.POST("buyer/forgotpassword", h.SendForgotPasswordEMailHandler)
-	apirouter.PUT("buyer/forgotpassword-reset", h.ForgotPasswordResetHandler)
+	apirouter.POST("buyer/forgotpassword", h.BuyerForgotPasswordEMailHandler)
+	apirouter.POST("seller/forgotpassword", h.SellerForgotPasswordEMailHandler)
 	apirouter.POST("/buyersignup", h.BuyerSignUpHandler)
 	apirouter.POST("/sellersignup", h.SellerSignUpHandler)
 	apirouter.POST("/loginbuyer", h.LoginBuyerHandler)
 	apirouter.POST("/loginseller", h.LoginSellerHandler)
+	apirouter.PUT("/sellerforgotpassword/", h.SellerForgotPasswordResetHandler)
+	apirouter.PUT("/buyerforgotpassword/", h.BuyerForgotPasswordResetHandler)
 
 	//All authorized routes here
 	authorizedRoutesBuyer := apirouter.Group("/")
