@@ -37,6 +37,7 @@ type DB interface {
 	UpdateProductByID(prod models.Product) error
 	GetAllSellers() ([]models.Seller, error)
 	GetProductByID(id string) (*models.Product, error)
+	FindSellerProduct(sellerID string) ([]models.Product, error)
 }
 
 // Mailer interface to implement mailing service
