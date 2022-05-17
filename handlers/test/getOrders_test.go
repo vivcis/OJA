@@ -34,7 +34,7 @@ func TestAllSellerOrders(t *testing.T) {
 
 	route, _ := router.SetupRouter(h)
 
-	sellerEmail := gofakeit.Email()
+	sellerEmail := "kukus@yahoo.com"
 	accClaim, _ := services.GenerateClaims(sellerEmail)
 
 	secret := os.Getenv("JWT_SECRET")
@@ -43,7 +43,7 @@ func TestAllSellerOrders(t *testing.T) {
 		t.Fail()
 	}
 	////Declaring FAKE testing variables
-	Id := uint(gofakeit.Number(1, 10))
+	Id := uint(5)
 	categoryID := uint(gofakeit.Number(1, 9))
 	sellerID := uint(5)
 
@@ -157,6 +157,7 @@ func TestAllSellerOrders(t *testing.T) {
 	productSlice := []models.Product{product}
 
 	testSeller := models.Seller{
+		Model:   testGormModel,
 		User:    testUser,
 		Product: productSlice,
 	}
@@ -167,22 +168,11 @@ func TestAllSellerOrders(t *testing.T) {
 	}
 
 	//authentication and authorisation
-	mockDB.EXPECT().TokenInBlacklist(gomock.Any()).Return(false).Times(2)
-	mockDB.EXPECT().FindSellerByEmail(testSeller.Email).Return(&testSeller, nil).Times(2)
+	mockDB.EXPECT().TokenInBlacklist(gomock.Any()).Return(false)
+	mockDB.EXPECT().FindSellerByEmail(testSeller.Email).Return(&testSeller, nil)
 
-	t.Run("test for bad request", func(t *testing.T) {
-		mockDB.EXPECT().GetAllSellerOrder(uint(0)).Return(nil, err)
-		rw := httptest.NewRecorder()
-		req, _ := http.NewRequest(http.MethodGet, "/api/v1/sellerorders/", strings.NewReader(string(bodyJSON)))
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *acc))
-		route.ServeHTTP(rw, req)
-		fmt.Println(rw.Body.String())
-		assert.NotEqual(t, http.StatusInternalServerError, rw.Code)
-		assert.Contains(t, rw.Body.String(), "Seller")
-
-	})
 	t.Run("Testing for Successful Request", func(t *testing.T) {
-		mockDB.EXPECT().GetAllSellerOrder(uint(0)).Return(testOrders, nil)
+		mockDB.EXPECT().GetAllSellerOrder(uint(5)).Return(testOrders, nil)
 		rw := httptest.NewRecorder()
 		req, _ := http.NewRequest(http.MethodGet, "/api/v1/sellerorders/", strings.NewReader(string(bodyJSON)))
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *acc))
