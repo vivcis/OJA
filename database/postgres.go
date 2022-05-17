@@ -396,3 +396,22 @@ func (pdb *PostgresDb) FindIndividualSellerShop(sellerID string) (*models.Seller
 
 	return seller, nil
 }
+
+// GetAllSellers returns all the sellers in the updated database
+func (pdb *PostgresDb) GetAllSellers() ([]models.Seller, error) {
+	var seller []models.Seller
+	err := pdb.DB.Model(&models.Seller{}).Find(&seller).Error
+	if err != nil {
+		return nil, err
+	}
+	return seller, nil
+}
+
+// GetProductByID returns a particular product by it's ID
+func (pdb *PostgresDb) GetProductByID(id string) (*models.Product, error) {
+	product := &models.Product{}
+	if err := pdb.DB.Where("ID=?", id).First(product).Error; err != nil {
+		return nil, err
+	}
+	return product, nil
+}
