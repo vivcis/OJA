@@ -7,6 +7,7 @@ import (
 	"github.com/joho/godotenv"
 	"log"
 	"mime/multipart"
+	"net/http"
 	"os"
 )
 
@@ -37,11 +38,21 @@ type DB interface {
 	GetProductByID(id string) (*models.Product, error)
 	FindSellerProduct(sellerID string) ([]models.Product, error)
 	FindPaidProduct(sellerID string) ([]models.CartProduct, error)
+	AddToCart(product models.Product, buyer *models.Buyer) error
+	GetCartProducts(buyer *models.Buyer) ([]models.CartProduct, error)
+	ViewCartProducts(addedProducts []models.CartProduct) ([]models.ProductDetails, error)
+	DeletePaidFromCart(cartID uint) error
 }
 
 // Mailer interface to implement mailing service
 type Mailer interface {
 	SendMail(subject, body, to, Private, Domain string) bool
+}
+
+//Paystack interface
+type Paystack interface {
+	InitializePayment(info []byte) (string, error)
+	Callback(reference string) (*http.Response, error)
 }
 
 // ValidationError defines error that occur due to validation

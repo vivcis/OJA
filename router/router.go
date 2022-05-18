@@ -30,6 +30,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter.POST("/sellersignup", h.SellerSignUpHandler)
 	apirouter.POST("/loginbuyer", h.LoginBuyerHandler)
 	apirouter.POST("/loginseller", h.LoginSellerHandler)
+	apirouter.GET("/callback", h.Callback)
 
 	//All authorized routes here
 	authorizedRoutesBuyer := apirouter.Group("/")
@@ -37,6 +38,9 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	{
 		authorizedRoutesBuyer.PUT("/updatebuyerprofile", h.UpdateBuyerProfileHandler)
 		authorizedRoutesBuyer.GET("/getbuyerprofile", h.GetBuyerProfileHandler)
+		authorizedRoutesBuyer.POST("/addtocart", h.AddToCart)
+		authorizedRoutesBuyer.GET("/viewcart", h.ViewCartProducts)
+		authorizedRoutesBuyer.POST("/pay", h.Pay)
 
 	}
 
