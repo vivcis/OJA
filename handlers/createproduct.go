@@ -1,21 +1,24 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/decadevs/shoparena/models"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 )
 
 func (h *Handler) CreateProducts(c *gin.Context) {
-	sellerId := c.Param("sellerid")
-	sellerIdInt, _ := strconv.Atoi(sellerId)
+	user, exist := c.Get("user")
+	if !exist {
+		c.JSON(http.StatusInternalServerError, "not logged in")
+	}
+
+	seller := user.(*models.Seller)
 
 	product := models.Product{}
 
-	log.Println("here 1", product.SellerId)
 	err := c.BindJSON(&product)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -24,8 +27,9 @@ func (h *Handler) CreateProducts(c *gin.Context) {
 		return
 	}
 
-	product.SellerId = uint(sellerIdInt)
-
+	product.SellerId = seller.ID
+	fmt.Println(product.SellerId)
+	fmt.Println("*********************************************")
 	err = h.DB.CreateProduct(product)
 	if err != nil {
 		log.Println("check error: ", err)

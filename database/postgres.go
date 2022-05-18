@@ -233,7 +233,12 @@ func (pdb PostgresDb) FindBuyerByPhone(phone string) (*models.Buyer, error) {
 
 // TokenInBlacklist checks if token is already in the blacklist collection
 func (pdb *PostgresDb) TokenInBlacklist(token *string) bool {
-	return false
+	tok := &models.Blacklist{}
+	if err := pdb.DB.Where("token = ?", token).First(&tok).Error; err != nil {
+		return false
+	}
+
+	return true
 }
 
 // FindAllUsersExcept returns all the users expcept the one specified in the except parameter
@@ -346,36 +351,52 @@ func (pdb *PostgresDb) FindIndividualSellerShop(sellerID string) (*models.Seller
 	return seller, nil
 }
 
-func (pdb *PostgresDb) CreateProduct(product models.Product) error {
-
-	err := pdb.DB.Create(&product).Error
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	return nil
-}
-
-func (pdb *PostgresDb) GetCategory(category string) (*models.Category, error) {
-	categories := models.Category{}
-
-	err := pdb.DB.Where("name = ?", category).First(&categories).Error
-	if err != nil {
-		fmt.Println(err)
+//GetAllBuyerOrder fetches all buyer orders
+func (pdb *PostgresDb) GetAllBuyerOrder(buyerId uint) ([]models.Order, error) {
+	var buyerOrder []models.Order
+	if err := pdb.DB.Where("buyer_id =?", buyerId).
+		Preload("Seller").
+		Preload("Buyer").
+		Preload("Product").
+		Preload("Product.Category").
+		Find(&buyerOrder).
+		Error; err != nil {
+		log.Println("could not find order", err)
 		return nil, err
 	}
-	return &categories, nil
+
+	return buyerOrder, nil
 }
 
-func (pdb *PostgresDb) DeleteProduct(productID, sellerID uint) error {
-	product := models.Product{}
-
-	err := pdb.DB.Where("id = ? AND seller_id = ?", productID, sellerID).Delete(&product).Error
-	if err != nil {
-		return err
+// GetAllSellerOrder fetches all buyer orders
+func (pdb *PostgresDb) GetAllSellerOrder(sellerId uint) ([]models.Order, error) {
+	var sellerOrder []models.Order
+	if err := pdb.DB.Where("seller_id= ?", sellerId).Preload("Seller").
+		Preload("Buyer").
+		Preload("Product").
+		Preload("Product.Category").
+		Find(&sellerOrder).
+		Error; err != nil {
+		return nil, err
 	}
+	return sellerOrder, nil
+}
 
-	return nil
+// GetAllSellerOrderCount fetches all buyer orders
+func (pdb *PostgresDb) GetAllSellerOrderCount(sellerId uint) (int, error) {
+	var sellerOrder []models.Order
+	if err := pdb.DB.Where("seller_id= ?", sellerId).Preload("Seller").
+		Preload("Buyer").
+		Preload("Product").
+		Preload("Product.Category").
+		Find(&sellerOrder).
+		Error; err != nil {
+		return 0, err
+	}
+	count := len(sellerOrder)
+
+	return count, nil
+
 }
 
 // GetAllSellers returns all the sellers in the updated database
@@ -388,7 +409,7 @@ func (pdb *PostgresDb) GetAllSellers() ([]models.Seller, error) {
 	return seller, nil
 }
 
-// GetProductByID returns a particular product by it's ID
+// GetProductByID returns a particular product by its ID
 func (pdb *PostgresDb) GetProductByID(id string) (*models.Product, error) {
 	product := &models.Product{}
 	if err := pdb.DB.Where("ID=?", id).First(product).Error; err != nil {
@@ -423,4 +444,36 @@ func (pdb *PostgresDb) FindPaidProduct(sellerID string) ([]models.CartProduct, e
 
 	return cartProduct, nil
 
+}
+
+func (pdb *PostgresDb) CreateProduct(product models.Product) error {
+
+	err := pdb.DB.Create(&product).Error
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
+func (pdb *PostgresDb) GetCategory(category string) (*models.Category, error) {
+	categories := models.Category{}
+
+	err := pdb.DB.Where("name = ?", category).First(&categories).Error
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return &categories, nil
+}
+
+func (pdb *PostgresDb) DeleteProduct(productID, sellerID uint) error {
+	product := models.Product{}
+
+	err := pdb.DB.Where("id = ?", productID, sellerID).Delete(&product).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
