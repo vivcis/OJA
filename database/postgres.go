@@ -28,29 +28,80 @@ type PostgresDb struct {
 func (pdb *PostgresDb) Init(host, user, password, dbName, port string) error {
 	fmt.Println("connecting to Database.....")
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Africa/Lagos", host, user, password, dbName, port)
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Africa/Lagos",
+		host, user, password, dbName, port)
 	var err error
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return err
 	}
-
 	if db == nil {
 		return fmt.Errorf("database was not initialized")
 	} else {
 		fmt.Println("Connected to Database")
 	}
 
-	err = db.AutoMigrate(&models.Category{}, &models.Seller{}, &models.Product{}, &models.Image{},
+	pdb.DB = db
+	err = pdb.PrePopulateTables()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
+
+}
+
+func (pdb *PostgresDb) PrePopulateTables() error {
+	err := pdb.DB.AutoMigrate(&models.Category{}, &models.Seller{}, &models.Product{}, &models.Image{},
 		&models.Buyer{}, &models.Cart{}, &models.CartProduct{}, &models.Order{}, &models.Blacklist{})
 	if err != nil {
 		return fmt.Errorf("migration error: %v", err)
 	}
+	categories := []models.Category{{Name: "fashion"}, {Name: "electronics"}, {Name: "health & beauty"}, {Name: "baby products"}, {Name: "phones & tablets"}, {Name: "food drinks"}, {Name: "computing"}, {Name: "sporting goods"}, {Name: "others"}}
+	result := pdb.DB.Find(&models.Category{})
+	if result.RowsAffected < 1 {
+		pdb.DB.Create(&categories)
+	}
 
-	pdb.DB = db
+	user := models.User{
+		Model:           gorm.Model{},
+		FirstName:       "John",
+		LastName:        "Doe",
+		Email:           "jdoe@gmail.com",
+		Username:        "JD Baba",
+		Password:        "12345678",
+		ConfirmPassword: "12345678",
+		PasswordHash:    "$2a$12$T2wSf1qgpTyhLOons3u4JOCqCwKDDL4J3UhGdOTEBL/CmAS/RNCPm",
+		Address:         "aso rock",
+		PhoneNumber:     "09091919292",
+		Image:           "https://i.ibb.co/5jwDfyF/Photo-on-24-11-2021-at-20-45.jpg",
+		IsActive:        true,
+		Token:           "",
+	}
+	buyer := models.Buyer{
+		Model:  gorm.Model{},
+		User:   user,
+		Orders: nil,
+	}
+	result = pdb.DB.Where("buyer = ?", "John").Find(&buyer)
 
+	if result.RowsAffected < 1 {
+		pdb.DB.Create(&buyer)
+	}
+
+	seller := models.Seller{
+		Model:   gorm.Model{},
+		User:    user,
+		Product: nil,
+		Orders:  nil,
+		Rating:  5,
+	}
+	result = pdb.DB.Where("seller = ?", "John").Find(&seller)
+
+	if result.RowsAffected < 1 {
+		pdb.DB.Create(&seller)
+	}
 	return nil
-
 }
 
 //GET ALL PRODUCTS FROM DB
@@ -256,7 +307,12 @@ func (pdb PostgresDb) FindBuyerByPhone(phone string) (*models.Buyer, error) {
 
 // TokenInBlacklist checks if token is already in the blacklist collection
 func (pdb *PostgresDb) TokenInBlacklist(token *string) bool {
-	return false
+	tok := &models.Blacklist{}
+	if err := pdb.DB.Where("token = ?", token).First(&tok).Error; err != nil {
+		return false
+	}
+
+	return true
 }
 
 // FindAllUsersExcept returns all the users expcept the one specified in the except parameter
@@ -369,6 +425,53 @@ func (pdb *PostgresDb) FindIndividualSellerShop(sellerID string) (*models.Seller
 	return seller, nil
 }
 
+//GetAllBuyerOrder fetches all buyer orders
+func (pdb *PostgresDb) GetAllBuyerOrder(buyerId uint) ([]models.Order, error) {
+	var buyerOrder []models.Order
+	if err := pdb.DB.Where("buyer_id =?", buyerId).
+		Preload("Seller").
+		Preload("Buyer").
+		Preload("Product").
+		Preload("Product.Category").
+		Find(&buyerOrder).
+		Error; err != nil {
+		log.Println("could not find order", err)
+		return nil, err
+	}
+
+	return buyerOrder, nil
+}
+
+// GetAllSellerOrder fetches all buyer orders
+func (pdb *PostgresDb) GetAllSellerOrder(sellerId uint) ([]models.Order, error) {
+	var sellerOrder []models.Order
+	if err := pdb.DB.Where("seller_id= ?", sellerId).Preload("Seller").
+		Preload("Buyer").
+		Preload("Product").
+		Preload("Product.Category").
+		Find(&sellerOrder).
+		Error; err != nil {
+		return nil, err
+	}
+	return sellerOrder, nil
+}
+
+// GetAllSellerOrderCount fetches all buyer orders
+func (pdb *PostgresDb) GetAllSellerOrderCount(sellerId uint) (int, error) {
+	var sellerOrder []models.Order
+	if err := pdb.DB.Where("seller_id= ?", sellerId).Preload("Seller").
+		Preload("Buyer").
+		Preload("Product").
+		Preload("Product.Category").
+		Find(&sellerOrder).
+		Error; err != nil {
+		return 0, err
+	}
+	count := len(sellerOrder)
+
+	return count, nil
+}
+
 // GetAllSellers returns all the sellers in the updated database
 func (pdb *PostgresDb) GetAllSellers() ([]models.Seller, error) {
 	var seller []models.Seller
@@ -398,5 +501,32 @@ func (pdb *PostgresDb) FindSellerProduct(sellerID string) ([]models.Product, err
 		return nil, err
 	}
 	return product, nil
+
+}
+
+//GET PAID PRODUCTS FROM DATABASE
+func (pdb *PostgresDb) FindPaidProduct(sellerID string) ([]models.CartProduct, error) {
+
+	cartProduct := []models.CartProduct{}
+
+	if err := pdb.DB.Where("order_status = ?", true).Where("seller_id = ?", sellerID).Find(&cartProduct).Error; err != nil {
+		log.Println("Error finding products paid", err)
+		return nil, err
+	}
+
+	return cartProduct, nil
+
+}
+
+func (pdb *PostgresDb) GetSellersProducts(sellerID uint) ([]models.Product, error) {
+	var products []models.Product
+
+	err := pdb.DB.Where("seller_id = ?", sellerID).Find(&products).Error
+	if err != nil {
+		log.Println("Error from GetSellersProduct in DB")
+		return nil, err
+	}
+
+	return products, nil
 
 }

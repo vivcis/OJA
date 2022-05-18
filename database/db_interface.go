@@ -38,11 +38,18 @@ type DB interface {
 	GetAllSellers() ([]models.Seller, error)
 	GetProductByID(id uint) (*models.Product, error)
 	FindSellerProduct(sellerID string) ([]models.Product, error)
+	GetAllBuyerOrder(buyerId uint) ([]models.Order, error)
+	GetAllSellerOrder(sellerId uint) ([]models.Order, error)
+	GetAllSellerOrderCount(sellerId uint) (int, error)
+	FindPaidProduct(sellerID string) ([]models.CartProduct, error)
+	GetSellersProducts(sellerID uint) ([]models.Product, error)
 }
 
 // Mailer interface to implement mailing service
 type Mailer interface {
-	SendMail(subject, body, to, Private, Domain string) bool
+	SendMail(subject, body, to, Private, Domain string) error
+	GenerateNonAuthToken(UserEmail string, secret string) (*string, error)
+	DecodeToken(token, secret string) (string, error)
 }
 
 // ValidationError defines error that occur due to validation
@@ -69,11 +76,11 @@ func InitDBParams() DBParams {
 		log.Fatal("Error loading .env file")
 	}
 
-	host := os.Getenv("DB_HOST")
+	host := os.Getenv("PDB_HOST")
 	user := os.Getenv("DB_USER")
 	password := os.Getenv("DB_PASSWORD")
 	dbName := os.Getenv("DB_NAME")
-	port := os.Getenv("DB_PORT")
+	port := os.Getenv("PDB_PORT")
 
 	return DBParams{
 		Host:     host,

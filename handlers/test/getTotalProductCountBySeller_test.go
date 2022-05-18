@@ -127,19 +127,15 @@ func TestGetTotalProductCountForSeller(t *testing.T) {
 	//instantiating the seller model object/struct
 
 	testUser := models.User{
-		testGormModel,
-		sellerFirstName,
-		sellerLastName,
-		sellerEmail,
-		sellerUserName,
-		"",
-		"",
-		sellerPhone,
-		"",
-		"",
-		sellerImage,
-		sellerStatus,
-		token,
+		Model:        testGormModel,
+		FirstName:    sellerFirstName,
+		LastName:     sellerLastName,
+		Email:        sellerEmail,
+		Username:     sellerUserName,
+		PasswordHash: sellerPhone,
+		Image:        sellerImage,
+		IsActive:     sellerStatus,
+		Token:        token,
 	}
 
 	testSeller := models.Seller{
