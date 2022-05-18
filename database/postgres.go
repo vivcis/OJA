@@ -28,29 +28,80 @@ type PostgresDb struct {
 func (pdb *PostgresDb) Init(host, user, password, dbName, port string) error {
 	fmt.Println("connecting to Database.....")
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Africa/Lagos", host, user, password, dbName, port)
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Africa/Lagos",
+		host, user, password, dbName, port)
 	var err error
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return err
 	}
-
 	if db == nil {
 		return fmt.Errorf("database was not initialized")
 	} else {
 		fmt.Println("Connected to Database")
 	}
 
-	err = db.AutoMigrate(&models.Category{}, &models.Seller{}, &models.Product{}, &models.Image{},
+	pdb.DB = db
+	err = pdb.PrePopulateTables()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
+
+}
+
+func (pdb *PostgresDb) PrePopulateTables() error {
+	err := pdb.DB.AutoMigrate(&models.Category{}, &models.Seller{}, &models.Product{}, &models.Image{},
 		&models.Buyer{}, &models.Cart{}, &models.CartProduct{}, &models.Order{}, &models.Blacklist{})
 	if err != nil {
 		return fmt.Errorf("migration error: %v", err)
 	}
+	categories := []models.Category{{Name: "fashion"}, {Name: "electronics"}, {Name: "health & beauty"}, {Name: "baby products"}, {Name: "phones & tablets"}, {Name: "food drinks"}, {Name: "computing"}, {Name: "sporting goods"}, {Name: "others"}}
+	result := pdb.DB.Find(&models.Category{})
+	if result.RowsAffected < 1 {
+		pdb.DB.Create(&categories)
+	}
 
-	pdb.DB = db
+	user := models.User{
+		Model:           gorm.Model{},
+		FirstName:       "John",
+		LastName:        "Doe",
+		Email:           "jdoe@gmail.com",
+		Username:        "JD Baba",
+		Password:        "12345678",
+		ConfirmPassword: "12345678",
+		PasswordHash:    "$2a$12$T2wSf1qgpTyhLOons3u4JOCqCwKDDL4J3UhGdOTEBL/CmAS/RNCPm",
+		Address:         "aso rock",
+		PhoneNumber:     "09091919292",
+		Image:           "https://i.ibb.co/5jwDfyF/Photo-on-24-11-2021-at-20-45.jpg",
+		IsActive:        true,
+		Token:           "",
+	}
+	buyer := models.Buyer{
+		Model:  gorm.Model{},
+		User:   user,
+		Orders: nil,
+	}
+	result = pdb.DB.Where("buyer = ?", "John").Find(&buyer)
 
+	if result.RowsAffected < 1 {
+		pdb.DB.Create(&buyer)
+	}
+
+	seller := models.Seller{
+		Model:   gorm.Model{},
+		User:    user,
+		Product: nil,
+		Orders:  nil,
+		Rating:  5,
+	}
+	result = pdb.DB.Where("seller = ?", "John").Find(&seller)
+
+	if result.RowsAffected < 1 {
+		pdb.DB.Create(&seller)
+	}
 	return nil
-
 }
 
 // SearchProduct Searches all products from DB
