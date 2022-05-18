@@ -87,7 +87,7 @@ func TestBuyerForgotPasswordResetHandler(t *testing.T) {
 		t.Fail()
 	}
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("PUT", "/api/v1/buyerforgotpassword/",
+	req, _ := http.NewRequest("PUT", "/api/v1/buyerresetpassword/",
 		strings.NewReader(string(resetPasswordPayload)))
 	route.ServeHTTP(w, req)
 	assert.Contains(t, w.Body.String(), "reset", "password")
@@ -164,7 +164,7 @@ func TestSellerForgotPasswordResetHandler(t *testing.T) {
 		t.Fail()
 	}
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("PUT", "/api/v1/sellerforgotpassword/",
+	req, _ := http.NewRequest("PUT", "/api/v1/sellerresetpassword/",
 		strings.NewReader(string(resetPasswordPayload)))
 	route.ServeHTTP(w, req)
 	assert.Contains(t, w.Body.String(), "reset", "password")
