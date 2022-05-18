@@ -22,8 +22,15 @@ func PingHandler(c *gin.Context) {
 
 func (h *Handler) SellerUpdatePassword(c *gin.Context) {
 	var password models.PasswordResetReq
-	email := c.Param("email")
-	seller, err := h.DB.FindSellerByEmail(email)
+	userI, exists := c.Get("user")
+	if !exists {
+		c.JSON(500, gin.H{"message": "internal server get error"})
+	}
+	user, ok := userI.(*models.Seller)
+	if !ok {
+		c.JSON(500, gin.H{"message": "invalid assert"})
+	}
+	seller, err := h.DB.FindSellerByEmail(user.Email)
 	if err != nil {
 		c.JSON(404, gin.H{"message": "User not found"})
 		c.Abort()
@@ -58,8 +65,15 @@ func (h *Handler) SellerUpdatePassword(c *gin.Context) {
 
 func (h *Handler) BuyerUpdatePassword(c *gin.Context) {
 	var password models.PasswordResetReq
-
-	email := c.Param("email")
+	userI, exists := c.Get("user")
+	log.Println("testtttt", userI)
+	if !exists {
+		c.JSON(500, gin.H{"message": "internal server get error"})
+	}
+	user, ok := userI.(*models.Buyer)
+	if !ok {
+		c.JSON(500, gin.H{"message": "invalid assert"})
+	}
 
 	err := c.BindJSON(&password)
 	if err != nil {
@@ -74,7 +88,7 @@ func (h *Handler) BuyerUpdatePassword(c *gin.Context) {
 		return
 	}
 
-	buyer, err := h.DB.FindBuyerByEmail(email)
+	buyer, err := h.DB.FindBuyerByEmail(user.Email)
 	if err != nil {
 		c.JSON(500, gin.H{"message": "Internal Server Error"})
 		c.Abort()
