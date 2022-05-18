@@ -224,7 +224,12 @@ func (pdb PostgresDb) FindBuyerByPhone(phone string) (*models.Buyer, error) {
 
 // TokenInBlacklist checks if token is already in the blacklist collection
 func (pdb *PostgresDb) TokenInBlacklist(token *string) bool {
-	return false
+	tok := &models.Blacklist{}
+	if err := pdb.DB.Where("token = ?", token).First(&tok).Error; err != nil {
+		return false
+	}
+
+	return true
 }
 
 // FindAllUsersExcept returns all the users expcept the one specified in the except parameter
