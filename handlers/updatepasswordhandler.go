@@ -1,13 +1,14 @@
 package handlers
 
 import (
+	"log"
+	"os"
+
 	"github.com/decadevs/shoparena/database"
 	"github.com/decadevs/shoparena/models"
 	"github.com/decadevs/shoparena/services"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
-	"log"
-	"os"
 )
 
 type Handler struct {
@@ -21,7 +22,6 @@ func PingHandler(c *gin.Context) {
 		"message": "pong",
 	})
 }
-
 func (h *Handler) SendForgotPasswordEMailHandler(c *gin.Context) {
 	// crete a password reset struct and initialize it
 
