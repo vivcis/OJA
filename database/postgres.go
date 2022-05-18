@@ -443,3 +443,16 @@ func (pdb *PostgresDb) FindPaidProduct(sellerID string) ([]models.CartProduct, e
 	return cartProduct, nil
 
 }
+
+func (pdb *PostgresDb) GetSellersProducts(sellerID uint) ([]models.Product, error) {
+	var products []models.Product
+
+	err := pdb.DB.Where("seller_id = ?", sellerID).Find(&products).Error
+	if err != nil {
+		log.Println("Error from GetSellersProduct in DB")
+		return nil, err
+	}
+
+	return products, nil
+
+}
