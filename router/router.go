@@ -34,7 +34,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	{
 		authorizedRoutesBuyer.PUT("/updatebuyerprofile", h.UpdateBuyerProfileHandler)
 		authorizedRoutesBuyer.GET("/getbuyerprofile", h.GetBuyerProfileHandler)
-		authorizedRoutesBuyer.PUT("/buyer/resetpassword/:email", h.BuyerUpdatePassword)
+		authorizedRoutesBuyer.PUT("/buyer/updatepassword", h.BuyerUpdatePassword)
 	}
 
 	authorizedRoutesSeller := apirouter.Group("/")
@@ -42,7 +42,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	{
 		authorizedRoutesSeller.PUT("/updatesellerprofile", h.UpdateSellerProfileHandler)
 		authorizedRoutesSeller.GET("/getsellerprofile", h.GetSellerProfileHandler)
-		authorizedRoutesSeller.PUT("/seller/resetpassword/:email", h.SellerUpdatePassword)
+		authorizedRoutesSeller.PUT("/seller/updatepassword", h.SellerUpdatePassword)
 		authorizedRoutesSeller.GET("/seller/shop", h.HandleGetSellerShopByProfileAndProduct())
 		authorizedRoutesSeller.GET("/seller/total/product/count", h.GetTotalProductCountForSeller)
 		authorizedRoutesSeller.GET("/seller/product", h.SellerIndividualProduct)
