@@ -40,8 +40,8 @@ func TestBuyerSendForgotPasswordEMailHandler(t *testing.T) {
 	privateAPIKey := os.Getenv("MAILGUN_API_KEY")
 	yourDomain := os.Getenv("DOMAIN_STRING")
 	mockDB.EXPECT().FindBuyerByEmail("test@testmail.com").Return(&buyer, nil)
-	mockMail.EXPECT().GenerateNonAuthToken("test@gmail.com", &secretString).Return("test@gmail.com", nil)
-	Link := "<strong>Here is your reset <a href='http://localhost:5000/api/v1/password-reset?reset_token=test@gmail.com'>link</a></strong>"
+	mockMail.EXPECT().GenerateNonAuthToken("test@gmail.com", secretString).Return(&buyer.Email, nil)
+	Link := "<strong>Here is your reset <a href='http://localhost:8085/reset-password?reset_token=test@gmail.com'>link</a></strong>"
 	mockMail.EXPECT().SendMail("forgot Password", Link, "test@gmail.com", privateAPIKey, yourDomain).Return(nil)
 	resetPasswordPayload, err := json.Marshal(resetPassword)
 	if err != nil {
@@ -49,7 +49,7 @@ func TestBuyerSendForgotPasswordEMailHandler(t *testing.T) {
 		t.Fail()
 	}
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/api/v1/buyerforgotpassword",
+	req, _ := http.NewRequest("POST", "/api/v1/buyer/forgotpassword",
 		strings.NewReader(string(resetPasswordPayload)))
 	route.ServeHTTP(w, req)
 	assert.Contains(t, w.Body.String(), "please", "check")
@@ -87,7 +87,7 @@ func TestBuyerForgotPasswordResetHandler(t *testing.T) {
 		t.Fail()
 	}
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("PUT", "/api/v1/buyer/seller/buyerforgotpassword/",
+	req, _ := http.NewRequest("PUT", "/api/v1/buyerforgotpassword/",
 		strings.NewReader(string(resetPasswordPayload)))
 	route.ServeHTTP(w, req)
 	assert.Contains(t, w.Body.String(), "reset", "password")
@@ -116,9 +116,9 @@ func TestSellerSendForgotPasswordEMailHandler(t *testing.T) {
 	secretString := os.Getenv("JWTSECRET")
 	privateAPIKey := os.Getenv("MAILGUN_API_KEY")
 	yourDomain := os.Getenv("DOMAIN_STRING")
-	mockDB.EXPECT().FindBuyerByEmail("test@testmail.com").Return(&seller, nil)
-	mockMail.EXPECT().GenerateNonAuthToken("test@gmail.com", &secretString).Return("test@gmail.com", nil)
-	Link := "<strong>Here is your reset <a href='http://localhost:5000/api/v1/password-reset?reset_token=test@gmail.com'>link</a></strong>"
+	mockDB.EXPECT().FindSellerByEmail("test@testmail.com").Return(&seller, nil)
+	mockMail.EXPECT().GenerateNonAuthToken("test@gmail.com", secretString).Return(&seller.Email, nil)
+	Link := "<strong>Here is your reset <a href='http://localhost:8085/reset-password?reset_token=test@gmail.com'>link</a></strong>"
 	mockMail.EXPECT().SendMail("forgot Password", Link, "test@gmail.com", privateAPIKey, yourDomain).Return(nil)
 	resetPasswordPayload, err := json.Marshal(resetPassword)
 	if err != nil {
@@ -126,7 +126,7 @@ func TestSellerSendForgotPasswordEMailHandler(t *testing.T) {
 		t.Fail()
 	}
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/api/v1/buyer/forgotpassword/",
+	req, _ := http.NewRequest("POST", "/api/v1/seller/forgotpassword",
 		strings.NewReader(string(resetPasswordPayload)))
 	route.ServeHTTP(w, req)
 	assert.Contains(t, w.Body.String(), "please", "check")
@@ -156,8 +156,8 @@ func TestSellerForgotPasswordResetHandler(t *testing.T) {
 	}
 	secretString := os.Getenv("JWTSECRET")
 	mockMail.EXPECT().DecodeToken(gomock.Any(), secretString).Return(seller.Email, nil)
-	mockDB.EXPECT().FindBuyerByEmail("test@gmail.com").Return(&seller, nil)
-	mockDB.EXPECT().BuyerResetPassword("test@gmail.com", gomock.Any()).Return(&seller, nil)
+	mockDB.EXPECT().FindSellerByEmail("test@gmail.com").Return(&seller, nil)
+	mockDB.EXPECT().SellerResetPassword("test@gmail.com", gomock.Any()).Return(&seller, nil)
 	resetPasswordPayload, err := json.Marshal(resetPassword)
 	if err != nil {
 		log.Println(err)
