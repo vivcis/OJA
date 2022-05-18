@@ -33,8 +33,10 @@ type DB interface {
 	BuyerResetPassword(email, newPassword string) (*models.Buyer, error)
 	CreateBuyerCart(cart *models.Cart) (*models.Cart, error)
 	FindIndividualSellerShop(sellerID string) (*models.Seller, error)
+	GetAllProducts() []models.Product
+	UpdateProductByID(Id uint, prod models.Product) error
 	GetAllSellers() ([]models.Seller, error)
-	GetProductByID(id string) (*models.Product, error)
+	GetProductByID(id uint) (*models.Product, error)
 	FindSellerProduct(sellerID string) ([]models.Product, error)
 	GetAllBuyerOrder(buyerId uint) ([]models.Order, error)
 	GetAllSellerOrder(sellerId uint) ([]models.Order, error)

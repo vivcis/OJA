@@ -20,6 +20,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter := router.Group("/api/v1")
 	apirouter.GET("/ping", handlers.PingHandler)
 	apirouter.GET("/searchproducts", h.SearchProductHandler)
+	apirouter.GET("/products", h.GetAllProducts)
 	apirouter.GET("/sellers", h.GetSellers)
 	apirouter.GET("/product/:id", h.GetProductById)
 	apirouter.POST("/buyersignup", h.BuyerSignUpHandler)
@@ -50,9 +51,9 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 		authorizedRoutesSeller.GET("/seller/shop", h.HandleGetSellerShopByProfileAndProduct())
 		authorizedRoutesSeller.GET("/seller/total/product/count", h.GetTotalProductCountForSeller)
 		authorizedRoutesSeller.GET("/seller/product", h.SellerIndividualProduct)
+		authorizedRoutesSeller.PUT("/update/product/:id", h.UpdateProduct)
 		authorizedRoutesSeller.GET("/seller/total/product/sold", h.GetTotalSoldProductCount)
 		authorizedRoutesSeller.GET("/seller/allproducts", h.SellerAllProducts)
-
 	}
 
 	port := ":" + os.Getenv("PORT")
