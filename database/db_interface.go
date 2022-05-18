@@ -34,9 +34,9 @@ type DB interface {
 	CreateBuyerCart(cart *models.Cart) (*models.Cart, error)
 	FindIndividualSellerShop(sellerID string) (*models.Seller, error)
 	GetAllProducts() []models.Product
-	UpdateProductByID(prod models.Product) error
+	UpdateProductByID(Id uint, prod models.Product) error
 	GetAllSellers() ([]models.Seller, error)
-	GetProductByID(id string) (*models.Product, error)
+	GetProductByID(id uint) (*models.Product, error)
 	FindSellerProduct(sellerID string) ([]models.Product, error)
 }
 

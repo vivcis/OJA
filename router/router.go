@@ -22,6 +22,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter.GET("/ping", handlers.PingHandler)
 
 	apirouter.GET("/searchproducts", h.SearchProductHandler)
+	apirouter.GET("/products", h.GetAllProducts)
 	apirouter.GET("/sellers", h.GetSellers)
 	apirouter.GET("/product/:id", h.GetProductById)
 	apirouter.PUT("/buyer/resetpassword/:email", h.BuyerResetPassword)
@@ -48,7 +49,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 		authorizedRoutesSeller.GET("/seller/shop", h.HandleGetSellerShopByProfileAndProduct())
 		authorizedRoutesSeller.GET("/seller/total/product/count", h.GetTotalProductCountForSeller)
 		authorizedRoutesSeller.GET("/seller/product", h.SellerIndividualProduct)
-
+		authorizedRoutesSeller.PUT("/update/product/:id", h.UpdateProduct)
 	}
 
 	port := ":" + os.Getenv("PORT")

@@ -63,10 +63,10 @@ func (pdb *PostgresDb) GetAllProducts() []models.Product {
 }
 
 //UPDATE PRODUCT BY ID
-func (pdb *PostgresDb) UpdateProductByID(prod models.Product) error {
+func (pdb *PostgresDb) UpdateProductByID(Id uint, prod models.Product) error {
 	products := models.Product{}
 
-	err := pdb.DB.Model(&products).Where("id = ?", prod.ID).Update("title", prod.Title).
+	err := pdb.DB.Model(&products).Where("id = ?", Id).Update("title", prod.Title).
 		Update("description", prod.Description).Update("price", prod.Price).
 		Update("rating", prod.Rating).Update("quantity", prod.Quantity).Error
 	if err != nil {
@@ -380,7 +380,7 @@ func (pdb *PostgresDb) GetAllSellers() ([]models.Seller, error) {
 }
 
 // GetProductByID returns a particular product by it's ID
-func (pdb *PostgresDb) GetProductByID(id string) (*models.Product, error) {
+func (pdb *PostgresDb) GetProductByID(id uint) (*models.Product, error) {
 	product := &models.Product{}
 	if err := pdb.DB.Where("ID=?", id).First(product).Error; err != nil {
 		return nil, err

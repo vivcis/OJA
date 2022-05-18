@@ -14,6 +14,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestGetProducts(t *testing.T) {
@@ -32,6 +33,7 @@ func TestGetProducts(t *testing.T) {
 
 	product := []models.Product{
 		{
+			Model:       gorm.Model{ID: 1, CreatedAt: time.Time{}, UpdatedAt: time.Time{}},
 			SellerId:    2,
 			CategoryId:  category.ID,
 			Title:       "household",
@@ -41,6 +43,7 @@ func TestGetProducts(t *testing.T) {
 			Quantity:    4903,
 		},
 		{
+			Model:       gorm.Model{ID: 1, CreatedAt: time.Time{}, UpdatedAt: time.Time{}},
 			SellerId:    2,
 			CategoryId:  3,
 			Title:       "household",

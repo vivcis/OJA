@@ -34,28 +34,6 @@ func TestUpdateProduct(t *testing.T) {
 		DB: mockDB,
 	}
 	route, _ := router.SetupRouter(h)
-	accClaim, _ := services.GenerateClaims("victorihemadu@gmail.com")
-	secret := os.Getenv("JWT_SECRET")
-	acc, err := services.GenerateToken(jwt.SigningMethodHS256, accClaim, &secret)
-	if err != nil {
-		t.Fail()
-	}
-
-	category := models.Category{
-		Model: gorm.Model{ID: 1},
-		Name:  "Shirt",
-	}
-
-	product := models.Product{
-		Model:       gorm.Model{ID: 4, CreatedAt: time.Time{}, UpdatedAt: time.Time{}},
-		SellerId:    2,
-		CategoryId:  category.ID,
-		Title:       "household",
-		Description: "home items",
-		Price:       78,
-		Rating:      8,
-		Quantity:    4903,
-	}
 
 	seller := models.Seller{
 		User: models.User{
@@ -70,8 +48,41 @@ func TestUpdateProduct(t *testing.T) {
 		},
 		Orders: nil,
 	}
+	accClaim, _ := services.GenerateClaims(seller.Email)
+	secret := os.Getenv("JWT_SECRET")
 
-	bodyJSON, err := json.Marshal(product)
+	acc, err := services.GenerateToken(jwt.SigningMethodHS256, accClaim, &secret)
+	if err != nil {
+		t.Fail()
+	}
+
+	category := models.Category{
+		Model: gorm.Model{ID: 1},
+		Name:  "Shirt",
+	}
+
+	product := &models.Product{
+		Model:       gorm.Model{ID: 4, CreatedAt: time.Time{}, UpdatedAt: time.Time{}},
+		SellerId:    2,
+		CategoryId:  category.ID,
+		Title:       "household",
+		Description: "home items",
+		Price:       78,
+		Rating:      8,
+		Quantity:    4903,
+	}
+
+	prod := models.Product{
+		Model:       gorm.Model{ID: 4},
+		SellerId:    2,
+		CategoryId:  category.ID,
+		Title:       "house",
+		Description: "items",
+		Price:       78,
+		Rating:      8,
+		Quantity:    4903,
+	}
+	prodJSON, err := json.Marshal(prod)
 	if err != nil {
 		t.Fail()
 	}
@@ -80,11 +91,12 @@ func TestUpdateProduct(t *testing.T) {
 	mockDB.EXPECT().FindSellerByEmail(seller.Email).Return(&seller, nil)
 
 	t.Run("Testing for valid update", func(t *testing.T) {
-		mockDB.EXPECT().UpdateProductByID(product).Return(nil)
+		mockDB.EXPECT().GetProductByID(product.ID).Return(product, nil)
+		mockDB.EXPECT().UpdateProductByID(uint(4), prod)
 		rw := httptest.NewRecorder()
 		req, err := http.NewRequest(http.MethodPut,
 			"/api/v1/update/product/4",
-			strings.NewReader(string(bodyJSON)))
+			strings.NewReader(string(prodJSON)))
 		if err != nil {
 			fmt.Printf("errrr here %v \n", err)
 			return
@@ -92,5 +104,6 @@ func TestUpdateProduct(t *testing.T) {
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *acc))
 		route.ServeHTTP(rw, req)
 		assert.Equal(t, http.StatusOK, rw.Code)
+		assert.Contains(t, rw.Body.String(), "product updated successfully")
 	})
 }
