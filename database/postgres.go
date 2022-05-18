@@ -518,6 +518,145 @@ func (pdb *PostgresDb) FindPaidProduct(sellerID string) ([]models.CartProduct, e
 
 }
 
+func (pdb *PostgresDb) AddToCart(product models.Product, buyer *models.Buyer) error {
+	var prod *models.Product
+	var userBuyer *models.Buyer
+	var cart *models.Cart
+
+	err := pdb.DB.Where("id = ?", product.ID).First(&prod).Error
+	if err != nil {
+		return err
+	}
+
+	err = pdb.DB.Where("id = ?", buyer.ID).First(&userBuyer).Error
+	if err != nil {
+		return err
+	}
+
+	err = pdb.DB.Where("buyer_id = ?", buyer.ID).First(&cart).Error
+	if err != nil {
+		return err
+	}
+
+	cartProduct := models.CartProduct{
+		CartID:        cart.ID,
+		ProductID:     product.ID,
+		TotalPrice:    prod.Price * product.Quantity,
+		TotalQuantity: product.Quantity,
+		OrderStatus:   false,
+	}
+
+	cart.Product = append(cart.Product, cartProduct)
+
+	err = pdb.DB.Where("id = ?", cart.ID).Save(&cart).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func (pdb *PostgresDb) GetCartProducts(buyer *models.Buyer) ([]models.CartProduct, error) {
+
+	var cart *models.Cart
+	var addedProducts []models.CartProduct
+
+	err := pdb.DB.Where("buyer_id = ?", buyer.ID).First(&cart).Error
+	if err != nil {
+		return nil, err
+	}
+
+	err = pdb.DB.Where("cart_id = ?", cart.ID).Where("order_status = ?", false).
+		Find(&addedProducts).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return addedProducts, nil
+
+}
+
+func (pdb *PostgresDb) ViewCartProducts(addedProducts []models.CartProduct) ([]models.ProductDetails, error) {
+	var details []models.ProductDetails
+
+	for i := 0; i < len(addedProducts); i++ {
+		var product *models.Product
+		err := pdb.DB.Where("id = ?", addedProducts[i].ProductID).First(&product).Error
+		if err != nil {
+			return nil, err
+		}
+		prodDetail := models.ProductDetails{
+			Name:     product.Title,
+			Price:    addedProducts[i].TotalPrice,
+			Quantity: addedProducts[i].TotalQuantity,
+			Images:   product.Images,
+		}
+
+		details = append(details, prodDetail)
+	}
+
+	return details, nil
+}
+
+func (pdb *PostgresDb) DeletePaidFromCart(cartID uint) error {
+	var cartProducts []models.CartProduct
+	var product []models.Product
+
+	err := pdb.DB.Where("cart_id = ?", cartID).Where("order_status = ?", false).
+		Find(&cartProducts).Error
+	if err != nil {
+		return err
+	}
+	err = pdb.DB.Find(&product).Error
+	if err != nil {
+		return err
+	}
+
+	for i := 0; i < len(cartProducts); i++ {
+		for j := i; j < len(product); j++ {
+			if cartProducts[i].ProductID == product[j].ID {
+				var cart models.Cart
+				err := pdb.DB.Where("id = ?", cartProducts[i].CartID).First(&cart).Error
+				if err != nil {
+					return nil
+				}
+				orders := models.Order{
+					SellerId:  product[j].SellerId,
+					BuyerId:   cart.BuyerID,
+					ProductId: product[j].ID,
+				}
+
+				newQuantity := product[j].Quantity - cartProducts[i].TotalQuantity
+				err = pdb.DB.Model(&models.Product{}).Where("id=?", product[j].ID).
+					Update("quantity", newQuantity).Error
+				if err != nil {
+					return err
+				}
+
+				err = pdb.DB.Model(&models.CartProduct{}).Where("id = ?", cartProducts[i].ID).
+					Update("order_status", true).Error
+				if err != nil {
+					return err
+				}
+
+				err = pdb.DB.Create(&orders).Error
+				if err != nil {
+					return err
+				}
+
+				err = pdb.DB.Where("id = ?", cartProducts[i].ID).Delete(&models.CartProduct{}).Error
+				if err != nil {
+					return err
+				}
+
+				break
+			}
+		}
+	}
+	return nil
+}
+
 func (pdb *PostgresDb) GetSellersProducts(sellerID uint) ([]models.Product, error) {
 	var products []models.Product
 
@@ -526,7 +665,5 @@ func (pdb *PostgresDb) GetSellersProducts(sellerID uint) ([]models.Product, erro
 		log.Println("Error from GetSellersProduct in DB")
 		return nil, err
 	}
-
 	return products, nil
-
 }
