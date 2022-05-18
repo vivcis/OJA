@@ -30,8 +30,8 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter.GET("/seller/totalorder/:id", h.SellerTotalOrders)
 	apirouter.POST("buyer/forgotpassword", h.BuyerForgotPasswordEMailHandler)
 	apirouter.POST("seller/forgotpassword", h.SellerForgotPasswordEMailHandler)
-	apirouter.PUT("/sellerforgotpassword/", h.SellerForgotPasswordResetHandler)
-	apirouter.PUT("/buyerforgotpassword/", h.BuyerForgotPasswordResetHandler)
+	apirouter.PUT("/sellerrestpassword/", h.SellerForgotPasswordResetHandler)
+	apirouter.PUT("/buyerresetpassword/", h.BuyerForgotPasswordResetHandler)
 
 	//All authorized routes here
 	authorizedRoutesBuyer := apirouter.Group("/")
