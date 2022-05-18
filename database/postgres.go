@@ -367,17 +367,16 @@ func (pdb *PostgresDb) GetCategory(category string) (*models.Category, error) {
 	return &categories, nil
 }
 
-func (pdb *PostgresDb) DeleteProduct(productID uint) error {
+func (pdb *PostgresDb) DeleteProduct(productID, sellerID uint) error {
 	product := models.Product{}
 
-	err := pdb.DB.Where("id = ?", productID).Delete(&product).Error
+	err := pdb.DB.Where("id = ? AND seller_id = ?", productID, sellerID).Delete(&product).Error
 	if err != nil {
 		return err
 	}
 
 	return nil
 }
-
 
 // GetAllSellers returns all the sellers in the updated database
 func (pdb *PostgresDb) GetAllSellers() ([]models.Seller, error) {

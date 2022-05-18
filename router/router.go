@@ -33,7 +33,6 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	authorizedRoutesSeller.Use(middleware.AuthorizeSeller(h.DB.FindSellerByEmail, h.DB.TokenInBlacklist))
 	authorizedRoutesBuyer.PUT("/updatebuyerprofile/:id", h.UpdateBuyerProfileHandler)
 	authorizedRoutesSeller.PUT("/updatesellerprofile/:id", h.UpdateSellerProfileHandler)
-	authorizedRoutesSeller.DELETE("/deleteproduct/:id", h.DeleteSellerProduct)
 
 	//All authorized routes here
 	authorizedRoutesBuyer = apirouter.Group("/")
@@ -50,7 +49,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 		authorizedRoutesSeller.PUT("/updatesellerprofile", h.UpdateSellerProfileHandler)
 		authorizedRoutesSeller.GET("/getsellerprofile", h.GetSellerProfileHandler)
 		authorizedRoutesSeller.GET("/seller/total/product/sold", h.GetTotalSoldProductCount)
-
+		authorizedRoutesSeller.DELETE("/deleteproduct/:id", h.DeleteSellerProduct)
 	}
 
 	port := ":" + os.Getenv("PORT")

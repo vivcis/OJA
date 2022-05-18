@@ -30,7 +30,7 @@ type DB interface {
 	UploadFileToS3(h *session.Session, file multipart.File, fileName string, size int64) (string, error)
 	CreateProduct(product models.Product) error
 	GetCategory(category string) (*models.Category, error)
-	DeleteProduct(productID uint) error
+	DeleteProduct(productID, sellerID uint) error
 	GetAllSellers() ([]models.Seller, error)
 	GetProductByID(id string) (*models.Product, error)
 	FindSellerProduct(sellerID string) ([]models.Product, error)
