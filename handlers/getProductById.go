@@ -3,14 +3,16 @@ package handlers
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
 func (h *Handler) GetProductById(c *gin.Context) {
 	id := c.Param("id")
+	idx, _ := strconv.Atoi(id)
 
-	product, err := h.DB.GetProductByID(id)
+	product, err := h.DB.GetProductByID(uint(idx))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"Message": "Error Exist in Getting All Sellers",
