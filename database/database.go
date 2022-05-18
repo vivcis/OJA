@@ -28,7 +28,7 @@ func SetupDB() error {
 		return fmt.Errorf("database was not initialized")
 	}
 
-	err = db.AutoMigrate(&models.Product{}, &models.Seller{}, &models.Buyer{})
+	err = db.AutoMigrate(&models.Product{}, &models.Seller{}, &models.Buyer{}, &models.Order{}, models.Cart{})
 	if err != nil {
 		return fmt.Errorf("migration error: %v", err)
 	}
@@ -37,5 +37,3 @@ func SetupDB() error {
 
 	return nil
 }
-
-

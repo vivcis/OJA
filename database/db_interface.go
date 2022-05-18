@@ -36,6 +36,9 @@ type DB interface {
 	GetAllSellers() ([]models.Seller, error)
 	GetProductByID(id string) (*models.Product, error)
 	FindSellerProduct(sellerID string) ([]models.Product, error)
+	GetAllBuyerOrder(buyerId uint) ([]models.Order, error)
+	GetAllSellerOrder(sellerId uint) ([]models.Order, error)
+	GetAllSellerOrderCount(sellerId uint) (int, error)
 	FindPaidProduct(sellerID string) ([]models.CartProduct, error)
 }
 
