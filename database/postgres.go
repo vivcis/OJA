@@ -411,6 +411,13 @@ func (pdb *PostgresDb) BuyerResetPassword(email, newPassword string) (*models.Bu
 	}
 	return buyer, nil
 }
+func (pdb *PostgresDb) SellerResetPassword(email, newPassword string) (*models.Seller, error) {
+	seller := &models.Seller{}
+	if err := pdb.DB.Model(seller).Where("email =?", email).Update("password_hash", newPassword).Error; err != nil {
+		return nil, err
+	}
+	return seller, nil
+}
 
 //FindIndividualSellerShop return the individual seller and its respective shop gotten by its unique ID
 func (pdb *PostgresDb) FindIndividualSellerShop(sellerID string) (*models.Seller, error) {
