@@ -66,7 +66,7 @@ func TestBuyerUpdatePassword(t *testing.T) {
 		t.Fail()
 	}
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("PUT", "/api/v1/buyer/resetpassword/chuks@gmail.com",
+	req, _ := http.NewRequest("PUT", "/api/v1/buyer/updatepassword",
 		strings.NewReader(string(resetPasswordPayload)))
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *acc))
 	route.ServeHTTP(w, req)
@@ -102,16 +102,15 @@ func TestSellerUpdatePassword(t *testing.T) {
 		ConfirmNewPassword: "123456789",
 	}
 
-	buyer := models.Buyer{
+	seller := models.Seller{
 		User: models.User{
 			Email:        "chuks@gmail.com",
 			PasswordHash: string(passwordHash),
 		},
-		Orders: nil,
 	}
 	mockDB.EXPECT().TokenInBlacklist(gomock.Any()).Return(false)
-	mockDB.EXPECT().FindBuyerByEmail("chuks@gmail.com").Return(&buyer, nil).Times(2)
-	mockDB.EXPECT().BuyerUpdatePassword(string(passwordHash), gomock.Any()).Return(&buyer, nil)
+	mockDB.EXPECT().FindSellerByEmail("chuks@gmail.com").Return(&seller, nil).Times(2)
+	mockDB.EXPECT().SellerUpdatePassword(string(passwordHash), gomock.Any()).Return(&seller, nil)
 
 	resetPasswordPayload, err := json.Marshal(resetPassword)
 	if err != nil {
@@ -119,7 +118,7 @@ func TestSellerUpdatePassword(t *testing.T) {
 		t.Fail()
 	}
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("PUT", "/api/v1/buyer/resetpassword/chuks@gmail.com",
+	req, _ := http.NewRequest("PUT", "/api/v1/seller/updatepassword",
 		strings.NewReader(string(resetPasswordPayload)))
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *acc))
 	route.ServeHTTP(w, req)
