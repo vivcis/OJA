@@ -166,7 +166,7 @@ func TestAllSellerOrders(t *testing.T) {
 	mockDB.EXPECT().FindSellerByEmail(testSeller.Email).Return(&testSeller, nil)
 
 	t.Run("Testing for Successful Request", func(t *testing.T) {
-		mockDB.EXPECT().GetAllSellerOrder(uint(5)).Return(testOrders, nil)
+		mockDB.EXPECT().GetAllSellerOrder(uint(5)).Return(testOrders, nil).AnyTimes()
 		rw := httptest.NewRecorder()
 		req, _ := http.NewRequest(http.MethodGet, "/api/v1/sellerorders/", strings.NewReader(string(bodyJSON)))
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *acc))
