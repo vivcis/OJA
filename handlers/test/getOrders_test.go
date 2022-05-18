@@ -11,21 +11,18 @@ import (
 	"github.com/decadevs/shoparena/services"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/golang/mock/gomock"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
-	"math/rand"
+	_ "math/rand"
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
 )
 
-func TestGetTotalProductCountForSeller(t *testing.T) {
-
+func TestAllSellerOrders(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	//creates a new mock instance
@@ -37,7 +34,7 @@ func TestGetTotalProductCountForSeller(t *testing.T) {
 
 	route, _ := router.SetupRouter(h)
 
-	sellerEmail := gofakeit.Email()
+	sellerEmail := "kukus@yahoo.com"
 	accClaim, _ := services.GenerateClaims(sellerEmail)
 
 	secret := os.Getenv("JWT_SECRET")
@@ -45,26 +42,31 @@ func TestGetTotalProductCountForSeller(t *testing.T) {
 	if err != nil {
 		t.Fail()
 	}
-
 	////Declaring FAKE testing variables
-	Id := uint(gofakeit.Number(1, 10))
+	Id := uint(5)
 	categoryID := uint(gofakeit.Number(1, 9))
-	sellerID := uint(gofakeit.Number(1, 10))
+	sellerID := uint(5)
+
+	buyerID := uint(gofakeit.Number(1, 10))
+	productID := uint(gofakeit.Number(1, 10))
 	sellerFirstName := gofakeit.FirstName()
+	//buyerFirstName := gofakeit.FirstName()
 	sellerLastName := gofakeit.LastName()
+	//buyerLastName := gofakeit.LastName()
 	sellerUserName := gofakeit.Username()
+	//buyerUserName := gofakeit.Username()
 	sellerPhone := gofakeit.Phone()
-	sellerImage := gofakeit.ImageURL(200, 500)
-	sellerStatus := gofakeit.Bool()
+	//buyerPhone := gofakeit.Phone()
 	productCategory := gofakeit.CarModel()
 	productTitle := gofakeit.CarType()
 	productDescriptn := gofakeit.CarType()
 	productPrice := gofakeit.Price(1200, 1000000)
 	convPrice := uint(productPrice)
-	productImage := gofakeit.ImageURL(200, 500)
-	rating := uint(rand.Intn(5))
+	//productImage := gofakeit.ImageURL(200, 500)
+	//rating := uint(rand.Intn(5))
 	quantity := uint(gofakeit.Number(1, 100))
-	token := ""
+
+	address := "lagos"
 
 	//instantiating the gorm model object/struct
 	testGormModel := gorm.Model{
@@ -73,59 +75,77 @@ func TestGetTotalProductCountForSeller(t *testing.T) {
 		UpdatedAt: time.Time{},
 	}
 
+	//instantiating the user model object/struct
+	testUserModel := models.User{
+		Model:       testGormModel,
+		FirstName:   sellerFirstName,
+		LastName:    sellerLastName,
+		Email:       sellerEmail,
+		Username:    sellerUserName,
+		Address:     address,
+		PhoneNumber: sellerPhone,
+	}
+
+	//instantiating the seller object/struct
+	testSellerModel := models.Seller{
+		Model:   testGormModel,
+		User:    testUserModel,
+		Product: nil,
+		Orders:  nil,
+	}
+	//instantiating the buyer object/struct
+	testBuyerModel := models.Buyer{
+		Model:  testGormModel,
+		User:   testUserModel,
+		Orders: nil,
+	}
+
 	category := models.Category{
 		testGormModel,
 		productCategory,
 	}
-	//image object
-	image := models.Image{
+	product := models.Product{
+		Model:       testGormModel,
+		SellerId:    sellerID,
+		CategoryId:  categoryID,
+		Category:    category,
+		Title:       productTitle,
+		Description: productDescriptn,
+		Price:       convPrice,
+		Quantity:    quantity,
+	}
+	//instantiating the buyer object/struct
+
+	orderOne := models.Order{
 		testGormModel,
 		sellerID,
-		productImage,
+		testSellerModel,
+		buyerID,
+		testBuyerModel,
+		productID,
+		product,
 	}
-
-	sliceOfImg := []models.Image{image}
-
-	productOne := models.Product{
+	orderTwo := models.Order{
 		testGormModel,
 		sellerID,
-		categoryID,
-		category,
-		productTitle,
-		productDescriptn,
-		convPrice,
-		sliceOfImg,
-		rating,
-		quantity,
-	}
-	productTwo := models.Product{
-		testGormModel,
-		sellerID,
-		categoryID,
-		category,
-		productTitle,
-		productDescriptn,
-		convPrice,
-		sliceOfImg,
-		rating,
-		quantity,
+		testSellerModel,
+		buyerID,
+		testBuyerModel,
+		productID,
+		product,
 	}
 
-	productThree := models.Product{
+	orderThree := models.Order{
 		testGormModel,
 		sellerID,
-		categoryID,
-		category,
-		productTitle,
-		productDescriptn,
-		convPrice,
-		sliceOfImg,
-		rating,
-		quantity,
+		testSellerModel,
+		buyerID,
+		testBuyerModel,
+		productID,
+		product,
 	}
-	testProducts := []models.Product{productOne, productTwo, productThree}
-	//instantiating the seller model object/struct
 
+	testOrders := []models.Order{orderOne, orderTwo, orderThree}
 	testUser := models.User{
 		Model:        testGormModel,
 		FirstName:    sellerFirstName,
@@ -133,48 +153,33 @@ func TestGetTotalProductCountForSeller(t *testing.T) {
 		Email:        sellerEmail,
 		Username:     sellerUserName,
 		PasswordHash: sellerPhone,
-		Image:        sellerImage,
-		IsActive:     sellerStatus,
-		Token:        token,
 	}
+	productSlice := []models.Product{product}
 
 	testSeller := models.Seller{
+		Model:   testGormModel,
 		User:    testUser,
-		Product: testProducts,
-		Rating:  int(rating),
+		Product: productSlice,
 	}
 
-	bodyJSON, err := json.Marshal(testProducts)
+	bodyJSON, err := json.Marshal(testOrders)
 	if err != nil {
 		t.Fail()
 	}
 
-	convSellerId := strconv.Itoa(0)
-
 	//authentication and authorisation
-	mockDB.EXPECT().TokenInBlacklist(gomock.Any()).Return(false).Times(2)
-	mockDB.EXPECT().FindSellerByEmail(testSeller.Email).Return(&testSeller, nil).Times(2)
-
-	t.Run("Testing for Bad/Wrong Request", func(t *testing.T) {
-		mockDB.EXPECT().FindSellerProduct(convSellerId).Return(nil, errors.New("Error Exist "))
-		rw := httptest.NewRecorder()
-		req, _ := http.NewRequest(http.MethodGet, "/api/v1/seller/product", strings.NewReader(string(bodyJSON)))
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *acc))
-		route.ServeHTTP(rw, req)
-		fmt.Println(rw.Body.String())
-		assert.Equal(t, http.StatusBadRequest, rw.Code)
-		assert.Contains(t, rw.Body.String(), "Error Exist")
-	})
+	mockDB.EXPECT().TokenInBlacklist(gomock.Any()).Return(false)
+	mockDB.EXPECT().FindSellerByEmail(testSeller.Email).Return(&testSeller, nil)
 
 	t.Run("Testing for Successful Request", func(t *testing.T) {
-		mockDB.EXPECT().FindSellerProduct(convSellerId).Return(testProducts, nil)
+		mockDB.EXPECT().GetAllSellerOrder(uint(5)).Return(testOrders, nil)
 		rw := httptest.NewRecorder()
-		req, _ := http.NewRequest(http.MethodGet, "/api/v1/seller/product", strings.NewReader(string(bodyJSON)))
+		req, _ := http.NewRequest(http.MethodGet, "/api/v1/sellerorders/", strings.NewReader(string(bodyJSON)))
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *acc))
 		route.ServeHTTP(rw, req)
 		fmt.Println(rw.Body.String())
 		assert.Equal(t, http.StatusOK, rw.Code)
-		assert.Contains(t, rw.Body.String(), "Seller Has Product In Shop")
+
 	})
 
 }

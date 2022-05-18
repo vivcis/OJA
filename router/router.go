@@ -31,18 +31,21 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter.POST("/loginbuyer", h.LoginBuyerHandler)
 	apirouter.POST("/loginseller", h.LoginSellerHandler)
 
+	apirouter.GET("/seller/totalorder/:id", h.SellerTotalOrders)
+
 	//All authorized routes here
 	authorizedRoutesBuyer := apirouter.Group("/")
+	authorizedRoutesSeller := apirouter.Group("/")
+	authorizedRoutesSeller.Use(middleware.AuthorizeSeller(h.DB.FindSellerByEmail, h.DB.TokenInBlacklist))
 	authorizedRoutesBuyer.Use(middleware.AuthorizeBuyer(h.DB.FindBuyerByEmail, h.DB.TokenInBlacklist))
 	{
 		authorizedRoutesBuyer.PUT("/updatebuyerprofile", h.UpdateBuyerProfileHandler)
 		authorizedRoutesBuyer.GET("/getbuyerprofile", h.GetBuyerProfileHandler)
-
-	}
-
-	authorizedRoutesSeller := apirouter.Group("/")
-	authorizedRoutesSeller.Use(middleware.AuthorizeSeller(h.DB.FindSellerByEmail, h.DB.TokenInBlacklist))
-	{
+		authorizedRoutesBuyer.PUT("/updatebuyerprofile/", h.UpdateBuyerProfileHandler)
+		authorizedRoutesSeller.PUT("/updatesellerprofile/", h.UpdateSellerProfileHandler)
+		authorizedRoutesBuyer.GET("/buyerorders/", h.AllBuyerOrders)
+		authorizedRoutesSeller.GET("/sellerorders/", h.AllSellerOrders)
+		authorizedRoutesSeller.GET("/seller/totalorder/", h.SellerTotalOrders)
 		authorizedRoutesSeller.PUT("/updatesellerprofile", h.UpdateSellerProfileHandler)
 		authorizedRoutesSeller.GET("/getsellerprofile", h.GetSellerProfileHandler)
 		authorizedRoutesSeller.GET("/seller/shop", h.HandleGetSellerShopByProfileAndProduct())
