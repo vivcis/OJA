@@ -20,31 +20,16 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter := router.Group("/api/v1")
 	apirouter.GET("/ping", handlers.PingHandler)
 	apirouter.GET("/searchproducts", h.SearchProductHandler)
-	apirouter.POST("buyer/forgotpassword", h.BuyerForgotPasswordEMailHandler)
-	apirouter.POST("seller/forgotpassword", h.SellerForgotPasswordEMailHandler)
-	apirouter.GET("/sellers", h.GetSellers)
-	apirouter.GET("/product/:id", h.GetProductById)
 	apirouter.GET("/sellers", h.GetSellers)
 	apirouter.GET("/product/:id", h.GetProductById)
 	apirouter.POST("/buyersignup", h.BuyerSignUpHandler)
 	apirouter.POST("/sellersignup", h.SellerSignUpHandler)
 	apirouter.POST("/loginbuyer", h.LoginBuyerHandler)
 	apirouter.POST("/loginseller", h.LoginSellerHandler)
-
-	apirouter.PUT("/sellerforgotpassword/", h.SellerForgotPasswordResetHandler)
-	apirouter.PUT("/buyerforgotpassword/", h.BuyerForgotPasswordResetHandler)
-
 	apirouter.GET("/seller/totalorder/:id", h.SellerTotalOrders)
 
 	//All authorized routes here
 	authorizedRoutesBuyer := apirouter.Group("/")
-	authorizedRoutesSeller := apirouter.Group("/")
-	authorizedRoutesSeller.Use(middleware.AuthorizeSeller(h.DB.FindSellerByEmail, h.DB.TokenInBlacklist))
-	authorizedRoutesBuyer.PUT("/buyer/resetpassword/:email", h.BuyerUpdatePassword)
-	authorizedRoutesSeller.PUT("/seller/resetpassword/:email", h.SellerUpdatePassword)
-	authorizedRoutesBuyer.PUT("/updatebuyerprofile/:id", h.UpdateBuyerProfileHandler)
-	authorizedRoutesSeller.PUT("/updatesellerprofile/:id", h.UpdateSellerProfileHandler)
-
 	authorizedRoutesBuyer.Use(middleware.AuthorizeBuyer(h.DB.FindBuyerByEmail, h.DB.TokenInBlacklist))
 	{
 		authorizedRoutesBuyer.PUT("/updatebuyerprofile", h.UpdateBuyerProfileHandler)
@@ -53,7 +38,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 		authorizedRoutesBuyer.PUT("/buyer/updatepassword", h.BuyerUpdatePassword)
 	}
 
-	authorizedRoutesBuyer := apirouter.Group("/")
+	authorizedRoutesSeller := apirouter.Group("/")
 	authorizedRoutesSeller.Use(middleware.AuthorizeSeller(h.DB.FindSellerByEmail, h.DB.TokenInBlacklist))
 	{
 
