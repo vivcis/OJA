@@ -2,6 +2,12 @@ package test
 
 import (
 	"encoding/json"
+	"log"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
 	mock_database "github.com/decadevs/shoparena/database/mocks"
 	"github.com/decadevs/shoparena/handlers"
 	"github.com/decadevs/shoparena/models"
@@ -9,11 +15,6 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/bcrypt"
-	"log"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
 )
 
 func TestUpdatePassword(t *testing.T) {
@@ -25,7 +26,9 @@ func TestUpdatePassword(t *testing.T) {
 
 	route, _ := router.SetupRouter(h)
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte("12345678"), bcrypt.DefaultCost)
-
+	if err != nil {
+		t.Fatal(err)
+	}
 	resetPassword := struct {
 		OldPassword        string `json:"old_password"`
 		NewPassword        string `json:"new_password"`

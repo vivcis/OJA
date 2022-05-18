@@ -30,10 +30,10 @@ func TestBuyerLogin(t *testing.T) {
 	rout, _ := router.SetupRouter(mockhandler)
 	t.Run("testing bad request", func(t *testing.T) {
 		usermk := &struct {
-			Email string `json:"email" binding:"required"`
+			Email    string `json:"email" binding:"required"`
 			Password string `json:"password" binding:"required"`
 		}{
-			Email: "",
+			Email:    "",
 			Password: "12345566666",
 		}
 		bytes, _ := json.Marshal(usermk)
@@ -47,10 +47,10 @@ func TestBuyerLogin(t *testing.T) {
 
 	t.Run("testing bad request", func(t *testing.T) {
 		usermk := &struct {
-			Email string `json:"email" binding:"required"`
+			Email    string `json:"email" binding:"required"`
 			Password string `json:"password" binding:"required"`
 		}{
-			Email: "mike123",
+			Email:    "mike123",
 			Password: "",
 		}
 		bytes, _ := json.Marshal(usermk)
@@ -66,15 +66,15 @@ func TestBuyerLogin(t *testing.T) {
 		hash, _ := handlers.HashPassword("12345566666")
 		buyer := &models.Buyer{
 			User: models.User{
-				Email:     "mike123",
+				Email:        "mike123",
 				PasswordHash: hash,
 			},
 		}
 		usermk := &struct {
-			Email string `json:"email" binding:"required"`
+			Email    string `json:"email" binding:"required"`
 			Password string `json:"password" binding:"required"`
 		}{
-			Email: "mike123",
+			Email:    "mike123",
 			Password: "12345566666",
 		}
 		mockdb.EXPECT().FindBuyerByEmail(buyer.Email).Return(buyer, nil)
