@@ -22,7 +22,6 @@ func (h *Handler) DeleteSellerProduct(c *gin.Context) {
 	}
 
 	fmt.Println(uint(productIdInt))
-	fmt.Println(seller.ID)
 
 	err = h.DB.DeleteProduct(uint(productIdInt), seller.ID)
 	if err != nil {

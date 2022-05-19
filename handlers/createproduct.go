@@ -29,7 +29,7 @@ func (h *Handler) CreateProducts(c *gin.Context) {
 
 	product.SellerId = seller.ID
 	fmt.Println(product.SellerId)
-	fmt.Println("*********************************************")
+
 	err = h.DB.CreateProduct(product)
 	if err != nil {
 		log.Println("check error: ", err)
