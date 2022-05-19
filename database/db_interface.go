@@ -29,6 +29,9 @@ type DB interface {
 	UpdateBuyerProfile(id uint, update *models.UpdateUser) error
 	UpdateSellerProfile(id uint, update *models.UpdateUser) error
 	UploadFileToS3(h *session.Session, file multipart.File, fileName string, size int64) (string, error)
+	CreateProduct(product models.Product) error
+	GetCategory(category string) (*models.Category, error)
+	DeleteProduct(productID, sellerID uint) error
 	BuyerUpdatePassword(password, newPassword string) (*models.Buyer, error)
 	SellerUpdatePassword(password, newPassword string) (*models.Seller, error)
 	BuyerResetPassword(email, newPassword string) (*models.Buyer, error)
