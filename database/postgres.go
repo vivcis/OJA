@@ -28,29 +28,103 @@ type PostgresDb struct {
 func (pdb *PostgresDb) Init(host, user, password, dbName, port string) error {
 	fmt.Println("connecting to Database.....")
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Africa/Lagos", host, user, password, dbName, port)
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Africa/Lagos",
+		host, user, password, dbName, port)
 	var err error
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return err
 	}
-
 	if db == nil {
 		return fmt.Errorf("database was not initialized")
 	} else {
 		fmt.Println("Connected to Database")
 	}
 
-	err = db.AutoMigrate(&models.Category{}, &models.Seller{}, &models.Product{}, &models.Image{},
+	pdb.DB = db
+	err = pdb.PrePopulateTables()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
+
+}
+
+func (pdb *PostgresDb) PrePopulateTables() error {
+	err := pdb.DB.AutoMigrate(&models.Category{}, &models.Seller{}, &models.Product{}, &models.Image{},
 		&models.Buyer{}, &models.Cart{}, &models.CartProduct{}, &models.Order{}, &models.Blacklist{})
 	if err != nil {
 		return fmt.Errorf("migration error: %v", err)
 	}
+	categories := []models.Category{{Name: "fashion"}, {Name: "electronics"}, {Name: "health & beauty"}, {Name: "baby products"}, {Name: "phones & tablets"}, {Name: "food drinks"}, {Name: "computing"}, {Name: "sporting goods"}, {Name: "others"}}
+	result := pdb.DB.Find(&models.Category{})
+	if result.RowsAffected < 1 {
+		pdb.DB.Create(&categories)
+	}
 
-	pdb.DB = db
+	user := models.User{
+		Model:           gorm.Model{},
+		FirstName:       "John",
+		LastName:        "Doe",
+		Email:           "jdoe@gmail.com",
+		Username:        "JD Baba",
+		Password:        "12345678",
+		ConfirmPassword: "12345678",
+		PasswordHash:    "$2a$12$T2wSf1qgpTyhLOons3u4JOCqCwKDDL4J3UhGdOTEBL/CmAS/RNCPm",
+		Address:         "aso rock",
+		PhoneNumber:     "09091919292",
+		Image:           "https://i.ibb.co/5jwDfyF/Photo-on-24-11-2021-at-20-45.jpg",
+		IsActive:        true,
+		Token:           "",
+	}
+	buyer := models.Buyer{
+		Model:  gorm.Model{},
+		User:   user,
+		Orders: nil,
+	}
+	result = pdb.DB.Where("buyer = ?", "John").Find(&buyer)
 
+	if result.RowsAffected < 1 {
+		pdb.DB.Create(&buyer)
+	}
+
+	seller := models.Seller{
+		Model:   gorm.Model{},
+		User:    user,
+		Product: nil,
+		Orders:  nil,
+		Rating:  5,
+	}
+	result = pdb.DB.Where("seller = ?", "John").Find(&seller)
+
+	if result.RowsAffected < 1 {
+		pdb.DB.Create(&seller)
+	}
 	return nil
+}
 
+//GET ALL PRODUCTS FROM DB
+func (pdb *PostgresDb) GetAllProducts() []models.Product {
+	var products []models.Product
+	if err := pdb.DB.Find(&products).Error; err != nil {
+		log.Println("Could not find product", err)
+	}
+	return products
+}
+
+//UPDATE PRODUCT BY ID
+func (pdb *PostgresDb) UpdateProductByID(Id uint, prod models.Product) error {
+	products := models.Product{}
+
+	err := pdb.DB.Model(&products).Where("id = ?", Id).Update("title", prod.Title).
+		Update("description", prod.Description).Update("price", prod.Price).
+		Update("rating", prod.Rating).Update("quantity", prod.Quantity).Error
+	if err != nil {
+		fmt.Println("error in updating in postgres db")
+		return err
+	}
+	return nil
 }
 
 // SearchProduct Searches all products from DB
@@ -396,7 +470,6 @@ func (pdb *PostgresDb) GetAllSellerOrderCount(sellerId uint) (int, error) {
 	count := len(sellerOrder)
 
 	return count, nil
-
 }
 
 // GetAllSellers returns all the sellers in the updated database
@@ -409,8 +482,8 @@ func (pdb *PostgresDb) GetAllSellers() ([]models.Seller, error) {
 	return seller, nil
 }
 
-// GetProductByID returns a particular product by its ID
-func (pdb *PostgresDb) GetProductByID(id string) (*models.Product, error) {
+// GetProductByID returns a particular product by it's ID
+func (pdb *PostgresDb) GetProductByID(id uint) (*models.Product, error) {
 	product := &models.Product{}
 	if err := pdb.DB.Where("ID=?", id).First(product).Error; err != nil {
 		return nil, err
@@ -470,10 +543,160 @@ func (pdb *PostgresDb) GetCategory(category string) (*models.Category, error) {
 func (pdb *PostgresDb) DeleteProduct(productID, sellerID uint) error {
 	product := models.Product{}
 
-	err := pdb.DB.Where("id = ?", productID, sellerID).Delete(&product).Error
+	err := pdb.DB.Where("id = ?", productID).Where("seller_id = ?", sellerID).Delete(&product).Error
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (pdb *PostgresDb) AddToCart(product models.Product, buyer *models.Buyer) error {
+	var prod *models.Product
+	var userBuyer *models.Buyer
+	var cart *models.Cart
+
+	err := pdb.DB.Where("id = ?", product.ID).First(&prod).Error
+	if err != nil {
+		return err
+	}
+
+	err = pdb.DB.Where("id = ?", buyer.ID).First(&userBuyer).Error
+	if err != nil {
+		return err
+	}
+
+	err = pdb.DB.Where("buyer_id = ?", buyer.ID).First(&cart).Error
+	if err != nil {
+		return err
+	}
+
+	cartProduct := models.CartProduct{
+		CartID:        cart.ID,
+		ProductID:     product.ID,
+		TotalPrice:    prod.Price * product.Quantity,
+		TotalQuantity: product.Quantity,
+		OrderStatus:   false,
+	}
+
+	cart.Product = append(cart.Product, cartProduct)
+
+	err = pdb.DB.Where("id = ?", cart.ID).Save(&cart).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func (pdb *PostgresDb) GetCartProducts(buyer *models.Buyer) ([]models.CartProduct, error) {
+
+	var cart *models.Cart
+	var addedProducts []models.CartProduct
+
+	err := pdb.DB.Where("buyer_id = ?", buyer.ID).First(&cart).Error
+	if err != nil {
+		return nil, err
+	}
+
+	err = pdb.DB.Where("cart_id = ?", cart.ID).Where("order_status = ?", false).
+		Find(&addedProducts).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return addedProducts, nil
+
+}
+
+func (pdb *PostgresDb) ViewCartProducts(addedProducts []models.CartProduct) ([]models.ProductDetails, error) {
+	var details []models.ProductDetails
+
+	for i := 0; i < len(addedProducts); i++ {
+		var product *models.Product
+		err := pdb.DB.Where("id = ?", addedProducts[i].ProductID).First(&product).Error
+		if err != nil {
+			return nil, err
+		}
+		prodDetail := models.ProductDetails{
+			Name:     product.Title,
+			Price:    addedProducts[i].TotalPrice,
+			Quantity: addedProducts[i].TotalQuantity,
+			Images:   product.Images,
+		}
+
+		details = append(details, prodDetail)
+	}
+
+	return details, nil
+}
+
+func (pdb *PostgresDb) DeletePaidFromCart(cartID uint) error {
+	var cartProducts []models.CartProduct
+	var product []models.Product
+
+	err := pdb.DB.Where("cart_id = ?", cartID).Where("order_status = ?", false).
+		Find(&cartProducts).Error
+	if err != nil {
+		return err
+	}
+	err = pdb.DB.Find(&product).Error
+	if err != nil {
+		return err
+	}
+
+	for i := 0; i < len(cartProducts); i++ {
+		for j := i; j < len(product); j++ {
+			if cartProducts[i].ProductID == product[j].ID {
+				var cart models.Cart
+				err := pdb.DB.Where("id = ?", cartProducts[i].CartID).First(&cart).Error
+				if err != nil {
+					return nil
+				}
+				orders := models.Order{
+					SellerId:  product[j].SellerId,
+					BuyerId:   cart.BuyerID,
+					ProductId: product[j].ID,
+				}
+
+				newQuantity := product[j].Quantity - cartProducts[i].TotalQuantity
+				err = pdb.DB.Model(&models.Product{}).Where("id=?", product[j].ID).
+					Update("quantity", newQuantity).Error
+				if err != nil {
+					return err
+				}
+
+				err = pdb.DB.Model(&models.CartProduct{}).Where("id = ?", cartProducts[i].ID).
+					Update("order_status", true).Error
+				if err != nil {
+					return err
+				}
+
+				err = pdb.DB.Create(&orders).Error
+				if err != nil {
+					return err
+				}
+
+				err = pdb.DB.Where("id = ?", cartProducts[i].ID).Delete(&models.CartProduct{}).Error
+				if err != nil {
+					return err
+				}
+
+				break
+			}
+		}
+	}
+	return nil
+}
+
+func (pdb *PostgresDb) GetSellersProducts(sellerID uint) ([]models.Product, error) {
+	var products []models.Product
+
+	err := pdb.DB.Where("seller_id = ?", sellerID).Find(&products).Error
+	if err != nil {
+		log.Println("Error from GetSellersProduct in DB")
+		return nil, err
+	}
+	return products, nil
 }

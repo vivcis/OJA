@@ -62,7 +62,7 @@ func TestGetProductById(t *testing.T) {
 		t.Fail()
 	}
 	t.Run("Testing For Error", func(t *testing.T) {
-		id := "1"
+		id := uint(1)
 		mockDB.EXPECT().GetProductByID(id).Return(nil, errors.New("Error Exist"))
 		rw := httptest.NewRecorder()
 		idVal := strconv.Itoa(int(testGorm.ID))
@@ -73,8 +73,8 @@ func TestGetProductById(t *testing.T) {
 		assert.Contains(t, rw.Body.String(), "Error Exist in ")
 	})
 	t.Run("getting product by ID successful", func(t *testing.T) {
-		id := "1"
-		mockDB.EXPECT().GetProductByID(id).Return(&product, nil)
+		id := 1
+		mockDB.EXPECT().GetProductByID(uint(id)).Return(&product, nil)
 		rw := httptest.NewRecorder()
 		idVal := strconv.Itoa(int(testGorm.ID))
 		req, _ := http.NewRequest(http.MethodGet, "/api/v1/product/"+idVal, strings.NewReader(string(bodyJSON)))
