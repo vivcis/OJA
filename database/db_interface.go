@@ -52,6 +52,7 @@ type DB interface {
 	ViewCartProducts(addedProducts []models.CartProduct) ([]models.ProductDetails, error)
 	DeletePaidFromCart(cartID uint) error
 	GetSellersProducts(sellerID uint) ([]models.Product, error)
+
 }
 
 // Mailer interface to implement mailing service
