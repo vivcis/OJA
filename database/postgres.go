@@ -379,17 +379,25 @@ func (pdb *PostgresDb) UploadFileToS3(h *session.Session, file multipart.File, f
 	return url, err
 }
 
-func (pdb *PostgresDb) UpdateUserImageURL(username, url string) error {
+func (pdb *PostgresDb) UpdateBuyerImageURL(username, url string, buyerID uint) error {
+	buyer := models.Buyer{}
+	buyer.Image = url
 	result :=
-		pdb.DB.Model(models.User{}).
+		pdb.DB.Model(models.Buyer{}).
 			Where("username = ?", username).
-			Updates(
-				models.User{
-					Image: url,
-				},
-			)
+			Updates(buyer)
 	return result.Error
 }
+func (pdb *PostgresDb) UpdateSellerImageURL(username, url string, sellerID uint) error {
+	seller := models.Seller{}
+	seller.Image = url
+	result :=
+		pdb.DB.Model(models.Seller{}).
+			Where("username = ?", username).
+			Updates(seller)
+	return result.Error
+}
+
 func (pdb *PostgresDb) BuyerUpdatePassword(password, newPassword string) (*models.Buyer, error) {
 	buyer := &models.Buyer{}
 	if err := pdb.DB.Model(buyer).Where("password_hash =?", password).Update("password_hash", newPassword).Error; err != nil {
