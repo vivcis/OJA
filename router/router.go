@@ -51,7 +51,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	authorizedRoutesSeller.Use(middleware.AuthorizeSeller(h.DB.FindSellerByEmail, h.DB.TokenInBlacklist))
 	{
 
-		authorizedRoutesSeller.PUT("/updatesellerprofile/", h.UpdateSellerProfileHandler)
+		authorizedRoutesSeller.PUT("/updatesellerprofile", h.UpdateSellerProfileHandler)
 		authorizedRoutesBuyer.GET("/buyerorders/", h.AllBuyerOrders)
 		authorizedRoutesSeller.GET("/sellerorders/", h.AllSellerOrders)
 		authorizedRoutesSeller.GET("/seller/totalorder/", h.SellerTotalOrders)
