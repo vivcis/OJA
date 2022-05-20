@@ -20,16 +20,21 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter := router.Group("/api/v1")
 
 	apirouter.GET("/ping", handlers.PingHandler)
-	apirouter.GET("/seller/:id", h.HandleGetSellerShopByProfileAndProduct())
 	apirouter.GET("/searchproducts", h.SearchProductHandler)
+	apirouter.GET("/products", h.GetAllProducts)
 	apirouter.GET("/sellers", h.GetSellers)
 	apirouter.GET("/product/:id", h.GetProductById)
-	apirouter.PUT("/buyer/resetpassword/:email", h.BuyerResetPassword)
-	apirouter.PUT("/seller/resetpassword/:email", h.SellerResetPassword)
-	apirouter.POST("/buyersignup", h.BuyerSignUpHandler)
-	apirouter.POST("/sellersignup", h.SellerSignUpHandler)
 	apirouter.POST("/loginbuyer", h.LoginBuyerHandler)
 	apirouter.POST("/loginseller", h.LoginSellerHandler)
+	apirouter.POST("/buyersignup", h.BuyerSignUpHandler)
+	apirouter.POST("/sellersignup", h.SellerSignUpHandler)
+	apirouter.GET("/callback", h.Callback)
+
+	apirouter.GET("/seller/totalorder/:id", h.SellerTotalOrders)
+	apirouter.POST("buyer/forgotpassword", h.BuyerForgotPasswordEMailHandler)
+	apirouter.POST("seller/forgotpassword", h.SellerForgotPasswordEMailHandler)
+	apirouter.PUT("/sellerresetpassword/", h.SellerForgotPasswordResetHandler)
+	apirouter.PUT("/buyerresetpassword/", h.BuyerForgotPasswordResetHandler)
 
 	//All authorized routes here
 	authorizedRoutesBuyer := apirouter.Group("/")
@@ -37,17 +42,31 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	{
 		authorizedRoutesBuyer.PUT("/updatebuyerprofile", h.UpdateBuyerProfileHandler)
 		authorizedRoutesBuyer.GET("/getbuyerprofile", h.GetBuyerProfileHandler)
-		
+		authorizedRoutesBuyer.POST("/addtocart", h.AddToCart)
+		authorizedRoutesBuyer.GET("/viewcart", h.ViewCartProducts)
+		authorizedRoutesBuyer.POST("/pay", h.Pay)
+		authorizedRoutesBuyer.PUT("/buyer/updatepassword", h.BuyerUpdatePassword)
 	}
-
 	authorizedRoutesSeller := apirouter.Group("/")
 	authorizedRoutesSeller.Use(middleware.AuthorizeSeller(h.DB.FindSellerByEmail, h.DB.TokenInBlacklist))
 	{
+
 		authorizedRoutesSeller.PUT("/updatesellerprofile", h.UpdateSellerProfileHandler)
+		authorizedRoutesBuyer.GET("/buyerorders/", h.AllBuyerOrders)
+		authorizedRoutesSeller.GET("/sellerorders/", h.AllSellerOrders)
+		authorizedRoutesSeller.GET("/seller/totalorder/", h.SellerTotalOrders)
 		authorizedRoutesSeller.GET("/getsellerprofile", h.GetSellerProfileHandler)
-		
+		authorizedRoutesSeller.GET("/seller/total/product/sold", h.GetTotalSoldProductCount)
+		authorizedRoutesSeller.DELETE("/deleteproduct/:id", h.DeleteSellerProduct)
+		authorizedRoutesSeller.POST("/createproduct/:id", h.CreateProducts)
+		authorizedRoutesSeller.PUT("/seller/updatepassword", h.SellerUpdatePassword)
+		authorizedRoutesSeller.GET("/seller/shop", h.HandleGetSellerShopByProfileAndProduct())
+		authorizedRoutesSeller.GET("/seller/total/product/count", h.GetTotalProductCountForSeller)
+		authorizedRoutesSeller.GET("/seller/product", h.SellerIndividualProduct)
+		authorizedRoutesSeller.PUT("/update/product/:id", h.UpdateProduct)
+		authorizedRoutesSeller.GET("/seller/allproducts", h.SellerAllProducts)
 	}
-	
+
 	port := ":" + os.Getenv("PORT")
 	if port == ":" {
 		port = ":8081"
