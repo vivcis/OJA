@@ -65,7 +65,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 		authorizedRoutesSeller.GET("/seller/product", h.SellerIndividualProduct)
 		authorizedRoutesSeller.PUT("/update/product/:id", h.UpdateProduct)
 		authorizedRoutesSeller.GET("/seller/allproducts", h.SellerAllProducts)
-		authorizedRoutesSeller.PUT("/seller/remaining/product/count", h.GetRemainingProductsCountSellerAndUpdateBD)
+		authorizedRoutesSeller.GET("/seller/remaining/product/count", h.GetRemainingProductsCountSellerCount)
 	}
 
 	port := ":" + os.Getenv("PORT")
