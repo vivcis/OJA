@@ -62,9 +62,6 @@ func (h *Handler) UploadBuyerImageHandler(c *gin.Context) {
 			return
 
 		}
-
 	}
 	c.JSON(http.StatusUnauthorized, []string{"unable to retrieve authenticated user"})
 }
-
-

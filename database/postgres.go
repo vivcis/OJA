@@ -397,7 +397,6 @@ func (pdb *PostgresDb) UpdateSellerImageURL(username, url string, sellerID uint)
 			Updates(seller)
 	return result.Error
 }
-
 func (pdb *PostgresDb) BuyerUpdatePassword(password, newPassword string) (*models.Buyer, error) {
 	buyer := &models.Buyer{}
 	if err := pdb.DB.Model(buyer).Where("password_hash =?", password).Update("password_hash", newPassword).Error; err != nil {
