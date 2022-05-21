@@ -94,8 +94,8 @@ func TestUploadSellerProfielPic(t *testing.T) {
 		Orders: nil,
 	}
 
-	mockDB.EXPECT().FindSellerByEmail(seller.Email).Return(&seller, nil).Times(3).AnyTimes()
-	mockDB.EXPECT().TokenInBlacklist(gomock.Any()).Return(false).Times(3).AnyTimes()
+	mockDB.EXPECT().FindSellerByEmail(seller.Email).Return(&seller, nil).AnyTimes()
+	mockDB.EXPECT().TokenInBlacklist(gomock.Any()).Return(false).AnyTimes()
 	mockDB.EXPECT().UploadFileToS3(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil).AnyTimes()
 
 	t.Run("Test Upload profile pic success", func(t *testing.T) {
