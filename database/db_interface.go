@@ -37,22 +37,23 @@ type DB interface {
 	BuyerResetPassword(email, newPassword string) (*models.Buyer, error)
 	SellerResetPassword(email, newPassword string) (*models.Seller, error)
 	CreateBuyerCart(cart *models.Cart) (*models.Cart, error)
-	FindIndividualSellerShop(sellerID string) (*models.Seller, error)
+	FindIndividualSellerShop(sellerID uint) (*models.Seller, error)
 	GetAllProducts() []models.Product
 	UpdateProductByID(Id uint, prod models.Product) error
 	GetAllSellers() ([]models.Seller, error)
 	GetProductByID(id uint) (*models.Product, error)
-	FindSellerProduct(sellerID string) ([]models.Product, error)
+	FindSellerProduct(sellerID uint) ([]models.Product, error)
 	GetAllBuyerOrder(buyerId uint) ([]models.Order, error)
 	GetAllSellerOrder(sellerId uint) ([]models.Order, error)
 	GetAllSellerOrderCount(sellerId uint) (int, error)
-	FindPaidProduct(sellerID string) ([]models.CartProduct, error)
+	FindPaidProduct(sellerID uint) ([]models.CartProduct, error)
 	AddToCart(product models.Product, buyer *models.Buyer) error
 	GetCartProducts(buyer *models.Buyer) ([]models.CartProduct, error)
 	ViewCartProducts(addedProducts []models.CartProduct) ([]models.ProductDetails, error)
 	DeletePaidFromCart(cartID uint) error
 	GetSellersProducts(sellerID uint) ([]models.Product, error)
-
+	FindSellerIndividualProduct(sellerID uint) (*models.Product, error)
+	FindCartProductSeller(sellerID, productID uint) (*models.CartProduct, error)
 }
 
 // Mailer interface to implement mailing service
