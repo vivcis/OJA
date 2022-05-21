@@ -17,7 +17,7 @@ func (h *Handler) GetTotalProductCountForSeller(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, []string{"internal server error"})
 		return
 	}
-	sellerID := strconv.Itoa(int(seller.ID))
+	sellerID := seller.ID
 
 	//find seller with the retrieved ID and return the seller and its preloaded product
 	Seller, err := h.DB.FindIndividualSellerShop(sellerID)
@@ -93,12 +93,12 @@ func (h *Handler) SellerIndividualProduct(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, []string{"internal server error"})
 		return
 	}
-	sellerID := strconv.Itoa(int(seller.ID))
+	sellerID := seller.ID
 
 	product, err := h.DB.FindSellerProduct(sellerID)
 	if err != nil {
 		log.Println("Error finding information in database:", err)
-		c.IndentedJSON(http.StatusBadRequest, gin.H{
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{
 			"Message": "Error Exist Count not find individual seller product",
 			"error":   err.Error(),
 		})
