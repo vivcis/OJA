@@ -18,7 +18,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -49,7 +48,7 @@ func TestGetTotalProductCountForSeller(t *testing.T) {
 	////Declaring FAKE testing variables
 	Id := uint(gofakeit.Number(1, 10))
 	categoryID := uint(gofakeit.Number(1, 9))
-	sellerID := uint(gofakeit.Number(1, 10))
+	sellerID := uint(0)
 	sellerFirstName := gofakeit.FirstName()
 	sellerLastName := gofakeit.LastName()
 	sellerUserName := gofakeit.Username()
@@ -149,25 +148,23 @@ func TestGetTotalProductCountForSeller(t *testing.T) {
 		t.Fail()
 	}
 
-	convSellerId := strconv.Itoa(0)
-
 	//authentication and authorisation
 	mockDB.EXPECT().TokenInBlacklist(gomock.Any()).Return(false).Times(2)
 	mockDB.EXPECT().FindSellerByEmail(testSeller.Email).Return(&testSeller, nil).Times(2)
 
 	t.Run("Testing for Bad/Wrong Request", func(t *testing.T) {
-		mockDB.EXPECT().FindSellerProduct(convSellerId).Return(nil, errors.New("Error Exist "))
+		mockDB.EXPECT().FindSellerProduct(sellerID).Return(nil, errors.New("Error Exist "))
 		rw := httptest.NewRecorder()
 		req, _ := http.NewRequest(http.MethodGet, "/api/v1/seller/product", strings.NewReader(string(bodyJSON)))
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *acc))
 		route.ServeHTTP(rw, req)
 		fmt.Println(rw.Body.String())
-		assert.Equal(t, http.StatusBadRequest, rw.Code)
+		assert.Equal(t, http.StatusInternalServerError, rw.Code)
 		assert.Contains(t, rw.Body.String(), "Error Exist")
 	})
 
 	t.Run("Testing for Successful Request", func(t *testing.T) {
-		mockDB.EXPECT().FindSellerProduct(convSellerId).Return(testProducts, nil)
+		mockDB.EXPECT().FindSellerProduct(sellerID).Return(testProducts, nil)
 		rw := httptest.NewRecorder()
 		req, _ := http.NewRequest(http.MethodGet, "/api/v1/seller/product", strings.NewReader(string(bodyJSON)))
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *acc))
