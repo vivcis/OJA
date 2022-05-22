@@ -46,16 +46,15 @@ func (h *Handler) UploadSellerImageHandler(c *gin.Context) {
 			url, err := h.DB.UploadFileToS3(session, file, tempFileName, fileHeader.Size)
 			if err != nil {
 				log.Println(err)
-				c.JSON(http.StatusInternalServerError, []string{"an error occured while uploading the image"})
+				c.JSON(http.StatusInternalServerError, []string{"an error occurred while uploading the image"})
 				return
 			}
-			//url := "img1.jpg"
-			buyerID := user.ID
+			sellerID := user.ID
 			user.Image = url
-			err = h.DB.UpdateSellerImageURL(user.Username, user.Image, buyerID)
+			err = h.DB.UpdateSellerImageURL(user.Username, user.Image, sellerID)
 			if err != nil {
 				log.Println(err)
-				c.JSON(http.StatusInternalServerError, []string{"an error occured while uploading the image"})
+				c.JSON(http.StatusInternalServerError, []string{"an error occurred while uploading the image"})
 				return
 			}
 			c.JSON(http.StatusOK, gin.H{
