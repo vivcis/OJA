@@ -56,6 +56,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 		authorizedRoutesBuyer.GET("/viewcart", h.ViewCartProducts)
 		authorizedRoutesBuyer.POST("/pay", h.Pay)
 		authorizedRoutesBuyer.PUT("/buyer/updatepassword", h.BuyerUpdatePassword)
+		authorizedRoutesBuyer.PUT("/uploadbuyerpic", h.UploadBuyerImageHandler)
 	}
 	authorizedRoutesSeller := apirouter.Group("/")
 	authorizedRoutesSeller.Use(middleware.AuthorizeSeller(h.DB.FindSellerByEmail, h.DB.TokenInBlacklist))
@@ -76,6 +77,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 		authorizedRoutesSeller.PUT("/update/product/:id", h.UpdateProduct)
 		authorizedRoutesSeller.GET("/seller/allproducts", h.SellerAllProducts)
 		authorizedRoutesSeller.GET("/seller/remaining/product/count", h.GetRemainingProductsCountSellerCount)
+		authorizedRoutesBuyer.PUT("/uploadsellerpic", h.UploadSellerImageHandler)
 	}
 
 	port := ":" + os.Getenv("PORT")
