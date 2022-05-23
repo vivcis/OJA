@@ -20,17 +20,12 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
-		AllowMethods:     []string{"POST", "GET", "PUT", "PATCH"},
+		AllowMethods:     []string{"POST", "GET", "PUT", "PATCH", "DELETE"},
 		AllowHeaders:     []string{"*"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
-		// AllowOriginFunc: func(origin string) bool {
-		// 	return origin == "https://github.com"
-		// },
-		MaxAge: 12 * time.Hour,
+		MaxAge:           12 * time.Hour,
 	}))
-
-	//router.Use(cors.Default())
 
 	apirouter := router.Group("/api/v1")
 
