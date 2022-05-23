@@ -31,17 +31,16 @@ func (h *Handler) GetTotalSoldProductCount(c *gin.Context) {
 	}
 
 	//FIND THE ORDERS AND CALL THE FUNCTION HERE
-	var soldProductCount int
+	var soldProductCount uint
 
 	for i := 0; i < len(cartProduct); i++ {
-		if cartProduct[i].OrderStatus {
-			soldProductCount++
-		}
+		soldProductCount += cartProduct[i].TotalQuantity
 	}
 
 	if soldProductCount == 0 {
 		c.IndentedJSON(http.StatusOK, gin.H{
-			"Message": "No Product has been Purchased",
+			"Message":      "No Product has been Purchased",
+			"Product_sold": soldProductCount,
 		})
 		return
 	}

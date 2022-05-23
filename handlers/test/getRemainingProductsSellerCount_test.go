@@ -185,7 +185,7 @@ func TestGetRemainingProductCountSeller(t *testing.T) {
 		mockDB.EXPECT().FindCartProductSeller(sellerID, Id).Return(nil,
 			fmt.Errorf("an error occurred"))
 		rw := httptest.NewRecorder()
-		req, _ := http.NewRequest(http.MethodPut, "/api/v1/seller/remaining/product/count",
+		req, _ := http.NewRequest(http.MethodGet, "/api/v1/seller/remaining/product/count",
 			strings.NewReader(string(bodyJSON)))
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *acc))
 		route.ServeHTTP(rw, req)
@@ -200,7 +200,7 @@ func TestGetRemainingProductCountSeller(t *testing.T) {
 		mockDB.EXPECT().FindCartProductSeller(sellerID, Id).Return(&testCartProductTwo, nil)
 		//mockDB.EXPECT().UpdateSellerProductQuantity(sellerID, productID, remainingQuantity).Return(&indProduct, nil)
 		rw := httptest.NewRecorder()
-		req, _ := http.NewRequest(http.MethodPut, "/api/v1/seller/remaining/product/count",
+		req, _ := http.NewRequest(http.MethodGet, "/api/v1/seller/remaining/product/count",
 			strings.NewReader(string(bodyJSON)))
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *acc))
 		route.ServeHTTP(rw, req)
