@@ -524,7 +524,9 @@ func (pdb *PostgresDb) FindPaidProduct(sellerID uint) ([]models.CartProduct, err
 
 	cartProduct := []models.CartProduct{}
 
-	if err := pdb.DB.Where("order_status = ?", true).Where("seller_id = ?", sellerID).Find(&cartProduct).Error; err != nil {
+	if err := pdb.DB.Where("order_status = ?", true).
+		Where("seller_id = ?", sellerID).
+		Find(&cartProduct).Error; err != nil {
 		log.Println("Error finding products paid", err)
 		return nil, err
 	}

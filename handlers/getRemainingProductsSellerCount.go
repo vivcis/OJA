@@ -1,13 +1,12 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 )
 
-func (h *Handler) GetRemainingProductsCountSellerAndUpdateBD(c *gin.Context) {
+func (h *Handler) GetRemainingProductsCountSellerCount(c *gin.Context) {
 	//authorize and authenticate seller
 	seller, err := h.GetUserFromContext(c)
 
@@ -30,7 +29,6 @@ func (h *Handler) GetRemainingProductsCountSellerAndUpdateBD(c *gin.Context) {
 
 	//get seller slice of products
 	sellerProducts := seller.Product
-	fmt.Println("Seller Product =>", sellerProducts)
 
 	//number of products in slice of products
 	productLength := len(sellerProducts)
@@ -67,8 +65,6 @@ func (h *Handler) GetRemainingProductsCountSellerAndUpdateBD(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("CART PRODUCT===>", cartProduct)
-
 	for i := 0; i < productLength; i++ {
 		if cartProduct.OrderStatus {
 			if cartProduct.TotalQuantity > 0 {
@@ -77,9 +73,7 @@ func (h *Handler) GetRemainingProductsCountSellerAndUpdateBD(c *gin.Context) {
 			}
 		}
 	}
-	fmt.Println("CART ORDER STATUS", cartProduct.OrderStatus)
-	fmt.Println("CART Total Quantity buyer wants to purchase", cartProduct.TotalQuantity)
-	fmt.Println("Sold Product Count", soldProductCount)
+
 	//get the remaining product count
 	finalRmProductCount := uint(remainingProductCount)
 
@@ -96,6 +90,5 @@ func (h *Handler) GetRemainingProductsCountSellerAndUpdateBD(c *gin.Context) {
 		"Total_Sold":      soldProductCount,
 		"Total_Remaining": finalRmProductCount,
 		"new_quantity":    newQuantityLeft,
-		//"slice":           products,
 	})
 }

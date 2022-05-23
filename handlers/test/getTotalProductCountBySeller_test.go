@@ -2,6 +2,7 @@ package test
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/brianvoe/gofakeit/v6"
 	mock_database "github.com/decadevs/shoparena/database/mocks"
@@ -11,7 +12,6 @@ import (
 	"github.com/decadevs/shoparena/services"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/golang/mock/gomock"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 	"math/rand"
@@ -153,25 +153,25 @@ func TestGetTotalProductCountForSeller(t *testing.T) {
 	mockDB.EXPECT().FindSellerByEmail(testSeller.Email).Return(&testSeller, nil).Times(2)
 
 	t.Run("Testing for Bad/Wrong Request", func(t *testing.T) {
-		mockDB.EXPECT().FindSellerProduct(sellerID).Return(nil, errors.New("Error Exist "))
+		mockDB.EXPECT().FindIndividualSellerShop(sellerID).Return(nil, errors.New("Error Exist"))
 		rw := httptest.NewRecorder()
-		req, _ := http.NewRequest(http.MethodGet, "/api/v1/seller/product", strings.NewReader(string(bodyJSON)))
+		req, _ := http.NewRequest(http.MethodGet, "/api/v1/seller/total/product/count", strings.NewReader(string(bodyJSON)))
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *acc))
 		route.ServeHTTP(rw, req)
 		fmt.Println(rw.Body.String())
-		assert.Equal(t, http.StatusInternalServerError, rw.Code)
+		assert.Equal(t, http.StatusBadRequest, rw.Code)
 		assert.Contains(t, rw.Body.String(), "Error Exist")
 	})
 
 	t.Run("Testing for Successful Request", func(t *testing.T) {
-		mockDB.EXPECT().FindSellerProduct(sellerID).Return(testProducts, nil)
+		mockDB.EXPECT().FindIndividualSellerShop(sellerID).Return(&testSeller, nil)
 		rw := httptest.NewRecorder()
-		req, _ := http.NewRequest(http.MethodGet, "/api/v1/seller/product", strings.NewReader(string(bodyJSON)))
+		req, _ := http.NewRequest(http.MethodGet, "/api/v1/seller/total/product/count", strings.NewReader(string(bodyJSON)))
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *acc))
 		route.ServeHTTP(rw, req)
 		fmt.Println(rw.Body.String())
 		assert.Equal(t, http.StatusOK, rw.Code)
-		assert.Contains(t, rw.Body.String(), "Seller Has Product In Shop")
+		assert.Contains(t, rw.Body.String(), fmt.Sprintf("%d", len(testSeller.Product)))
 	})
 
 }
