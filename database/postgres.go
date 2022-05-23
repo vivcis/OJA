@@ -382,15 +382,22 @@ func (pdb *PostgresDb) UploadFileToS3(h *session.Session, file multipart.File, f
 	return url, err
 }
 
-func (pdb *PostgresDb) UpdateUserImageURL(username, url string) error {
+func (pdb *PostgresDb) UpdateBuyerImageURL(username, url string, buyerID uint) error {
+	buyer := models.Buyer{}
+	buyer.Image = url
 	result :=
-		pdb.DB.Model(models.User{}).
+		pdb.DB.Model(models.Buyer{}).
 			Where("username = ?", username).
-			Updates(
-				models.User{
-					Image: url,
-				},
-			)
+			Updates(buyer)
+	return result.Error
+}
+func (pdb *PostgresDb) UpdateSellerImageURL(username, url string, sellerID uint) error {
+	seller := models.Seller{}
+	seller.Image = url
+	result :=
+		pdb.DB.Model(models.Seller{}).
+			Where("username = ?", username).
+			Updates(seller)
 	return result.Error
 }
 func (pdb *PostgresDb) BuyerUpdatePassword(password, newPassword string) (*models.Buyer, error) {
@@ -423,7 +430,7 @@ func (pdb *PostgresDb) SellerResetPassword(email, newPassword string) (*models.S
 }
 
 //FindIndividualSellerShop return the individual seller and its respective shop gotten by its unique ID
-func (pdb *PostgresDb) FindIndividualSellerShop(sellerID string) (*models.Seller, error) {
+func (pdb *PostgresDb) FindIndividualSellerShop(sellerID uint) (*models.Seller, error) {
 	//create instance of a seller and its respective product, and unmarshal data into them
 	seller := &models.Seller{}
 
@@ -503,7 +510,7 @@ func (pdb *PostgresDb) GetProductByID(id uint) (*models.Product, error) {
 }
 
 //GET INDIVIDUAL SELLER PRODUCT
-func (pdb *PostgresDb) FindSellerProduct(sellerID string) ([]models.Product, error) {
+func (pdb *PostgresDb) FindSellerProduct(sellerID uint) ([]models.Product, error) {
 
 	product := []models.Product{}
 
@@ -516,7 +523,7 @@ func (pdb *PostgresDb) FindSellerProduct(sellerID string) ([]models.Product, err
 }
 
 //GET PAID PRODUCTS FROM DATABASE
-func (pdb *PostgresDb) FindPaidProduct(sellerID string) ([]models.CartProduct, error) {
+func (pdb *PostgresDb) FindPaidProduct(sellerID uint) ([]models.CartProduct, error) {
 
 	cartProduct := []models.CartProduct{}
 
@@ -709,4 +716,30 @@ func (pdb *PostgresDb) GetSellersProducts(sellerID uint) ([]models.Product, erro
 		return nil, err
 	}
 	return products, nil
+}
+
+//GET INDIVIDUAL SELLER PRODUCT
+func (pdb *PostgresDb) FindSellerIndividualProduct(sellerID uint) (*models.Product, error) {
+
+	product := &models.Product{}
+
+	if err := pdb.DB.Preload("Category").Where("seller_id = ?", sellerID).Find(&product).Error; err != nil {
+		log.Println("Error finding seller product", err)
+		return nil, err
+	}
+	return product, nil
+
+}
+
+func (pdb *PostgresDb) FindCartProductSeller(sellerID, productID uint) (*models.CartProduct, error) {
+
+	//initiating an instance of a cart product
+	cartProduct := &models.CartProduct{}
+
+	if err := pdb.DB.Where("seller_id = ?", sellerID).Where("product_id = ?", productID).Find(cartProduct).Error; err != nil {
+		log.Println("Error In find Cart", err)
+		return nil, err
+	}
+
+	return cartProduct, nil
 }
