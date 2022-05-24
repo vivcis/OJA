@@ -9,8 +9,9 @@ import (
 )
 
 type Handler struct {
-	DB   database.DB
-	Mail database.Mailer
+	DB       database.DB
+	Mail     database.Mailer
+	Paystack database.Paystack
 }
 
 func PingHandler(c *gin.Context) {
