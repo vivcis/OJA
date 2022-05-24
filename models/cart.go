@@ -17,3 +17,10 @@ type CartProduct struct {
 	OrderStatus   bool `json:"order_status"`
 	SellerId      uint `json:"seller_id"`
 }
+
+type ProductDetails struct {
+	Name     string
+	Price    uint
+	Quantity uint
+	Images   []Image
+}
