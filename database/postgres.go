@@ -27,7 +27,6 @@ type PostgresDb struct {
 // Init sets up the mongodb instance
 func (pdb *PostgresDb) Init(host, user, password, dbName, port string) error {
 	fmt.Println("connecting to Database.....")
-
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Africa/Lagos",
 		host, user, password, dbName, port)
 	var err error
@@ -36,6 +35,7 @@ func (pdb *PostgresDb) Init(host, user, password, dbName, port string) error {
 	}
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 	if db == nil {
@@ -104,6 +104,72 @@ func (pdb *PostgresDb) PrePopulateTables() error {
 	if result.RowsAffected < 1 {
 		pdb.DB.Create(&seller)
 	}
+	Product := models.Product{
+		Model:       gorm.Model{},
+		SellerId:    1,
+		CategoryId:  1,
+		Category:    models.Category{},
+		Title:       "shoes",
+		Description: "loafers",
+		Price:       5000,
+		Images:      nil,
+		Rating:      4,
+		Quantity:    3,
+	}
+	result = pdb.DB.Where("product = ?", "shoes").Find(&Product)
+	if result.RowsAffected < 1 {
+		pdb.DB.Create(&Product)
+	}
+	Product1 := models.Product{
+		Model:       gorm.Model{},
+		SellerId:    1,
+		CategoryId:  1,
+		Category:    models.Category{},
+		Title:       "shoes",
+		Description: "Trainers",
+		Price:       5000,
+		Images:      nil,
+		Rating:      4,
+		Quantity:    3,
+	}
+	result = pdb.DB.Where("product = ?", "Trainers").Find(&Product)
+	if result.RowsAffected < 1 {
+		pdb.DB.Create(&Product1)
+	}
+	Product2 := models.Product{
+		Model:       gorm.Model{},
+		SellerId:    1,
+		CategoryId:  1,
+		Category:    models.Category{},
+		Title:       "clothes",
+		Description: "summer",
+		Price:       5000,
+		Images:      nil,
+		Rating:      4,
+		Quantity:    3,
+	}
+	result = pdb.DB.Where("product = ?", "clothes").Find(&Product)
+	if result.RowsAffected < 1 {
+		pdb.DB.Create(&Product2)
+	}
+	Product3 := models.Product{
+		Model:       gorm.Model{},
+		SellerId:    1,
+		CategoryId:  1,
+		Category:    models.Category{},
+		Title:       "sandals",
+		Description: "footwear",
+		Price:       5000,
+		Images:      nil,
+		Rating:      4,
+		Quantity:    3,
+	}
+	result = pdb.DB.Where("product = ?", "sandals").Find(&Product)
+
+	if result.RowsAffected < 1 {
+		pdb.DB.Create(&Product3)
+	}
+
 	return nil
 }
 
