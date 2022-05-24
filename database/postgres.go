@@ -27,12 +27,12 @@ type PostgresDb struct {
 // Init sets up the mongodb instance
 func (pdb *PostgresDb) Init(host, user, password, dbName, port string) error {
 	fmt.Println("connecting to Database.....")
-
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Africa/Lagos",
 		host, user, password, dbName, port)
 	var err error
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 	if db == nil {
