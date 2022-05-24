@@ -43,7 +43,6 @@ type DB interface {
 	GetAllSellerOrderCount(sellerId uint) (int, error)
 	FindPaidProduct(sellerID string) ([]models.CartProduct, error)
 	GetSellersProducts(sellerID uint) ([]models.Product, error)
-
 }
 
 // Mailer interface to implement mailing service
@@ -77,11 +76,11 @@ func InitDBParams() DBParams {
 		log.Fatal("Error loading .env file")
 	}
 
-	host := os.Getenv("PDB_HOST")
+	host := os.Getenv("DB_HOST")
 	user := os.Getenv("DB_USER")
 	password := os.Getenv("DB_PASSWORD")
 	dbName := os.Getenv("DB_NAME")
-	port := os.Getenv("PDB_PORT")
+	port := os.Getenv("DB_PORT")
 
 	return DBParams{
 		Host:     host,
