@@ -796,6 +796,22 @@ func (pdb *PostgresDb) FindSellerIndividualProduct(sellerID uint) (*models.Produ
 
 }
 
+func (pdb *PostgresDb) AddTokenToBlacklist(email string, token string) error {
+	blacklisted := models.Blacklist{}
+	blacklisted.Token = token
+	blacklisted.Email = email
+	blacklisted.CreatedAt = time.Now()
+
+	err := pdb.DB.Create(&blacklisted).Error
+	if err != nil {
+		log.Println("error in ad token to blacklist")
+		return err
+	}
+	log.Println("token added to blacklist")
+	return nil
+
+}
+
 func (pdb *PostgresDb) FindCartProductSeller(sellerID, productID uint) (*models.CartProduct, error) {
 
 	//initiating an instance of a cart product
