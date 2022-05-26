@@ -70,7 +70,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 		authorizedRoutesSeller.GET("/getsellerprofile", h.GetSellerProfileHandler)
 		authorizedRoutesSeller.GET("/seller/total/product/sold", h.GetTotalSoldProductCount)
 		authorizedRoutesSeller.DELETE("/deleteproduct/:id", h.DeleteSellerProduct)
-		authorizedRoutesSeller.POST("/createproduct/:id", h.CreateProducts)
+		authorizedRoutesSeller.POST("/createproduct", h.CreateProducts)
 		authorizedRoutesSeller.PUT("/seller/updatepassword", h.SellerUpdatePassword)
 		authorizedRoutesSeller.GET("/seller/shop", h.HandleGetSellerShopByProfileAndProduct())
 		authorizedRoutesSeller.GET("/seller/total/product/count", h.GetTotalProductCountForSeller)
