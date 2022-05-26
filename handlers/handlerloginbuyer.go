@@ -50,14 +50,12 @@ func (h *Handler) LoginBuyerHandler(c *gin.Context) {
 	}
 	buyer, sqlErr := h.DB.FindBuyerByEmail(buyerLoginRequest.Email)
 
-
 	if sqlErr != nil {
 		fmt.Println(sqlErr)
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
 	}
 	fmt.Println(hashpass)
 
-	
 	if err := bcrypt.CompareHashAndPassword([]byte(buyer.PasswordHash), []byte(buyerLoginRequest.Password)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "invalid Password"})
 		return
@@ -80,7 +78,8 @@ func (h *Handler) LoginBuyerHandler(c *gin.Context) {
 		response.JSON(c, "", http.StatusInternalServerError, nil, []string{"internal server error"})
 		return
 	}
-
+	c.Header("refresh_token", *refreshToken)
+	c.Header("access_token", *accToken)
 	response.JSON(c, "login successful", http.StatusOK, gin.H{
 		"user":          buyer,
 		"access_token":  *accToken,

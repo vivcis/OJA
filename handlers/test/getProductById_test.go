@@ -45,23 +45,24 @@ func TestGetProductById(t *testing.T) {
 
 	//an instance of product
 	product := models.Product{
-		testGorm,
-		2,
-		4,
-		category,
-		"RubberGloves",
-		"Blue, latex,",
-		600,
-		sliceImages,
-		6,
-		1000,
+		Model:       testGorm,
+		SellerId:    2,
+		CategoryId:  4,
+		Category:    category,
+		Title:       "RubberGloves",
+		Description: "Blue, latex",
+		Price:       600,
+		Images:      sliceImages,
+		Rating:      6,
+		Quantity:    1000,
+
 	}
 	bodyJSON, err := json.Marshal(product)
 	if err != nil {
 		t.Fail()
 	}
 	t.Run("Testing For Error", func(t *testing.T) {
-		id := "1"
+		id := uint(1)
 		mockDB.EXPECT().GetProductByID(id).Return(nil, errors.New("Error Exist"))
 		rw := httptest.NewRecorder()
 		idVal := strconv.Itoa(int(testGorm.ID))
@@ -72,8 +73,8 @@ func TestGetProductById(t *testing.T) {
 		assert.Contains(t, rw.Body.String(), "Error Exist in ")
 	})
 	t.Run("getting product by ID successful", func(t *testing.T) {
-		id := "1"
-		mockDB.EXPECT().GetProductByID(id).Return(&product, nil)
+		id := 1
+		mockDB.EXPECT().GetProductByID(uint(id)).Return(&product, nil)
 		rw := httptest.NewRecorder()
 		idVal := strconv.Itoa(int(testGorm.ID))
 		req, _ := http.NewRequest(http.MethodGet, "/api/v1/product/"+idVal, strings.NewReader(string(bodyJSON)))

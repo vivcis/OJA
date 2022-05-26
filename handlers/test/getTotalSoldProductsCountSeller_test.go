@@ -18,7 +18,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -177,32 +176,32 @@ func TestGetTotalSoldProductCountSeller(t *testing.T) {
 		t.Fail()
 	}
 
-	convSellerId := strconv.Itoa(0)
-	
+	//convSellerId := 0
+
 	//authentication and authorisation
 	mockDB.EXPECT().TokenInBlacklist(gomock.Any()).Return(false).Times(2)
 	mockDB.EXPECT().FindSellerByEmail(testSeller.Email).Return(&testSeller, nil).Times(2)
 
 	t.Run("Testing for Bad/Wrong Request", func(t *testing.T) {
-		mockDB.EXPECT().FindPaidProduct(convSellerId).Return(nil, errors.New("Error Exist "))
+		mockDB.EXPECT().FindPaidProduct(sellerID).Return(nil, errors.New("Error Exist "))
 		rw := httptest.NewRecorder()
 		req, _ := http.NewRequest(http.MethodGet, "/api/v1/seller/total/product/sold", strings.NewReader(string(bodyJSON)))
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *acc))
 		route.ServeHTTP(rw, req)
 		fmt.Println(rw.Body.String())
-		assert.Equal(t, http.StatusBadRequest, rw.Code)
+		assert.Equal(t, http.StatusInternalServerError, rw.Code)
 		assert.Contains(t, rw.Body.String(), "Error Exist is finding sold product")
 	})
 
 	t.Run("Testing for Successful Request", func(t *testing.T) {
-		mockDB.EXPECT().FindPaidProduct(convSellerId).Return(sliceOfCartProduct, nil)
+		mockDB.EXPECT().FindPaidProduct(sellerID).Return(sliceOfCartProduct, nil)
 		rw := httptest.NewRecorder()
 		req, _ := http.NewRequest(http.MethodGet, "/api/v1/seller/total/product/sold", strings.NewReader(string(bodyJSON)))
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *acc))
 		route.ServeHTTP(rw, req)
 		fmt.Println(rw.Body.String())
 		assert.Equal(t, http.StatusOK, rw.Code)
-		assert.Contains(t, rw.Body.String(), "Total Product Sold")
+		assert.Contains(t, rw.Body.String(), "Product")
 	})
 
 }
