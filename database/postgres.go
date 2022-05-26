@@ -663,7 +663,7 @@ func (pdb *PostgresDb) GetCategory(category string) (*models.Category, error) {
 func (pdb *PostgresDb) DeleteProduct(productID, sellerID uint) error {
 	product := models.Product{}
 
-	err := pdb.DB.Where("id = ?", productID).Where("seller_id = ?", sellerID).Delete(&product).Error
+	err := pdb.DB.Where("id = AND seller_id = ?", sellerID, productID).Delete(&product).Error
 	if err != nil {
 		return err
 	}
