@@ -24,5 +24,5 @@ func (h *Handler) SearchProductHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusFound, product)
+	c.JSON(http.StatusOK, product)
 }

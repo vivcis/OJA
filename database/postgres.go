@@ -101,69 +101,59 @@ func (pdb *PostgresDb) PrePopulateTables() error {
 	if result.RowsAffected < 1 {
 		pdb.DB.Create(&seller)
 	}
-	Product := models.Product{
+	product := models.Product{
 		Model:       gorm.Model{},
 		SellerId:    1,
 		CategoryId:  1,
 		Category:    models.Category{},
 		Title:       "shoes",
 		Description: "loafers",
-		Price:       5000,
+		Price:       30,
 		Images:      nil,
 		Rating:      4,
 		Quantity:    3,
-	}
-	result = pdb.DB.Where("product = ?", "shoes").Find(&Product)
-	if result.RowsAffected < 1 {
-		pdb.DB.Create(&Product)
 	}
 	Product1 := models.Product{
 		Model:       gorm.Model{},
 		SellerId:    1,
-		CategoryId:  1,
+		CategoryId:  2,
 		Category:    models.Category{},
-		Title:       "shoes",
-		Description: "Trainers",
-		Price:       5000,
+		Title:       "toaster",
+		Description: "sony press on toaster",
+		Price:       420,
 		Images:      nil,
 		Rating:      4,
 		Quantity:    3,
 	}
-	result = pdb.DB.Where("product = ?", "Trainers").Find(&Product)
-	if result.RowsAffected < 1 {
-		pdb.DB.Create(&Product1)
-	}
-	Product2 := models.Product{
+	product2 := models.Product{
 		Model:       gorm.Model{},
 		SellerId:    1,
-		CategoryId:  1,
+		CategoryId:  3,
 		Category:    models.Category{},
-		Title:       "clothes",
-		Description: "summer",
-		Price:       5000,
+		Title:       "lip gloss",
+		Description: "fenty beauty shimmer gloss",
+		Price:       76,
 		Images:      nil,
 		Rating:      4,
 		Quantity:    3,
-	}
-	result = pdb.DB.Where("product = ?", "clothes").Find(&Product)
-	if result.RowsAffected < 1 {
-		pdb.DB.Create(&Product2)
 	}
 	Product3 := models.Product{
 		Model:       gorm.Model{},
 		SellerId:    1,
-		CategoryId:  1,
+		CategoryId:  4,
 		Category:    models.Category{},
-		Title:       "sandals",
-		Description: "footwear",
-		Price:       5000,
+		Title:       "pampers",
+		Description: "7 in 1 pamper pack",
+		Price:       100,
 		Images:      nil,
 		Rating:      4,
 		Quantity:    3,
 	}
-	result = pdb.DB.Where("product = ?", "sandals").Find(&Product)
-
+	result = pdb.DB.Where("title = ?", "shoes").Find(&product)
 	if result.RowsAffected < 1 {
+		pdb.DB.Create(&product)
+		pdb.DB.Create(&Product1)
+		pdb.DB.Create(&product2)
 		pdb.DB.Create(&Product3)
 	}
 
