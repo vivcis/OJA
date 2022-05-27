@@ -201,7 +201,7 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name 
 	LPInt, _ := strconv.Atoi(lowerPrice)
 	UPInt, _ := strconv.Atoi(upperPrice)
 
-	if categoryName == "" {
+	if categoryName == "All Categories" {
 		if LPInt == 0 && UPInt == 0 && name == "" {
 			err := pdb.DB.Find(&products).Error
 			if err != nil {
