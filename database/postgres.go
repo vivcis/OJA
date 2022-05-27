@@ -671,6 +671,14 @@ func (pdb *PostgresDb) DeleteProduct(productID, sellerID uint) error {
 	return nil
 }
 
+func (pdb *PostgresDb) DeleteAllSellerProducts(sellerID uint) error {
+	err := pdb.DB.Where("seller_id = ?", sellerID).Delete(&models.Product{}).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (pdb *PostgresDb) AddToCart(product models.Product, buyer *models.Buyer) error {
 	var prod *models.Product
 	var userBuyer *models.Buyer

@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -12,8 +11,6 @@ func (h *Handler) DeleteAllSellerProducts(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, []string{"internal server error"})
 		return
 	}
-
-	fmt.Println(Seller)
 
 	err = h.DB.DeleteAllSellerProducts(Seller.ID)
 	if err != nil {
