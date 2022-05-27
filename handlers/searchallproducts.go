@@ -16,7 +16,8 @@ func (h *Handler) SearchProductHandler(c *gin.Context) {
 	product, err := h.DB.SearchProduct(lowerPrice, upperPrice, categoryName, name)
 	if err != nil {
 		log.Println("handler error in search product", err)
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, "Product Not found")
+		return
 	}
 
 	if len(product) == 0 {
