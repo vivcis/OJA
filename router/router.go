@@ -39,6 +39,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter.POST("/buyersignup", h.BuyerSignUpHandler)
 	apirouter.POST("/sellersignup", h.SellerSignUpHandler)
 	apirouter.GET("/callback", h.Callback)
+
 	apirouter.GET("/seller/totalorder/:id", h.SellerTotalOrders)
 	apirouter.POST("buyer/forgotpassword", h.BuyerForgotPasswordEMailHandler)
 	apirouter.POST("seller/forgotpassword", h.SellerForgotPasswordEMailHandler)
@@ -79,7 +80,6 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 		authorizedRoutesSeller.GET("/seller/remaining/product/count", h.GetRemainingProductsCountSellerCount)
 		authorizedRoutesBuyer.PUT("/uploadsellerpic", h.UploadSellerImageHandler)
 		authorizedRoutesSeller.POST("/seller/logout", h.HandleLogoutSeller)
-		authorizedRoutesSeller.DELETE("/deleteallsellerproducts/", h.DeleteAllSellerProducts)
 	}
 
 	port := ":" + os.Getenv("PORT")

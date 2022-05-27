@@ -27,14 +27,14 @@ type PostgresDb struct {
 // Init sets up the mongodb instance
 func (pdb *PostgresDb) Init(host, user, password, dbName, port string) error {
 	fmt.Println("connecting to Database.....")
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Africa/Lagos",
-		host, user, password, dbName, port)
+
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Africa/Lagos", host, user, password, dbName, port)
 	var err error
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Println(err)
 		return err
 	}
+
 	if db == nil {
 		return fmt.Errorf("database was not initialized")
 	} else {
@@ -158,6 +158,7 @@ func (pdb *PostgresDb) PrePopulateTables() error {
 	}
 
 	return nil
+
 }
 
 //GET ALL PRODUCTS FROM DB
@@ -252,6 +253,7 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name 
 			fmt.Println(err)
 			return nil, err
 		}
+	}
 
 		category := categories.ID
 
@@ -314,7 +316,7 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name 
 				return nil, err
 			}
 		}
-	}
+
 
 	return products, nil
 }
@@ -663,19 +665,11 @@ func (pdb *PostgresDb) GetCategory(category string) (*models.Category, error) {
 func (pdb *PostgresDb) DeleteProduct(productID, sellerID uint) error {
 	product := models.Product{}
 
-	err := pdb.DB.Where("id = AND seller_id = ?", sellerID, productID).Delete(&product).Error
+	err := pdb.DB.Where("id = ?", productID).Where("seller_id = ?", sellerID).Delete(&product).Error
 	if err != nil {
 		return err
 	}
 
-	return nil
-}
-
-func (pdb *PostgresDb) DeleteAllSellerProducts(sellerID uint) error {
-	err := pdb.DB.Where("seller_id = ?", sellerID).Delete(&models.Product{}).Error
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
