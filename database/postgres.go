@@ -198,57 +198,65 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name 
 	categories := models.Category{}
 	var products []models.Product
 
-	LPInt, _ := strconv.Atoi(lowerPrice)
-	UPInt, _ := strconv.Atoi(upperPrice)
+	var LPInt int
+	var UPInt int
+
+	if lowerPrice != "Lower Price Limit" {
+		LPInt, _ = strconv.Atoi(lowerPrice)
+	}
+
+	if upperPrice != "Upper Price Limit" {
+		UPInt, _ = strconv.Atoi(upperPrice)
+	}
 
 	if categoryName == "All Categories" {
-		if LPInt == 0 && UPInt == 0 && name == "" {
+		if lowerPrice == "Lower Price Limit" && upperPrice == "Upper Price Limit" && name == "" {
 			err := pdb.DB.Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
 			return products, nil
-		} else if LPInt == 0 && UPInt != 0 && name == "" {
+		} else if lowerPrice == "Lower Price Limit" && upperPrice != "Upper Price Limit" && name == "" {
 			err := pdb.DB.Where("price <= ?", uint(UPInt)).Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
-		} else if LPInt != 0 && UPInt == 0 && name == "" {
+		} else if lowerPrice != "Lower Price Limit" && upperPrice == "Upper Price Limit" && name == "" {
 			err := pdb.DB.Where("price >= ?", uint(LPInt)).Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
-		} else if LPInt != 0 && UPInt != 0 && name == "" {
+		} else if lowerPrice != "Lower Price Limit" && upperPrice != "Upper Price Limit" && name == "" {
 			err := pdb.DB.Where("price >= ?", uint(LPInt)).
 				Where("price <= ?", uint(UPInt)).Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
-		} else if LPInt == 0 && UPInt == 0 && name != "" {
+		} else if lowerPrice == "Lower Price Limit" && upperPrice == "Upper Price Limit" && name != "" {
 			err := pdb.DB.Where("title LIKE ?", "%"+name+"%").Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
-		} else if LPInt == 0 && name != "" {
+		} else if lowerPrice == "Lower Price Limit" && upperPrice != "Upper Price Limit" && name != "" {
 			err := pdb.DB.Where("price <= ?", uint(UPInt)).
 				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
-		} else if UPInt == 0 && name != "" {
+		} else if lowerPrice != "Lower Price Limit" && upperPrice == "Upper Price Limit" && name != "" {
 			err := pdb.DB.Where("price >= ?", uint(LPInt)).
 				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
-		} else if LPInt != 0 && UPInt != 0 && name != "" {
+		} else if lowerPrice != "Lower Price Limit" && upperPrice != "Upper Price Limit" && name != "" {
 			err := pdb.DB.Where("price >= ?", uint(LPInt)).Where("price <= ?", uint(UPInt)).
 				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
 			if err != nil {
@@ -265,41 +273,41 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name 
 
 		category := categories.ID
 
-		if LPInt == 0 && UPInt == 0 && name == "" {
+		if lowerPrice == "Lower Price Limit" && upperPrice == "Upper Price Limit" && name == "" {
 			err := pdb.DB.Where("category_id = ?", category).Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
-		} else if LPInt == 0 && name == "" {
+		} else if lowerPrice == "Lower Price Limit" && upperPrice != "Upper Price Limit" && name == "" {
 			err := pdb.DB.Where("category_id = ?", category).
 				Where("price <= ?", uint(UPInt)).Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
-		} else if UPInt == 0 && name == "" {
+		} else if lowerPrice != "Lower Price Limit" && upperPrice == "Upper Price Limit" && name == "" {
 			err := pdb.DB.Where("category_id = ?", category).
 				Where("price >= ?", uint(LPInt)).Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
-		} else if LPInt != 0 && UPInt != 0 && name == "" {
+		} else if lowerPrice != "Lower Price Limit" && upperPrice != "Upper Price Limit" && name == "" {
 			err := pdb.DB.Where("category_id = ?", category).Where("price >= ?", uint(LPInt)).
 				Where("price <= ?", uint(UPInt)).Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
-		} else if LPInt == 0 && UPInt == 0 && name != "" {
+		} else if lowerPrice == "Lower Price Limit" && upperPrice == "Upper Price Limit" && name != "" {
 			err := pdb.DB.Where("category_id = ?", category).
 				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
-		} else if LPInt == 0 && name != "" {
+		} else if lowerPrice == "Lower Price Limit" && upperPrice != "Upper Price Limit" && name != "" {
 			err := pdb.DB.Where("category_id = ?", category).
 				Where("price <= ?", uint(UPInt)).
 				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
@@ -307,7 +315,7 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name 
 				fmt.Println(err)
 				return nil, err
 			}
-		} else if UPInt == 0 && name != "" {
+		} else if lowerPrice != "Lower Price Limit" && upperPrice == "Upper Price Limit" && name != "" {
 			err := pdb.DB.Where("category_id = ?", category).
 				Where("price >= ?", uint(LPInt)).
 				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
