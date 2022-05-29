@@ -255,68 +255,67 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name 
 		}
 	}
 
-		category := categories.ID
+	category := categories.ID
 
-		if LPInt == 0 && UPInt == 0 && name == "" {
-			err := pdb.DB.Where("category_id = ?", category).Find(&products).Error
-			if err != nil {
-				fmt.Println(err)
-				return nil, err
-			}
-		} else if LPInt == 0 && name == "" {
-			err := pdb.DB.Where("category_id = ?", category).
-				Where("price <= ?", uint(UPInt)).Find(&products).Error
-			if err != nil {
-				fmt.Println(err)
-				return nil, err
-			}
-		} else if UPInt == 0 && name == "" {
-			err := pdb.DB.Where("category_id = ?", category).
-				Where("price >= ?", uint(LPInt)).Find(&products).Error
-			if err != nil {
-				fmt.Println(err)
-				return nil, err
-			}
-		} else if LPInt != 0 && UPInt != 0 && name == "" {
-			err := pdb.DB.Where("category_id = ?", category).Where("price >= ?", uint(LPInt)).
-				Where("price <= ?", uint(UPInt)).Find(&products).Error
-			if err != nil {
-				fmt.Println(err)
-				return nil, err
-			}
-		} else if LPInt == 0 && UPInt == 0 && name != "" {
-			err := pdb.DB.Where("category_id = ?", category).
-				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
-			if err != nil {
-				fmt.Println(err)
-				return nil, err
-			}
-		} else if LPInt == 0 && name != "" {
-			err := pdb.DB.Where("category_id = ?", category).
-				Where("price <= ?", uint(UPInt)).
-				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
-			if err != nil {
-				fmt.Println(err)
-				return nil, err
-			}
-		} else if UPInt == 0 && name != "" {
-			err := pdb.DB.Where("category_id = ?", category).
-				Where("price >= ?", uint(LPInt)).
-				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
-			if err != nil {
-				fmt.Println(err)
-				return nil, err
-			}
-		} else {
-			err := pdb.DB.Where("category_id = ?", category).Where("price >= ?", uint(LPInt)).
-				Where("price <= ?", uint(UPInt)).
-				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
-			if err != nil {
-				fmt.Println(err)
-				return nil, err
-			}
+	if LPInt == 0 && UPInt == 0 && name == "" {
+		err := pdb.DB.Where("category_id = ?", category).Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
 		}
-
+	} else if LPInt == 0 && name == "" {
+		err := pdb.DB.Where("category_id = ?", category).
+			Where("price <= ?", uint(UPInt)).Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if UPInt == 0 && name == "" {
+		err := pdb.DB.Where("category_id = ?", category).
+			Where("price >= ?", uint(LPInt)).Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if LPInt != 0 && UPInt != 0 && name == "" {
+		err := pdb.DB.Where("category_id = ?", category).Where("price >= ?", uint(LPInt)).
+			Where("price <= ?", uint(UPInt)).Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if LPInt == 0 && UPInt == 0 && name != "" {
+		err := pdb.DB.Where("category_id = ?", category).
+			Where("title LIKE ?", "%"+name+"%").Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if LPInt == 0 && name != "" {
+		err := pdb.DB.Where("category_id = ?", category).
+			Where("price <= ?", uint(UPInt)).
+			Where("title LIKE ?", "%"+name+"%").Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else if UPInt == 0 && name != "" {
+		err := pdb.DB.Where("category_id = ?", category).
+			Where("price >= ?", uint(LPInt)).
+			Where("title LIKE ?", "%"+name+"%").Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	} else {
+		err := pdb.DB.Where("category_id = ?", category).Where("price >= ?", uint(LPInt)).
+			Where("price <= ?", uint(UPInt)).
+			Where("title LIKE ?", "%"+name+"%").Find(&products).Error
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+	}
 
 	return products, nil
 }
@@ -863,4 +862,15 @@ func (pdb *PostgresDb) FindCartProductSeller(sellerID, productID uint) (*models.
 	}
 
 	return cartProduct, nil
+}
+
+func (pdb *PostgresDb) DeleteAllSellerProducts(sellerID uint) error {
+
+	err := pdb.DB.Where("id = ?", sellerID).Delete(&sellerID).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }
