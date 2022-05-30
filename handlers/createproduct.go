@@ -35,6 +35,8 @@ func (h *Handler) CreateProducts(c *gin.Context) {
 
 	formImages := form.File["images"]
 	images := []models.Image{}
+	log.Println(formImages)
+	log.Println(images)
 
 	// upload the images to aws.
 	for _, f := range formImages {
@@ -52,6 +54,7 @@ func (h *Handler) CreateProducts(c *gin.Context) {
 		}
 
 		session, tempFileName, err := services.PreAWS(fileExtension, "product")
+		log.Println("good product")
 		if err != nil {
 			log.Println("could not upload file", err)
 		}
@@ -72,31 +75,40 @@ func (h *Handler) CreateProducts(c *gin.Context) {
 	}
 
 	price, err := strconv.Atoi(c.PostForm("price"))
+	log.Println("good price")
 	if err != nil {
+		log.Println(err)
 		response.JSON(c, "", http.StatusBadRequest, nil, []string{err.Error()})
 		return
 	}
 
 	// err := strconv.Atoi(c.PostForm("no_of_rooms"))
 	rating, err := strconv.Atoi(c.PostForm("rating"))
+	log.Println("good price too")
 	if err != nil {
+		log.Println(err)
 		response.JSON(c, "", http.StatusBadRequest, nil, []string{err.Error()})
 		return
 	}
 
 	quantity, err := strconv.Atoi(c.PostForm("quantity"))
+	log.Println("good price 3")
 	if err != nil {
+		log.Println(err)
+		response.JSON(c, "", http.StatusBadRequest, nil, []string{err.Error()})
+	}
+	CategoryID, err := strconv.Atoi(c.PostForm("category_id"))
+	log.Println("id verified")
+	if err != nil {
+		log.Println(err)
 		response.JSON(c, "", http.StatusBadRequest, nil, []string{err.Error()})
 	}
 
 	products := models.Product{
-		Model: gorm.Model{
-			ID: 1,
-		},
 		Category: models.Category{
 			Name: c.PostForm("name"),
 			Model: gorm.Model{
-				ID: 1,
+				ID: uint(CategoryID),
 			},
 		},
 		Title:       c.PostForm("title"),

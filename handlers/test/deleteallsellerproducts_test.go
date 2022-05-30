@@ -75,7 +75,7 @@ func TestDeleteAllSellerProducts(t *testing.T) {
 	t.Run("testing for error deleting all seller products", func(t *testing.T) {
 		mockDB.EXPECT().DeleteAllSellerProducts(seller.ID).Return(errors.New("error fetching products"))
 		rw := httptest.NewRecorder()
-		req, err := http.NewRequest(http.MethodDelete, "/api/v1/deleteallsellerproducts/"+strconv.Itoa(int(product.ID)),
+		req, err := http.NewRequest(http.MethodDelete, "/api/v1/deleteallsellerproducts/"+strconv.Itoa(int(seller.ID)),
 			strings.NewReader(string(bodyJSON)))
 		if err != nil {
 			fmt.Printf("error occured")
@@ -89,7 +89,7 @@ func TestDeleteAllSellerProducts(t *testing.T) {
 	t.Run("testing for success deleting all seller products", func(t *testing.T) {
 		mockDB.EXPECT().DeleteAllSellerProducts(seller.ID).Return(nil)
 		rw := httptest.NewRecorder()
-		req, err := http.NewRequest(http.MethodDelete, "/api/v1/deleteallsellerproducts/"+strconv.Itoa(int(product.ID)),
+		req, err := http.NewRequest(http.MethodDelete, "/api/v1/deleteallsellerproducts/"+strconv.Itoa(int(seller.ID)),
 			strings.NewReader(string(bodyJSON)))
 		if err != nil {
 			fmt.Printf("error occured")
