@@ -13,3 +13,7 @@ type ForgotPassword struct {
 type ResetPasswordRequest struct {
 	Email string `json:"email"`
 }
+
+type RatingRequest struct {
+	Rating uint `json:"rating"`
+}
