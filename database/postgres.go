@@ -461,6 +461,29 @@ func (pdb *PostgresDb) UpdateSellerProfile(id uint, update *models.UpdateUser) e
 			)
 	return result.Error
 }
+func (pdb *PostgresDb) UpdateSellerRating(id uint, update *models.UpdateUser) error {
+	result :=
+		pdb.DB.Model(models.Seller{}).
+			Where("id = ?", id).
+			Updates(
+				models.Seller{
+					Model: gorm.Model{},
+					User: models.User{
+						FirstName:   update.FirstName,
+						LastName:    update.LastName,
+						PhoneNumber: update.PhoneNumber,
+						Address:     update.Address,
+						Email:       update.Email,
+					},
+					Product:                 nil,
+					Orders:                  nil,
+					Rating:                  0,
+					TotalRatings:            update.Rating,
+					NumberOfRatingsReceived: 0,
+				},
+			)
+	return result.Error
+}
 
 // UploadFileToS3 saves a file to aws bucket and returns the url to the file and an error if there's any
 func (pdb *PostgresDb) UploadFileToS3(h *session.Session, file multipart.File, fileName string, size int64) (string, error) {
