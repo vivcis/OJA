@@ -35,6 +35,9 @@ func (h *Handler) CreateProducts(c *gin.Context) {
 
 	formImages := form.File["images"]
 	images := []models.Image{}
+	//i := c.PostForm("images")
+	//log.Println(i)
+	//return
 	log.Println(formImages)
 	log.Println(images)
 
