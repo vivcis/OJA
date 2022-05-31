@@ -189,57 +189,65 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name 
 	categories := models.Category{}
 	var products []models.Product
 
-	LPInt, _ := strconv.Atoi(lowerPrice)
-	UPInt, _ := strconv.Atoi(upperPrice)
+	var LPInt int
+	var UPInt int
 
-	if categoryName == "" {
-		if LPInt == 0 && UPInt == 0 && name == "" {
+	if lowerPrice != "Lower Price Limit" {
+		LPInt, _ = strconv.Atoi(lowerPrice)
+	}
+
+	if upperPrice != "Upper Price Limit" {
+		UPInt, _ = strconv.Atoi(upperPrice)
+	}
+
+	if categoryName == "All Categories" {
+		if lowerPrice == "Lower Price Limit" && upperPrice == "Upper Price Limit" && name == "" {
 			err := pdb.DB.Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
 			return products, nil
-		} else if LPInt == 0 && UPInt != 0 && name == "" {
+		} else if lowerPrice == "Lower Price Limit" && upperPrice != "Upper Price Limit" && name == "" {
 			err := pdb.DB.Where("price <= ?", uint(UPInt)).Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
-		} else if LPInt != 0 && UPInt == 0 && name == "" {
+		} else if lowerPrice != "Lower Price Limit" && upperPrice == "Upper Price Limit" && name == "" {
 			err := pdb.DB.Where("price >= ?", uint(LPInt)).Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
-		} else if LPInt != 0 && UPInt != 0 && name == "" {
+		} else if lowerPrice != "Lower Price Limit" && upperPrice != "Upper Price Limit" && name == "" {
 			err := pdb.DB.Where("price >= ?", uint(LPInt)).
 				Where("price <= ?", uint(UPInt)).Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
-		} else if LPInt == 0 && UPInt == 0 && name != "" {
+		} else if lowerPrice == "Lower Price Limit" && upperPrice == "Upper Price Limit" && name != "" {
 			err := pdb.DB.Where("title LIKE ?", "%"+name+"%").Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
-		} else if LPInt == 0 && name != "" {
+		} else if lowerPrice == "Lower Price Limit" && upperPrice != "Upper Price Limit" && name != "" {
 			err := pdb.DB.Where("price <= ?", uint(UPInt)).
 				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
-		} else if UPInt == 0 && name != "" {
+		} else if lowerPrice != "Lower Price Limit" && upperPrice == "Upper Price Limit" && name != "" {
 			err := pdb.DB.Where("price >= ?", uint(LPInt)).
 				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
-		} else if LPInt != 0 && UPInt != 0 && name != "" {
+		} else if lowerPrice != "Lower Price Limit" && upperPrice != "Upper Price Limit" && name != "" {
 			err := pdb.DB.Where("price >= ?", uint(LPInt)).Where("price <= ?", uint(UPInt)).
 				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
 			if err != nil {
@@ -256,7 +264,6 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name 
 	}
 
 	category := categories.ID
-
 	if LPInt == 0 && UPInt == 0 && name == "" {
 		err := pdb.DB.Where("category_id = ?", category).Find(&products).Error
 		if err != nil {
@@ -314,6 +321,65 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name 
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
+		}
+		if lowerPrice == "Lower Price Limit" && upperPrice == "Upper Price Limit" && name == "" {
+			err := pdb.DB.Where("category_id = ?", category).Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else if lowerPrice == "Lower Price Limit" && upperPrice != "Upper Price Limit" && name == "" {
+			err := pdb.DB.Where("category_id = ?", category).
+				Where("price <= ?", uint(UPInt)).Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else if lowerPrice != "Lower Price Limit" && upperPrice == "Upper Price Limit" && name == "" {
+			err := pdb.DB.Where("category_id = ?", category).
+				Where("price >= ?", uint(LPInt)).Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else if lowerPrice != "Lower Price Limit" && upperPrice != "Upper Price Limit" && name == "" {
+			err := pdb.DB.Where("category_id = ?", category).Where("price >= ?", uint(LPInt)).
+				Where("price <= ?", uint(UPInt)).Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else if lowerPrice == "Lower Price Limit" && upperPrice == "Upper Price Limit" && name != "" {
+			err := pdb.DB.Where("category_id = ?", category).
+				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else if lowerPrice == "Lower Price Limit" && upperPrice != "Upper Price Limit" && name != "" {
+			err := pdb.DB.Where("category_id = ?", category).
+				Where("price <= ?", uint(UPInt)).
+				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else if lowerPrice != "Lower Price Limit" && upperPrice == "Upper Price Limit" && name != "" {
+			err := pdb.DB.Where("category_id = ?", category).
+				Where("price >= ?", uint(LPInt)).
+				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else {
+			err := pdb.DB.Where("category_id = ?", category).Where("price >= ?", uint(LPInt)).
+				Where("price <= ?", uint(UPInt)).
+				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
 		}
 	}
 
@@ -462,7 +528,7 @@ func (pdb *PostgresDb) UpdateSellerProfile(id uint, update *models.UpdateUser) e
 	return result.Error
 }
 
-// UploadFileToS3 saves a file to aws bucket and returns the url to the file and an error if there's any
+// UploadFileToS3 send FileToS3 saves a file to aws bucket and returns the url to the file and an error if there's any
 func (pdb *PostgresDb) UploadFileToS3(h *session.Session, file multipart.File, fileName string, size int64) (string, error) {
 	// get the file size and read the file content into a buffer
 	buffer := make([]byte, size)

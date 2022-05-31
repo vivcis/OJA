@@ -7,7 +7,6 @@ import (
 )
 
 func (h *Handler) SearchProductHandler(c *gin.Context) {
-	//Equivalent to param
 	categoryName := c.Query("category")
 	lowerPrice := c.Query("lower-price")
 	upperPrice := c.Query("upper-price")
