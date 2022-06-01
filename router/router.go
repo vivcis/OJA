@@ -4,10 +4,11 @@ import (
 	"github.com/decadevs/shoparena/handlers"
 	"github.com/decadevs/shoparena/server/middleware"
 	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Router struct {
@@ -28,7 +29,6 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	}))
 
 	apirouter := router.Group("/api/v1")
-
 	apirouter.GET("/ping", handlers.PingHandler)
 	apirouter.GET("/searchproducts", h.SearchProductHandler)
 	apirouter.GET("/products", h.GetAllProducts)
@@ -39,12 +39,11 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter.POST("/buyersignup", h.BuyerSignUpHandler)
 	apirouter.POST("/sellersignup", h.SellerSignUpHandler)
 	apirouter.GET("/callback", h.Callback)
-
 	apirouter.GET("/seller/totalorder/:id", h.SellerTotalOrders)
 	apirouter.POST("buyer/forgotpassword", h.BuyerForgotPasswordEMailHandler)
 	apirouter.POST("seller/forgotpassword", h.SellerForgotPasswordEMailHandler)
-	apirouter.PUT("/sellerresetpassword/", h.SellerForgotPasswordResetHandler)
-	apirouter.PUT("/buyerresetpassword/", h.BuyerForgotPasswordResetHandler)
+	apirouter.PUT("/sellerresetpassword", h.SellerForgotPasswordResetHandler)
+	apirouter.PUT("/buyerresetpassword", h.BuyerForgotPasswordResetHandler)
 
 	//All authorized routes here
 	authorizedRoutesBuyer := apirouter.Group("/")
