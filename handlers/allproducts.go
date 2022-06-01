@@ -12,4 +12,8 @@ func (h *Handler) GetAllProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"All_Products": products,
 	})
+	//c.JSON(http.StatusOK, gin.H{
+	//	"all_Products": products,
+	//})
+	c.JSON(http.StatusOK, products)
 }
