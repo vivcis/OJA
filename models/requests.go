@@ -16,4 +16,5 @@ type ResetPasswordRequest struct {
 
 type RatingRequest struct {
 	Rating uint `json:"rating"`
+	Id     uint `json:"Id"`
 }
