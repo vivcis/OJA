@@ -55,14 +55,12 @@ type DB interface {
 	GetSellersProducts(sellerID uint) ([]models.Product, error)
 	FindSellerIndividualProduct(sellerID uint) (*models.Product, error)
 	FindCartProductSeller(sellerID, productID uint) (*models.CartProduct, error)
-
-	GetAllSellerOrders(sellerId uint) ([]models.OrderProducts, error)
-	GetAllBuyerOrders(buyerId uint) ([]models.OrderProducts, error)
-
 	DeleteCartProduct(buyerID, cartProductID uint) error
 	DeleteAllFromCart(buyerID uint) error
 	AddTokenToBlacklist(email string, token string) error
 	DeleteAllSellerProducts(sellerID uint) error
+	GetAllSellerOrders(sellerId uint) ([]models.OrderProducts, error)
+	GetAllBuyerOrders(buyerId uint) ([]models.OrderProducts, error)
 }
 
 // Mailer interface to implement mailing service
