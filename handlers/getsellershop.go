@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/decadevs/shoparena/models"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -31,11 +32,13 @@ func (h *Handler) HandleGetSellerShopByProfileAndProduct() gin.HandlerFunc {
 			})
 			return
 		}
+		var Shop []models.Seller
+		Shop = append(Shop, *Seller)
 
 		//5. return a json object of seller profile and product if found
 		c.IndentedJSON(http.StatusOK, gin.H{
 			"Message":     "Found Seller Shop by Profile and Product",
-			"Seller_Shop": Seller,
+			"Seller_Shop": Shop,
 		})
 
 	}
