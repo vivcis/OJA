@@ -27,14 +27,14 @@ type PostgresDb struct {
 // Init sets up the mongodb instance
 func (pdb *PostgresDb) Init(host, user, password, dbName, port string) error {
 	fmt.Println("connecting to Database.....")
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Africa/Lagos",
-		host, user, password, dbName, port)
+
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Africa/Lagos", host, user, password, dbName, port)
 	var err error
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Println(err)
 		return err
 	}
+
 	if db == nil {
 		return fmt.Errorf("database was not initialized")
 	} else {
@@ -101,7 +101,64 @@ func (pdb *PostgresDb) PrePopulateTables() error {
 	if result.RowsAffected < 1 {
 		pdb.DB.Create(&seller)
 	}
+	product := models.Product{
+		Model:       gorm.Model{},
+		SellerId:    1,
+		CategoryId:  1,
+		Category:    models.Category{},
+		Title:       "shoes",
+		Description: "loafers",
+		Price:       30,
+		Images:      nil,
+		Rating:      4,
+		Quantity:    3,
+	}
+	Product1 := models.Product{
+		Model:       gorm.Model{},
+		SellerId:    1,
+		CategoryId:  2,
+		Category:    models.Category{},
+		Title:       "toaster",
+		Description: "sony press on toaster",
+		Price:       420,
+		Images:      nil,
+		Rating:      4,
+		Quantity:    3,
+	}
+	product2 := models.Product{
+		Model:       gorm.Model{},
+		SellerId:    1,
+		CategoryId:  3,
+		Category:    models.Category{},
+		Title:       "lip gloss",
+		Description: "fenty beauty shimmer gloss",
+		Price:       76,
+		Images:      nil,
+		Rating:      4,
+		Quantity:    3,
+	}
+	Product3 := models.Product{
+		Model:       gorm.Model{},
+		SellerId:    1,
+		CategoryId:  4,
+		Category:    models.Category{},
+		Title:       "pampers",
+		Description: "7 in 1 pamper pack",
+		Price:       100,
+		Images:      nil,
+		Rating:      4,
+		Quantity:    3,
+	}
+	result = pdb.DB.Where("title = ?", "shoes").Find(&product)
+	if result.RowsAffected < 1 {
+		pdb.DB.Create(&product)
+		pdb.DB.Create(&Product1)
+		pdb.DB.Create(&product2)
+		pdb.DB.Create(&Product3)
+	}
+
 	return nil
+
 }
 
 //GET ALL PRODUCTS FROM DB
@@ -132,17 +189,73 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name 
 	categories := models.Category{}
 	var products []models.Product
 
-	LPInt, _ := strconv.Atoi(lowerPrice)
-	UPInt, _ := strconv.Atoi(upperPrice)
+	var LPInt int
+	var UPInt int
 
-	if categoryName == "" {
-		err := pdb.DB.Find(&products).Error
-		if err != nil {
-			fmt.Println(err)
-			return nil, err
+	if lowerPrice != "Lower Price Limit" {
+		LPInt, _ = strconv.Atoi(lowerPrice)
+	}
+
+	if upperPrice != "Upper Price Limit" {
+		UPInt, _ = strconv.Atoi(upperPrice)
+	}
+
+	if categoryName == "All Categories" {
+		if lowerPrice == "Lower Price Limit" && upperPrice == "Upper Price Limit" && name == "" {
+			err := pdb.DB.Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+			return products, nil
+		} else if lowerPrice == "Lower Price Limit" && upperPrice != "Upper Price Limit" && name == "" {
+			err := pdb.DB.Where("price <= ?", uint(UPInt)).Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else if lowerPrice != "Lower Price Limit" && upperPrice == "Upper Price Limit" && name == "" {
+			err := pdb.DB.Where("price >= ?", uint(LPInt)).Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else if lowerPrice != "Lower Price Limit" && upperPrice != "Upper Price Limit" && name == "" {
+			err := pdb.DB.Where("price >= ?", uint(LPInt)).
+				Where("price <= ?", uint(UPInt)).Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else if lowerPrice == "Lower Price Limit" && upperPrice == "Upper Price Limit" && name != "" {
+			err := pdb.DB.Where("title LIKE ?", "%"+name+"%").Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else if lowerPrice == "Lower Price Limit" && upperPrice != "Upper Price Limit" && name != "" {
+			err := pdb.DB.Where("price <= ?", uint(UPInt)).
+				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else if lowerPrice != "Lower Price Limit" && upperPrice == "Upper Price Limit" && name != "" {
+			err := pdb.DB.Where("price >= ?", uint(LPInt)).
+				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else if lowerPrice != "Lower Price Limit" && upperPrice != "Upper Price Limit" && name != "" {
+			err := pdb.DB.Where("price >= ?", uint(LPInt)).Where("price <= ?", uint(UPInt)).
+				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
 		}
-		return products, nil
-	} else {
+	} else if categoryName != "" {
 		err := pdb.DB.Where("name = ?", categoryName).First(&categories).Error
 		if err != nil {
 			fmt.Println(err)
@@ -151,7 +264,6 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name 
 	}
 
 	category := categories.ID
-
 	if LPInt == 0 && UPInt == 0 && name == "" {
 		err := pdb.DB.Where("category_id = ?", category).Find(&products).Error
 		if err != nil {
@@ -209,6 +321,65 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name 
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
+		}
+		if lowerPrice == "Lower Price Limit" && upperPrice == "Upper Price Limit" && name == "" {
+			err := pdb.DB.Where("category_id = ?", category).Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else if lowerPrice == "Lower Price Limit" && upperPrice != "Upper Price Limit" && name == "" {
+			err := pdb.DB.Where("category_id = ?", category).
+				Where("price <= ?", uint(UPInt)).Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else if lowerPrice != "Lower Price Limit" && upperPrice == "Upper Price Limit" && name == "" {
+			err := pdb.DB.Where("category_id = ?", category).
+				Where("price >= ?", uint(LPInt)).Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else if lowerPrice != "Lower Price Limit" && upperPrice != "Upper Price Limit" && name == "" {
+			err := pdb.DB.Where("category_id = ?", category).Where("price >= ?", uint(LPInt)).
+				Where("price <= ?", uint(UPInt)).Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else if lowerPrice == "Lower Price Limit" && upperPrice == "Upper Price Limit" && name != "" {
+			err := pdb.DB.Where("category_id = ?", category).
+				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else if lowerPrice == "Lower Price Limit" && upperPrice != "Upper Price Limit" && name != "" {
+			err := pdb.DB.Where("category_id = ?", category).
+				Where("price <= ?", uint(UPInt)).
+				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else if lowerPrice != "Lower Price Limit" && upperPrice == "Upper Price Limit" && name != "" {
+			err := pdb.DB.Where("category_id = ?", category).
+				Where("price >= ?", uint(LPInt)).
+				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else {
+			err := pdb.DB.Where("category_id = ?", category).Where("price >= ?", uint(LPInt)).
+				Where("price <= ?", uint(UPInt)).
+				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
 		}
 	}
 
@@ -357,7 +528,7 @@ func (pdb *PostgresDb) UpdateSellerProfile(id uint, update *models.UpdateUser) e
 	return result.Error
 }
 
-// UploadFileToS3 saves a file to aws bucket and returns the url to the file and an error if there's any
+// UploadFileToS3 send FileToS3 saves a file to aws bucket and returns the url to the file and an error if there's any
 func (pdb *PostgresDb) UploadFileToS3(h *session.Session, file multipart.File, fileName string, size int64) (string, error) {
 	// get the file size and read the file content into a buffer
 	buffer := make([]byte, size)
@@ -787,6 +958,22 @@ func (pdb *PostgresDb) FindSellerIndividualProduct(sellerID uint) (*models.Produ
 
 }
 
+func (pdb *PostgresDb) AddTokenToBlacklist(email string, token string) error {
+	blacklisted := models.Blacklist{}
+	blacklisted.Token = token
+	blacklisted.Email = email
+	blacklisted.CreatedAt = time.Now()
+
+	err := pdb.DB.Create(&blacklisted).Error
+	if err != nil {
+		log.Println("error in ad token to blacklist")
+		return err
+	}
+	log.Println("token added to blacklist")
+	return nil
+
+}
+
 func (pdb *PostgresDb) FindCartProductSeller(sellerID, productID uint) (*models.CartProduct, error) {
 
 	//initiating an instance of a cart product
@@ -798,4 +985,46 @@ func (pdb *PostgresDb) FindCartProductSeller(sellerID, productID uint) (*models.
 	}
 
 	return cartProduct, nil
+}
+
+func (pdb *PostgresDb) DeleteAllSellerProducts(sellerID uint) error {
+	product := models.Product{}
+	err := pdb.DB.Where("id = ?", sellerID).Delete(&product).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (pdb *PostgresDb) DeleteCartProduct(buyerID, cartProductID uint) error {
+	cart := &models.Cart{}
+	cartProduct := &models.CartProduct{}
+
+	err := pdb.DB.Where("buyer_id = ?", buyerID).First(cart).Error
+	if err != nil {
+		return err
+	}
+
+	err = pdb.DB.Where("cart_id = ?", cart.ID).Where("id = ?", cartProductID).Delete(cartProduct).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (pdb *PostgresDb) DeleteAllFromCart(buyerID uint) error {
+	cart := &models.Cart{}
+	cartProduct := &models.CartProduct{}
+
+	err := pdb.DB.Where("buyer_id = ?", buyerID).First(cart).Error
+	if err != nil {
+		return err
+	}
+
+	err = pdb.DB.Where("cart_id = ?", cart.ID).Delete(cartProduct).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
