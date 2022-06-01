@@ -931,12 +931,43 @@ func (pdb *PostgresDb) FindCartProductSeller(sellerID, productID uint) (*models.
 }
 
 func (pdb *PostgresDb) DeleteAllSellerProducts(sellerID uint) error {
+	product := models.Product{}
+	err := pdb.DB.Where("id = ?", sellerID).Delete(&product).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
-	err := pdb.DB.Where("id = ?", sellerID).Delete(&sellerID).Error
+func (pdb *PostgresDb) DeleteCartProduct(buyerID, cartProductID uint) error {
+	cart := &models.Cart{}
+	cartProduct := &models.CartProduct{}
+
+	err := pdb.DB.Where("buyer_id = ?", buyerID).First(cart).Error
+	if err != nil {
+		return err
+	}
+
+	err = pdb.DB.Where("cart_id = ?", cart.ID).Where("id = ?", cartProductID).Delete(cartProduct).Error
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
 
+func (pdb *PostgresDb) DeleteAllFromCart(buyerID uint) error {
+	cart := &models.Cart{}
+	cartProduct := &models.CartProduct{}
+
+	err := pdb.DB.Where("buyer_id = ?", buyerID).First(cart).Error
+	if err != nil {
+		return err
+	}
+
+	err = pdb.DB.Where("cart_id = ?", cart.ID).Delete(cartProduct).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
