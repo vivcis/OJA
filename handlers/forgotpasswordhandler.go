@@ -148,7 +148,7 @@ func (h *Handler) SellerForgotPasswordEMailHandler(c *gin.Context) {
 	resetToken, _ := h.Mail.GenerateNonAuthToken(seller.Email, secretString)
 	// the link to be clicked in order to perform password reset
 	//link := "http://localhost:8085/api/v1/sellerresetpassword?reset_token=" + *resetToken
-	link := "https://shoparena-frontend.vercel.app/seller/forgot" + *resetToken
+	link := "https://shoparena-frontend.vercel.app/seller/forgot/" + *resetToken
 	// define the body of the email
 	body := "Here is your reset <a href='" + link + "'>link</a>"
 	html := "<strong>" + body + "</strong>"
