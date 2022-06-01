@@ -11,22 +11,22 @@ func (h *Handler) UserRating(c *gin.Context) {
 	if !exists {
 		c.JSON(500, gin.H{"message": "internal server get error"})
 	}
-	user, ok := userI.(*models.Seller)
+	_, ok := userI.(*models.Buyer)
 	if !ok {
 		c.JSON(500, gin.H{"message": "invalid assert"})
 	}
-	seller, err := h.DB.FindSellerByEmail(user.Email)
+	err := c.BindJSON(&rating)
+	if err != nil {
+		c.JSON(404, gin.H{"message": "please fill al fields"})
+		c.Abort()
+		return
+	}
+	seller, err := h.DB.FindSellerById(rating.Id)
 	if err != nil {
 		c.JSON(404, gin.H{"message": "User not found"})
 		c.Abort()
 		return
 	}
-	err = c.BindJSON(&rating)
-	if err != nil {
-		c.JSON(404, gin.H{"message": "something went wrong!"})
-		c.Abort()
-		return
-	}
-	seller.
-	seller.Rating = (seller.TotalRatings + rating.Rating)/seller.NumberOfRatingsReceived)
+
+	seller.Rating = (seller.TotalRatings + rating.Rating) / seller.NumberOfRatingsReceived
 }
