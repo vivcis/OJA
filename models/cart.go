@@ -19,6 +19,7 @@ type CartProduct struct {
 }
 
 type ProductDetails struct {
+	gorm.Model
 	Name     string
 	Price    uint
 	Quantity uint
