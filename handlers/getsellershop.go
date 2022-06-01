@@ -4,22 +4,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 func (h *Handler) HandleGetSellerShopByProfileAndProduct() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		//authorize and authenticate seller
-		seller, err := h.GetUserFromContext(c)
-
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, []string{"internal server error"})
-			return
-		}
-		sellerID := seller.ID
+		sID := c.Param("id")
+		sellerID, _ := strconv.Atoi(sID)
 
 		//find seller with the retrieved ID and return the seller and its product
-		Seller, err := h.DB.FindIndividualSellerShop(sellerID)
+		Seller, err := h.DB.FindIndividualSellerShop(uint(sellerID))
 
 		if err != nil {
 			log.Println("Error finding information in database:", err)

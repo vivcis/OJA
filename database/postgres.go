@@ -456,7 +456,37 @@ func (pdb *PostgresDb) GetAllBuyerOrder(buyerId uint) ([]models.Order, error) {
 	return buyerOrder, nil
 }
 
-// GetAllSellerOrder fetches all buyer orders
+//GetAllBuyerOrders fetches all buyer orders
+func (pdb *PostgresDb) GetAllBuyerOrders(buyerId uint) ([]models.OrderProducts, error) {
+	var buyerOrder []models.Order
+
+	var result []models.OrderProducts
+
+	if err := pdb.DB.Where("buyer_id =?", buyerId).
+		Preload("Seller").
+		Preload("Buyer").
+		Preload("Product").
+		Preload("Product.Category").
+		Find(&buyerOrder).
+		Error; err != nil {
+		log.Println("could not find order", err)
+		return nil, err
+	}
+	for i := 0; i < len(buyerOrder); i++ {
+		re := models.OrderProducts{
+			Fname:        buyerOrder[i].Seller.FirstName,
+			Lname:        buyerOrder[i].Seller.LastName,
+			CategoryName: buyerOrder[i].Product.Category.Name,
+			Title:        buyerOrder[i].Product.Title,
+			Price:        buyerOrder[i].Product.Price,
+			Quantity:     buyerOrder[i].Product.Quantity,
+		}
+		result = append(result, re)
+	}
+	return result, nil
+}
+
+// GetAllSellerOrder fetches all seller orders
 func (pdb *PostgresDb) GetAllSellerOrder(sellerId uint) ([]models.Order, error) {
 	var sellerOrder []models.Order
 	if err := pdb.DB.Where("seller_id= ?", sellerId).Preload("Seller").
@@ -468,6 +498,33 @@ func (pdb *PostgresDb) GetAllSellerOrder(sellerId uint) ([]models.Order, error) 
 		return nil, err
 	}
 	return sellerOrder, nil
+}
+
+// GetAllSellerOrders fetches all seller orders
+func (pdb *PostgresDb) GetAllSellerOrders(sellerId uint) ([]models.OrderProducts, error) {
+	var sellerOrder []models.Order
+
+	var result []models.OrderProducts
+	if err := pdb.DB.Where("seller_id= ?", sellerId).Preload("Seller").
+		Preload("Buyer").
+		Preload("Product").
+		Preload("Product.Category").
+		Find(&sellerOrder).
+		Error; err != nil {
+		return nil, err
+	}
+	for i := 0; i < len(sellerOrder); i++ {
+		re := models.OrderProducts{
+			Fname:        sellerOrder[i].Buyer.FirstName,
+			Lname:        sellerOrder[i].Buyer.LastName,
+			CategoryName: sellerOrder[i].Product.Category.Name,
+			Title:        sellerOrder[i].Product.Title,
+			Price:        sellerOrder[i].Product.Price,
+			Quantity:     sellerOrder[i].Product.Quantity,
+		}
+		result = append(result, re)
+	}
+	return result, nil
 }
 
 // GetAllSellerOrderCount fetches all buyer orders
