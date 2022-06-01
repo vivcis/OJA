@@ -25,6 +25,7 @@ type DB interface {
 	UpdateBuyerImageURL(username, url string, buyerID uint) error
 	UpdateSellerImageURL(username, url string, sellerID uint) error
 	FindSellerByUsername(username string) (*models.Seller, error)
+	FindSellerById(Id uint) (*models.Seller, error)
 	SearchProduct(lowerPrice, upperPrice, category, name string) ([]models.Product, error)
 	TokenInBlacklist(token *string) bool
 	UpdateBuyerProfile(id uint, update *models.UpdateUser) error
