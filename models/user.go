@@ -31,6 +31,12 @@ type UpdateUser struct {
 	Rating      uint   `json:"rating"`
 }
 
+type UpdateRating struct {
+	Rating                  uint `json:"rating"`
+	TotalRatings            uint `json:"total_ratings"`
+	NumberOfRatingsReceived uint `json:"number_of_ratings_received"`
+}
+
 func (user *User) HashPassword() error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
