@@ -382,6 +382,16 @@ func (pdb *PostgresDb) FindSellerByEmail(email string) (*models.Seller, error) {
 	return seller, nil
 }
 
+// FindSellerByEmail finds a user by email
+func (pdb *PostgresDb) FindSellerById(Id uint) (*models.Seller, error) {
+	seller := &models.Seller{}
+	if err := pdb.DB.Where("Id = ?", Id).First(seller).Error; err != nil {
+		return nil, errors.New(string(Id) + " does not exist" + " seller not found")
+	}
+
+	return seller, nil
+}
+
 // FindBuyerByEmail finds a user by email
 func (pdb *PostgresDb) FindBuyerByEmail(email string) (*models.Buyer, error) {
 	buyer := &models.Buyer{}
@@ -461,25 +471,15 @@ func (pdb *PostgresDb) UpdateSellerProfile(id uint, update *models.UpdateUser) e
 			)
 	return result.Error
 }
-func (pdb *PostgresDb) UpdateSellerRating(id uint, update *models.UpdateUser) error {
+func (pdb *PostgresDb) UpdateSellerRating(id uint, update *models.UpdateRating) error {
 	result :=
 		pdb.DB.Model(models.Seller{}).
 			Where("id = ?", id).
 			Updates(
 				models.Seller{
-					Model: gorm.Model{},
-					User: models.User{
-						FirstName:   update.FirstName,
-						LastName:    update.LastName,
-						PhoneNumber: update.PhoneNumber,
-						Address:     update.Address,
-						Email:       update.Email,
-					},
-					Product:                 nil,
-					Orders:                  nil,
-					Rating:                  0,
-					TotalRatings:            update.Rating,
-					NumberOfRatingsReceived: 0,
+					Rating:                  update.Rating,
+					TotalRatings:            update.TotalRatings,
+					NumberOfRatingsReceived: update.NumberOfRatingsReceived,
 				},
 			)
 	return result.Error
