@@ -39,6 +39,9 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	apirouter.POST("/buyersignup", h.BuyerSignUpHandler)
 	apirouter.POST("/sellersignup", h.SellerSignUpHandler)
 	apirouter.GET("/callback", h.Callback)
+
+	apirouter.GET("/seller/shop/:id", h.HandleGetSellerShopByProfileAndProduct())
+
 	apirouter.GET("/seller/totalorder/:id", h.SellerTotalOrders)
 	apirouter.POST("buyer/forgotpassword", h.BuyerForgotPasswordEMailHandler)
 	apirouter.POST("seller/forgotpassword", h.SellerForgotPasswordEMailHandler)
@@ -73,7 +76,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 		authorizedRoutesSeller.DELETE("/deleteproduct/:id", h.DeleteSellerProduct)
 		authorizedRoutesSeller.POST("/createproduct", h.CreateProducts)
 		authorizedRoutesSeller.PUT("/seller/updatepassword", h.SellerUpdatePassword)
-		authorizedRoutesSeller.GET("/seller/shop", h.HandleGetSellerShopByProfileAndProduct())
+
 		authorizedRoutesSeller.GET("/seller/total/product/count", h.GetTotalProductCountForSeller)
 		authorizedRoutesSeller.GET("/seller/product", h.SellerIndividualProduct)
 		authorizedRoutesSeller.PUT("/update/product/:id", h.UpdateProduct)

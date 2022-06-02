@@ -59,6 +59,8 @@ type DB interface {
 	DeleteAllFromCart(buyerID uint) error
 	AddTokenToBlacklist(email string, token string) error
 	DeleteAllSellerProducts(sellerID uint) error
+	GetAllSellerOrders(sellerId uint) ([]models.OrderProducts, error)
+	GetAllBuyerOrders(buyerId uint) ([]models.OrderProducts, error)
 }
 
 // Mailer interface to implement mailing service
