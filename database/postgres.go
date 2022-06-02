@@ -55,14 +55,17 @@ func (pdb *PostgresDb) PrePopulateTables() error {
 	err := pdb.DB.AutoMigrate(&models.Category{}, &models.Seller{}, &models.Product{}, &models.Image{},
 		&models.Buyer{}, &models.Cart{}, &models.CartProduct{}, &models.Order{}, &models.Blacklist{})
 	if err != nil {
+		log.Println("check 1", err)
 		return fmt.Errorf("migration error: %v", err)
 	}
 	categories := []models.Category{{Name: "fashion"}, {Name: "electronics"}, {Name: "health & beauty"}, {Name: "baby products"}, {Name: "phones & tablets"}, {Name: "food drinks"}, {Name: "computing"}, {Name: "sporting goods"}, {Name: "others"}}
 	result := pdb.DB.Find(&models.Category{})
+	log.Println("check 2")
 	if result.RowsAffected < 1 {
+		log.Println("check 3")
 		pdb.DB.Create(&categories)
 	}
-
+	log.Println("check 4")
 	user := models.User{
 		Model:           gorm.Model{},
 		FirstName:       "John",
@@ -78,17 +81,18 @@ func (pdb *PostgresDb) PrePopulateTables() error {
 		IsActive:        true,
 		Token:           "",
 	}
+	log.Println("check 5")
 	buyer := models.Buyer{
 		Model:  gorm.Model{},
 		User:   user,
 		Orders: nil,
 	}
 	result = pdb.DB.Where("buyer = ?", "John").Find(&buyer)
-
+	log.Println("check 6")
 	if result.RowsAffected < 1 {
 		pdb.DB.Create(&buyer)
 	}
-
+	log.Println("check 6")
 	seller := models.Seller{
 		Model:   gorm.Model{},
 		User:    user,
@@ -189,8 +193,11 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name 
 	categories := models.Category{}
 	var products []models.Product
 
-	LPInt, _ := strconv.Atoi(lowerPrice)
-	UPInt, _ := strconv.Atoi(upperPrice)
+	var LPInt int
+	var UPInt int
+
+	LPInt, _ = strconv.Atoi(lowerPrice)
+	UPInt, _ = strconv.Atoi(upperPrice)
 
 	if categoryName == "" {
 		if LPInt == 0 && UPInt == 0 && name == "" {
@@ -225,14 +232,14 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name 
 				fmt.Println(err)
 				return nil, err
 			}
-		} else if LPInt == 0 && name != "" {
+		} else if LPInt == 0 && UPInt != 0 && name != "" {
 			err := pdb.DB.Where("price <= ?", uint(UPInt)).
 				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
-		} else if UPInt == 0 && name != "" {
+		} else if LPInt != 0 && UPInt == 0 && name != "" {
 			err := pdb.DB.Where("price >= ?", uint(LPInt)).
 				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
 			if err != nil {
@@ -256,7 +263,6 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name 
 	}
 
 	category := categories.ID
-
 	if LPInt == 0 && UPInt == 0 && name == "" {
 		err := pdb.DB.Where("category_id = ?", category).Find(&products).Error
 		if err != nil {
@@ -314,6 +320,65 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name 
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
+		}
+		if LPInt == 0 && UPInt == 0 && name == "" {
+			err := pdb.DB.Where("category_id = ?", category).Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else if LPInt == 0 && UPInt != 0 && name == "" {
+			err := pdb.DB.Where("category_id = ?", category).
+				Where("price <= ?", uint(UPInt)).Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else if LPInt != 0 && UPInt == 0 && name == "" {
+			err := pdb.DB.Where("category_id = ?", category).
+				Where("price >= ?", uint(LPInt)).Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else if LPInt != 0 && UPInt != 0 && name == "" {
+			err := pdb.DB.Where("category_id = ?", category).Where("price >= ?", uint(LPInt)).
+				Where("price <= ?", uint(UPInt)).Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else if LPInt == 0 && UPInt == 0 && name != "" {
+			err := pdb.DB.Where("category_id = ?", category).
+				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else if LPInt == 0 && UPInt != 0 && name != "" {
+			err := pdb.DB.Where("category_id = ?", category).
+				Where("price <= ?", uint(UPInt)).
+				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else if LPInt != 0 && UPInt == 0 && name != "" {
+			err := pdb.DB.Where("category_id = ?", category).
+				Where("price >= ?", uint(LPInt)).
+				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+		} else {
+			err := pdb.DB.Where("category_id = ?", category).Where("price >= ?", uint(LPInt)).
+				Where("price <= ?", uint(UPInt)).
+				Where("title LIKE ?", "%"+name+"%").Find(&products).Error
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
 		}
 	}
 
@@ -485,7 +550,7 @@ func (pdb *PostgresDb) UpdateSellerRating(id uint, update *models.UpdateRating) 
 	return result.Error
 }
 
-// UploadFileToS3 saves a file to aws bucket and returns the url to the file and an error if there's any
+// UploadFileToS3 send FileToS3 saves a file to aws bucket and returns the url to the file and an error if there's any
 func (pdb *PostgresDb) UploadFileToS3(h *session.Session, file multipart.File, fileName string, size int64) (string, error) {
 	// get the file size and read the file content into a buffer
 	buffer := make([]byte, size)
@@ -584,7 +649,37 @@ func (pdb *PostgresDb) GetAllBuyerOrder(buyerId uint) ([]models.Order, error) {
 	return buyerOrder, nil
 }
 
-// GetAllSellerOrder fetches all buyer orders
+//GetAllBuyerOrders fetches all buyer orders
+func (pdb *PostgresDb) GetAllBuyerOrders(buyerId uint) ([]models.OrderProducts, error) {
+	var buyerOrder []models.Order
+
+	var result []models.OrderProducts
+
+	if err := pdb.DB.Where("buyer_id =?", buyerId).
+		Preload("Seller").
+		Preload("Buyer").
+		Preload("Product").
+		Preload("Product.Category").
+		Find(&buyerOrder).
+		Error; err != nil {
+		log.Println("could not find order", err)
+		return nil, err
+	}
+	for i := 0; i < len(buyerOrder); i++ {
+		re := models.OrderProducts{
+			Fname:        buyerOrder[i].Seller.FirstName,
+			Lname:        buyerOrder[i].Seller.LastName,
+			CategoryName: buyerOrder[i].Product.Category.Name,
+			Title:        buyerOrder[i].Product.Title,
+			Price:        buyerOrder[i].Product.Price,
+			Quantity:     buyerOrder[i].Product.Quantity,
+		}
+		result = append(result, re)
+	}
+	return result, nil
+}
+
+// GetAllSellerOrder fetches all seller orders
 func (pdb *PostgresDb) GetAllSellerOrder(sellerId uint) ([]models.Order, error) {
 	var sellerOrder []models.Order
 	if err := pdb.DB.Where("seller_id= ?", sellerId).Preload("Seller").
@@ -596,6 +691,33 @@ func (pdb *PostgresDb) GetAllSellerOrder(sellerId uint) ([]models.Order, error) 
 		return nil, err
 	}
 	return sellerOrder, nil
+}
+
+// GetAllSellerOrders fetches all seller orders
+func (pdb *PostgresDb) GetAllSellerOrders(sellerId uint) ([]models.OrderProducts, error) {
+	var sellerOrder []models.Order
+
+	var result []models.OrderProducts
+	if err := pdb.DB.Where("seller_id= ?", sellerId).Preload("Seller").
+		Preload("Buyer").
+		Preload("Product").
+		Preload("Product.Category").
+		Find(&sellerOrder).
+		Error; err != nil {
+		return nil, err
+	}
+	for i := 0; i < len(sellerOrder); i++ {
+		re := models.OrderProducts{
+			Fname:        sellerOrder[i].Buyer.FirstName,
+			Lname:        sellerOrder[i].Buyer.LastName,
+			CategoryName: sellerOrder[i].Product.Category.Name,
+			Title:        sellerOrder[i].Product.Title,
+			Price:        sellerOrder[i].Product.Price,
+			Quantity:     sellerOrder[i].Product.Quantity,
+		}
+		result = append(result, re)
+	}
+	return result, nil
 }
 
 // GetAllSellerOrderCount fetches all buyer orders
@@ -764,10 +886,11 @@ func (pdb *PostgresDb) ViewCartProducts(addedProducts []models.CartProduct) ([]m
 			return nil, err
 		}
 		prodDetail := models.ProductDetails{
-			Name:     product.Title,
-			Price:    addedProducts[i].TotalPrice,
-			Quantity: addedProducts[i].TotalQuantity,
-			Images:   product.Images,
+			Name:          product.Title,
+			Price:         addedProducts[i].TotalPrice,
+			Quantity:      addedProducts[i].TotalQuantity,
+			Images:        product.Images,
+			CartProductID: addedProducts[i].ID,
 		}
 
 		details = append(details, prodDetail)
@@ -888,12 +1011,43 @@ func (pdb *PostgresDb) FindCartProductSeller(sellerID, productID uint) (*models.
 }
 
 func (pdb *PostgresDb) DeleteAllSellerProducts(sellerID uint) error {
+	product := models.Product{}
+	err := pdb.DB.Where("id = ?", sellerID).Delete(&product).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
-	err := pdb.DB.Where("id = ?", sellerID).Delete(&sellerID).Error
+func (pdb *PostgresDb) DeleteCartProduct(buyerID, cartProductID uint) error {
+	cart := &models.Cart{}
+	cartProduct := &models.CartProduct{}
+
+	err := pdb.DB.Where("buyer_id = ?", buyerID).First(cart).Error
+	if err != nil {
+		return err
+	}
+
+	err = pdb.DB.Where("cart_id = ?", cart.ID).Where("id = ?", cartProductID).Delete(cartProduct).Error
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
 
+func (pdb *PostgresDb) DeleteAllFromCart(buyerID uint) error {
+	cart := &models.Cart{}
+	cartProduct := &models.CartProduct{}
+
+	err := pdb.DB.Where("buyer_id = ?", buyerID).First(cart).Error
+	if err != nil {
+		return err
+	}
+
+	err = pdb.DB.Where("cart_id = ?", cart.ID).Delete(cartProduct).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }

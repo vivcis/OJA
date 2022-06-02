@@ -16,10 +16,11 @@ func (s *Service) SendMail(subject, body, recipient, Private, Domain string) err
 
 	mg := mailgun.NewMailgun(yourDomain, privateAPIKey)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
 	// Create a new template
+
 	//err := mg.CreateTemplate(ctx, &mailgun.Template{
 	//	Name: "i_template",
 	//	Version: mailgun.TemplateVersion{
