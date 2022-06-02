@@ -56,6 +56,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 		authorizedRoutesBuyer.GET("/viewcart", h.ViewCartProducts)
 		authorizedRoutesBuyer.POST("/pay", h.Pay)
 		authorizedRoutesBuyer.PUT("/buyer/updatepassword", h.BuyerUpdatePassword)
+		authorizedRoutesBuyer.PUT("/buyer/givesellerrating", h.SellerRating)
 		authorizedRoutesBuyer.PUT("/uploadbuyerpic", h.UploadBuyerImageHandler)
 		authorizedRoutesBuyer.POST("/buyer/logout", h.HandleLogoutBuyer)
 	}

@@ -30,6 +30,7 @@ type DB interface {
 	TokenInBlacklist(token *string) bool
 	UpdateBuyerProfile(id uint, update *models.UpdateUser) error
 	UpdateSellerProfile(id uint, update *models.UpdateUser) error
+	UpdateSellerRating(id uint, update *models.UpdateRating) error
 	UploadFileToS3(h *session.Session, file multipart.File, fileName string, size int64) (string, error)
 	CreateProduct(product models.Product) error
 	GetCategory(category string) (*models.Category, error)
