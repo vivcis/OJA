@@ -859,10 +859,11 @@ func (pdb *PostgresDb) ViewCartProducts(addedProducts []models.CartProduct) ([]m
 			return nil, err
 		}
 		prodDetail := models.ProductDetails{
-			Name:     product.Title,
-			Price:    addedProducts[i].TotalPrice,
-			Quantity: addedProducts[i].TotalQuantity,
-			Images:   product.Images,
+			Name:          product.Title,
+			Price:         addedProducts[i].TotalPrice,
+			Quantity:      addedProducts[i].TotalQuantity,
+			Images:        product.Images,
+			CartProductID: addedProducts[i].ID,
 		}
 
 		details = append(details, prodDetail)

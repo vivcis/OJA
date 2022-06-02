@@ -20,8 +20,9 @@ type CartProduct struct {
 
 type ProductDetails struct {
 	gorm.Model
-	Name     string
-	Price    uint
-	Quantity uint
-	Images   []Image
+	Name          string
+	Price         uint
+	Quantity      uint
+	Images        []Image
+	CartProductID uint
 }
