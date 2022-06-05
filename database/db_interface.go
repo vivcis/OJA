@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/decadevs/shoparena/models"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/joho/godotenv"
 	"log"
 	"mime/multipart"
@@ -74,6 +75,7 @@ type Mailer interface {
 type Paystack interface {
 	InitializePayment(info []byte) (string, error)
 	Callback(reference string) (*http.Response, error)
+	PayStackDecodeToken(token, secret string) (jwt.MapClaims, error)
 }
 
 // ValidationError defines error that occur due to validation

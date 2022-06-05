@@ -66,7 +66,7 @@ func (h *Handler) Pay(c *gin.Context) {
 		FirstName:   user.FirstName,
 		LastName:    user.LastName,
 		Email:       user.Email,
-		CallBackUrl: "http://localhost:8085/api/v1/callback",
+		CallBackUrl: "https://oja-ecommerce.herokuapp.com/api/v1/callback",
 		Reference:   *token,
 	}
 	m, err := json.Marshal(transaction)
@@ -98,9 +98,13 @@ func (h *Handler) Callback(c *gin.Context) {
 	}
 
 	//fmt.Printf("this is before the decode %v \n", resp)
-	claims, err := DecodeTokenForPayment(reference)
+	//claims, err := DecodeTokenForPayment(reference)
+
+	secret := os.Getenv("JWT_SECRET")
+	claims, err := h.Paystack.PayStackDecodeToken(reference, secret)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "details not valid"})
+		return
 	}
 
 	var ID string
@@ -124,15 +128,4 @@ func (h *Handler) Callback(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, "payment successful")
-}
-
-func DecodeTokenForPayment(tokenString string) (jwt.MapClaims, error) {
-
-	token, err := jwt.Parse(tokenString, nil)
-	if token == nil {
-		return nil, err
-	}
-	claims, _ := token.Claims.(jwt.MapClaims)
-
-	return claims, err
 }
