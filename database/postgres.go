@@ -837,8 +837,7 @@ func (pdb *PostgresDb) DeletePaidFromCart(cartID uint) error {
 		}
 	}
 
-	err = pdb.DB.Where("cart_id = ?", cartID).Where("order_status = ?", false).
-		Delete(&cartProducts).Error
+	err = pdb.DB.Where("cart_id = ?", cartID).Delete(&cartProducts).Error
 	if err != nil {
 		return err
 	}
