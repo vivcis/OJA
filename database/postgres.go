@@ -382,7 +382,7 @@ func (pdb *PostgresDb) FindSellerByEmail(email string) (*models.Seller, error) {
 func (pdb *PostgresDb) FindSellerById(Id uint) (*models.Seller, error) {
 	seller := &models.Seller{}
 	if err := pdb.DB.Where("seller_id = ?", Id).First(seller).Error; err != nil {
-		return nil, errors.New(string(Id) + " does not exist" + " seller not found")
+		return nil, errors.New("Id does not, exist seller not found")
 	}
 
 	return seller, nil
@@ -392,7 +392,7 @@ func (pdb *PostgresDb) FindSellerById(Id uint) (*models.Seller, error) {
 func (pdb *PostgresDb) FindProductById(Id uint) (*models.Product, error) {
 	product := &models.Product{}
 	if err := pdb.DB.Where("product_id = ?", Id).First(product).Error; err != nil {
-		return nil, errors.New(string(Id) + " does not exist" + " product not found")
+		return nil, errors.New("Id does not exist, seller not found")
 	}
 
 	return product, nil
