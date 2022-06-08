@@ -844,7 +844,7 @@ func (pdb *PostgresDb) ViewCartProducts(addedProducts []models.CartProduct) ([]m
 
 	for i := 0; i < len(addedProducts); i++ {
 		var product *models.Product
-		err := pdb.DB.Where("id = ?", addedProducts[i].ProductID).First(&product).Error
+		err := pdb.DB.Where("id = ?", addedProducts[i].ProductID).Preload("Images").First(&product).Error
 		if err != nil {
 			return nil, err
 		}
@@ -895,7 +895,7 @@ func (pdb *PostgresDb) DeletePaidFromCart(cartID uint) error {
 func (pdb *PostgresDb) GetSellersProducts(sellerID uint) ([]models.Product, error) {
 	var products []models.Product
 
-	err := pdb.DB.Where("seller_id = ?", sellerID).Find(&products).Error
+	err := pdb.DB.Where("seller_id = ?", sellerID).Preload("Images").Find(&products).Error
 	if err != nil {
 		log.Println("Error from GetSellersProduct in DB")
 		return nil, err
