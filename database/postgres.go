@@ -381,6 +381,26 @@ func (pdb *PostgresDb) FindSellerByEmail(email string) (*models.Seller, error) {
 	return seller, nil
 }
 
+// FindSellerByID finds a user by Id
+func (pdb *PostgresDb) FindSellerById(Id uint) (*models.Seller, error) {
+	seller := &models.Seller{}
+	if err := pdb.DB.Where("seller_id = ?", Id).First(seller).Error; err != nil {
+		return nil, errors.New("Id does not, exist seller not found")
+	}
+
+	return seller, nil
+}
+
+// FindProductByID finds a product by Id
+func (pdb *PostgresDb) FindProductById(Id uint) (*models.Product, error) {
+	product := &models.Product{}
+	if err := pdb.DB.Where("product_id = ?", Id).First(product).Error; err != nil {
+		return nil, errors.New("Id does not exist, seller not found")
+	}
+
+	return product, nil
+}
+
 // FindBuyerByEmail finds a user by email
 func (pdb *PostgresDb) FindBuyerByEmail(email string) (*models.Buyer, error) {
 	buyer := &models.Buyer{}
@@ -461,11 +481,44 @@ func (pdb *PostgresDb) UpdateSellerProfile(id uint, update *models.UpdateUser) e
 	return result.Error
 }
 
+// UpdateSellerRating updates a sellers' rating by Id
+func (pdb *PostgresDb) UpdateSellerRating(id uint, update *models.UpdateRating) error {
+	result :=
+		pdb.DB.Model(models.Seller{}).
+			Where("id = ?", id).
+			Updates(
+				models.Seller{
+					Rating:                  update.Rating,
+					TotalRatings:            update.TotalRatings,
+					NumberOfRatingsReceived: update.NumberOfRatingsReceived,
+				},
+			)
+	return result.Error
+}
+
+// UpdateProductRating updates a products' rating by Id
+func (pdb *PostgresDb) UpdateProductRating(id uint, update *models.UpdateRating) error {
+	result :=
+		pdb.DB.Model(models.Product{}).
+			Where("id = ?", id).
+			Updates(
+				models.Product{
+					Rating:                  update.Rating,
+					TotalRatings:            update.TotalRatings,
+					NumberOfRatingsReceived: update.NumberOfRatingsReceived,
+				},
+			)
+	return result.Error
+}
+
 // UploadFileToS3 send FileToS3 saves a file to aws bucket and returns the url to the file and an error if there's any
 func (pdb *PostgresDb) UploadFileToS3(h *session.Session, file multipart.File, fileName string, size int64) (string, error) {
 	// get the file size and read the file content into a buffer
 	buffer := make([]byte, size)
-	file.Read(buffer)
+	_, err2 := file.Read(buffer)
+	if err2 != nil {
+		return "", err2
+	}
 	// config settings: this is where you choose the bucket,
 	// filename, content-type and storage class of the file you're uploading
 	url := "https://s3-eu-west-3.amazonaws.com/arp-rental/" + fileName
@@ -794,7 +847,7 @@ func (pdb *PostgresDb) ViewCartProducts(addedProducts []models.CartProduct) ([]m
 
 	for i := 0; i < len(addedProducts); i++ {
 		var product *models.Product
-		err := pdb.DB.Where("id = ?", addedProducts[i].ProductID).First(&product).Error
+		err := pdb.DB.Where("id = ?", addedProducts[i].ProductID).Preload("Images").First(&product).Error
 		if err != nil {
 			return nil, err
 		}
@@ -845,7 +898,7 @@ func (pdb *PostgresDb) DeletePaidFromCart(cartID uint) error {
 func (pdb *PostgresDb) GetSellersProducts(sellerID uint) ([]models.Product, error) {
 	var products []models.Product
 
-	err := pdb.DB.Where("seller_id = ?", sellerID).Find(&products).Error
+	err := pdb.DB.Where("seller_id = ?", sellerID).Preload("Images").Find(&products).Error
 	if err != nil {
 		log.Println("Error from GetSellersProduct in DB")
 		return nil, err
