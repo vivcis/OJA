@@ -104,61 +104,6 @@ func (pdb *PostgresDb) PrePopulateTables() error {
 	if result.RowsAffected < 1 {
 		pdb.DB.Create(&seller)
 	}
-	product := models.Product{
-		Model:       gorm.Model{},
-		SellerId:    1,
-		CategoryId:  1,
-		Category:    models.Category{},
-		Title:       "shoes",
-		Description: "loafers",
-		Price:       30,
-		Images:      nil,
-		Rating:      4,
-		Quantity:    3,
-	}
-	Product1 := models.Product{
-		Model:       gorm.Model{},
-		SellerId:    1,
-		CategoryId:  2,
-		Category:    models.Category{},
-		Title:       "toaster",
-		Description: "sony press on toaster",
-		Price:       420,
-		Images:      nil,
-		Rating:      4,
-		Quantity:    3,
-	}
-	product2 := models.Product{
-		Model:       gorm.Model{},
-		SellerId:    1,
-		CategoryId:  3,
-		Category:    models.Category{},
-		Title:       "lip gloss",
-		Description: "fenty beauty shimmer gloss",
-		Price:       76,
-		Images:      nil,
-		Rating:      4,
-		Quantity:    3,
-	}
-	Product3 := models.Product{
-		Model:       gorm.Model{},
-		SellerId:    1,
-		CategoryId:  4,
-		Category:    models.Category{},
-		Title:       "pampers",
-		Description: "7 in 1 pamper pack",
-		Price:       100,
-		Images:      nil,
-		Rating:      4,
-		Quantity:    3,
-	}
-	result = pdb.DB.Where("title = ?", "shoes").Find(&product)
-	if result.RowsAffected < 1 {
-		pdb.DB.Create(&product)
-		pdb.DB.Create(&Product1)
-		pdb.DB.Create(&product2)
-		pdb.DB.Create(&Product3)
-	}
 
 	return nil
 
@@ -713,7 +658,7 @@ func (pdb *PostgresDb) GetAllSellers() ([]models.Seller, error) {
 // GetProductByID returns a particular product by it's ID
 func (pdb *PostgresDb) GetProductByID(id uint) (*models.Product, error) {
 	product := &models.Product{}
-	if err := pdb.DB.Where("ID=?", id).First(product).Error; err != nil {
+	if err := pdb.DB.Where("ID=?", id).Preload("Images").First(product).Error; err != nil {
 		return nil, err
 	}
 	return product, nil
