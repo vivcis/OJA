@@ -29,6 +29,7 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 	}))
 
 	apirouter := router.Group("/api/v1")
+
 	apirouter.GET("/ping", handlers.PingHandler)
 	apirouter.GET("/searchproducts", h.SearchProductHandler)
 	apirouter.GET("/products", h.GetAllProducts)
@@ -58,20 +59,18 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 		authorizedRoutesBuyer.GET("/viewcart", h.ViewCartProducts)
 		authorizedRoutesBuyer.POST("/pay", h.Pay)
 		authorizedRoutesBuyer.PUT("/buyer/updatepassword", h.BuyerUpdatePassword)
-		authorizedRoutesBuyer.PUT("/buyer/givesellerrating", h.SellerRating)
 		authorizedRoutesBuyer.PUT("/uploadbuyerpic", h.UploadBuyerImageHandler)
 		authorizedRoutesBuyer.DELETE("/deletefromcart/:id", h.DeleteFromCart)
 		authorizedRoutesBuyer.DELETE("/deleteallcart", h.DeleteAllCartProducts)
 		authorizedRoutesBuyer.POST("/buyer/logout", h.HandleLogoutBuyer)
-		authorizedRoutesBuyer.POST("/buyer/ratingaseller", h.SellerRating)
+		authorizedRoutesBuyer.GET("/buyerorders", h.AllBuyerOrders)
 	}
 	authorizedRoutesSeller := apirouter.Group("/")
 	authorizedRoutesSeller.Use(middleware.AuthorizeSeller(h.DB.FindSellerByEmail, h.DB.TokenInBlacklist))
 	{
 
 		authorizedRoutesSeller.PUT("/updatesellerprofile", h.UpdateSellerProfileHandler)
-		authorizedRoutesBuyer.GET("/buyerorders/", h.AllBuyerOrders)
-		authorizedRoutesSeller.GET("/sellerorders/", h.AllSellerOrders)
+		authorizedRoutesSeller.GET("/sellerorders", h.AllSellerOrders)
 		authorizedRoutesSeller.GET("/seller/totalorder/", h.SellerTotalOrders)
 		authorizedRoutesSeller.GET("/getsellerprofile", h.GetSellerProfileHandler)
 		authorizedRoutesSeller.GET("/seller/total/product/sold", h.GetTotalSoldProductCount)
