@@ -187,16 +187,17 @@ func (pdb *PostgresDb) UpdateProductByID(Id uint, prod models.Product) error {
 
 // SearchProduct Searches all products from DB
 func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name string) ([]models.Product, error) {
-	categories := models.Category{}
 	var products []models.Product
 
 	var LPInt int
 	var UPInt int
+	var categoryInt int
 
 	LPInt, _ = strconv.Atoi(lowerPrice)
 	UPInt, _ = strconv.Atoi(upperPrice)
+	categoryInt, _ = strconv.Atoi(categoryName)
 
-	if categoryName == "All Categories" {
+	if categoryInt == 0 {
 		if LPInt == 0 && UPInt == 0 && name == "" {
 			err := pdb.DB.Preload("Images").Find(&products).Error
 			if err != nil {
@@ -251,49 +252,43 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name 
 				return nil, err
 			}
 		}
-	} else if categoryName != "" {
-		err := pdb.DB.Where("name = ?", categoryName).Preload("Images").First(&categories).Error
-		if err != nil {
-			fmt.Println(err)
-			return nil, err
-		}
-		category := categories.ID
+	} else if categoryInt != 0 {
 		if LPInt == 0 && UPInt == 0 && name == "" {
-			err := pdb.DB.Where("category_id = ?", category).Preload("Images").Find(&products).Error
+			err := pdb.DB.Where("category_id = ?", uint(categoryInt)).Preload("Images").Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
 		} else if LPInt == 0 && name == "" {
-			err := pdb.DB.Where("category_id = ?", category).
+			err := pdb.DB.Where("category_id = ?", uint(categoryInt)).
 				Where("price <= ?", uint(UPInt)).Preload("Images").Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
 		} else if UPInt == 0 && name == "" {
-			err := pdb.DB.Where("category_id = ?", category).
+			err := pdb.DB.Where("category_id = ?", uint(categoryInt)).
 				Where("price >= ?", uint(LPInt)).Preload("Images").Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
 		} else if LPInt != 0 && UPInt != 0 && name == "" {
-			err := pdb.DB.Where("category_id = ?", category).Where("price >= ?", uint(LPInt)).
+			err := pdb.DB.Where("category_id = ?", uint(categoryInt)).Where("price >= ?", uint(LPInt)).
 				Where("price <= ?", uint(UPInt)).Preload("Images").Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
 		} else if LPInt == 0 && UPInt == 0 && name != "" {
-			err := pdb.DB.Where("category_id = ?", category).
+			err := pdb.DB.Where("category_id = ?", uint(categoryInt)).
 				Where("title LIKE ?", "%"+name+"%").Preload("Images").Find(&products).Error
 			if err != nil {
 				fmt.Println(err)
 				return nil, err
 			}
 		} else if LPInt == 0 && name != "" {
-			err := pdb.DB.Where("category_id = ?", category).
+			err := pdb.DB.Where("category_id = ?", uint(categoryInt)).
 				Where("price <= ?", uint(UPInt)).
 				Where("title LIKE ?", "%"+name+"%").Preload("Images").Find(&products).Error
 			if err != nil {
@@ -301,7 +296,7 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name 
 				return nil, err
 			}
 		} else if UPInt == 0 && name != "" {
-			err := pdb.DB.Where("category_id = ?", category).
+			err := pdb.DB.Where("category_id = ?", uint(categoryInt)).
 				Where("price >= ?", uint(LPInt)).
 				Where("title LIKE ?", "%"+name+"%").Preload("Images").Find(&products).Error
 			if err != nil {
@@ -309,7 +304,7 @@ func (pdb *PostgresDb) SearchProduct(lowerPrice, upperPrice, categoryName, name 
 				return nil, err
 			}
 		} else {
-			err := pdb.DB.Where("category_id = ?", category).Where("price >= ?", uint(LPInt)).
+			err := pdb.DB.Where("category_id = ?", uint(categoryInt)).Where("price >= ?", uint(LPInt)).
 				Where("price <= ?", uint(UPInt)).
 				Where("title LIKE ?", "%"+name+"%").Preload("Images").Find(&products).Error
 			if err != nil {
