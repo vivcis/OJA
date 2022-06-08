@@ -710,7 +710,7 @@ func (pdb *PostgresDb) GetAllSellers() ([]models.Seller, error) {
 // GetProductByID returns a particular product by it's ID
 func (pdb *PostgresDb) GetProductByID(id uint) (*models.Product, error) {
 	product := &models.Product{}
-	if err := pdb.DB.Where("ID=?", id).First(product).Error; err != nil {
+	if err := pdb.DB.Where("ID=?", id).Preload("Images").First(product).Error; err != nil {
 		return nil, err
 	}
 	return product, nil
