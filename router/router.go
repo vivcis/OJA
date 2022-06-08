@@ -64,6 +64,8 @@ func SetupRouter(h *handlers.Handler) (*gin.Engine, string) {
 		authorizedRoutesBuyer.DELETE("/deleteallcart", h.DeleteAllCartProducts)
 		authorizedRoutesBuyer.POST("/buyer/logout", h.HandleLogoutBuyer)
 		authorizedRoutesBuyer.GET("/buyerorders", h.AllBuyerOrders)
+		authorizedRoutesBuyer.POST("/buyer/rateaseller", h.SellerRating)
+		authorizedRoutesBuyer.POST("/buyer/rateaproduct", h.ProductRating)
 	}
 	authorizedRoutesSeller := apirouter.Group("/")
 	authorizedRoutesSeller.Use(middleware.AuthorizeSeller(h.DB.FindSellerByEmail, h.DB.TokenInBlacklist))
