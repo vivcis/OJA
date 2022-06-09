@@ -812,13 +812,26 @@ func (pdb *PostgresDb) ViewCartProducts(addedProducts []models.CartProduct) ([]m
 
 func (pdb *PostgresDb) DeletePaidFromCart(cartID uint) error {
 	var cartProducts []models.CartProduct
+	var cart models.Cart
 
-	err := pdb.DB.Where("cart_id = ?", cartID).Where("order_status = ?", false).
+	log.Println("buyer_1d coming in", cartID)
+
+	err := pdb.DB.Where("buyer_id = ?", cartID).First(&cart).Error
+	if err != nil {
+		return err
+	}
+
+	log.Println("cartid coming in", cart.ID)
+
+	err = pdb.DB.Where("cart_id = ?", cart.ID).Where("order_status = ?", false).
 		Find(&cartProducts).Error
 	if err != nil {
 		return err
 	}
 
+	log.Println("hello world", cartProducts)
+
+	var totalOrders []models.Order
 	for i := 0; i < len(cartProducts); i++ {
 
 		orders := models.Order{
@@ -826,14 +839,16 @@ func (pdb *PostgresDb) DeletePaidFromCart(cartID uint) error {
 			BuyerId:   cartProducts[i].BuyerId,
 			ProductId: cartProducts[i].ProductID,
 		}
+		totalOrders = append(totalOrders, orders)
 
-		err = pdb.DB.Create(&orders).Error
-		if err != nil {
-			return err
-		}
 	}
 
-	err = pdb.DB.Where("cart_id = ?", cartID).Delete(&cartProducts).Error
+	err = pdb.DB.Create(&totalOrders).Error
+	if err != nil {
+		return err
+	}
+
+	err = pdb.DB.Where("cart_id = ?", cart.ID).Delete(&cartProducts).Error
 	if err != nil {
 		return err
 	}
@@ -895,7 +910,7 @@ func (pdb *PostgresDb) FindCartProductSeller(sellerID, productID uint) (*models.
 
 func (pdb *PostgresDb) DeleteAllSellerProducts(sellerID uint) error {
 	product := models.Product{}
-	err := pdb.DB.Where("id = ?", sellerID).Delete(&product).Error
+	err := pdb.DB.Where("seller_id = ?", sellerID).Delete(&product).Error
 	if err != nil {
 		return err
 	}
