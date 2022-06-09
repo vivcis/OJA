@@ -91,11 +91,13 @@ func (h *Handler) CreateProducts(c *gin.Context) {
 	if err != nil {
 		log.Println(err)
 		response.JSON(c, "", http.StatusBadRequest, nil, []string{err.Error()})
+		return
 	}
 	CategoryID, err := strconv.Atoi(c.PostForm("category_id"))
 	if err != nil {
 		log.Println(err)
 		response.JSON(c, "", http.StatusBadRequest, nil, []string{err.Error()})
+		return
 	}
 
 	products := models.Product{
@@ -113,7 +115,7 @@ func (h *Handler) CreateProducts(c *gin.Context) {
 		Rating:      uint(rating),
 		Quantity:    uint(quantity),
 	}
-
+	log.Println(products, CategoryID)
 	err = h.DB.CreateProduct(products)
 	if err != nil {
 		response.JSON(c, "", http.StatusBadRequest, nil, []string{err.Error()})
