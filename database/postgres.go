@@ -892,7 +892,7 @@ func (pdb *PostgresDb) FindCartProductSeller(sellerID, productID uint) (*models.
 
 func (pdb *PostgresDb) DeleteAllSellerProducts(sellerID uint) error {
 	product := models.Product{}
-	err := pdb.DB.Where("id = ?", sellerID).Delete(&product).Error
+	err := pdb.DB.Where("seller_id = ?", sellerID).Delete(&product).Error
 	if err != nil {
 		return err
 	}
