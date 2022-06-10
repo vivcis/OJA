@@ -102,6 +102,7 @@ type DBParams struct {
 
 func InitDBParams() DBParams {
 	ginMode := os.Getenv("GIN_MODE")
+	log.Println(ginMode)
 	if ginMode != "release" {
 		errEnv := godotenv.Load()
 		if errEnv != nil {
