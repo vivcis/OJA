@@ -90,10 +90,10 @@ func (h *Handler) Pay(c *gin.Context) {
 func (h *Handler) Callback(c *gin.Context) {
 	reference := c.Query("reference")
 
-	_, err := h.Paystack.Callback(reference)
+	_, err := h.Paystack.VerifyReference(reference)
 	if err != nil {
 		log.Println(err)
-		c.JSON(http.StatusBadRequest, gin.H{"message": "payment not valid"})
+		c.Redirect(http.StatusBadRequest, "https://oja-ecommerce.herokuapp.com/api/v1/buyer/payment/unsuccessful")
 		return
 	}
 
@@ -103,7 +103,7 @@ func (h *Handler) Callback(c *gin.Context) {
 	secret := os.Getenv("JWT_SECRET")
 	claims, err := h.Paystack.PayStackDecodeToken(reference, secret)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "details not valid"})
+		c.Redirect(http.StatusBadRequest, "https://oja-ecommerce.herokuapp.com/api/v1/buyer/payment/unsuccessful")
 		return
 	}
 
@@ -116,16 +116,17 @@ func (h *Handler) Callback(c *gin.Context) {
 
 	cartID, err := strconv.Atoi(ID)
 	if err != nil {
-		fmt.Printf("error converting stringed cartID to int")
+		c.Redirect(http.StatusBadRequest, "https://oja-ecommerce.herokuapp.com/api/v1/buyer/payment/unsuccessful")
 		return
 	}
 
 	err = h.DB.DeletePaidFromCart(uint(cartID))
 	if err != nil {
 		log.Println(err)
-		c.JSON(http.StatusBadRequest, gin.H{"message": "cannot delete products from cart"})
+		c.Redirect(http.StatusBadRequest, "https://oja-ecommerce.herokuapp.com/api/v1/buyer/payment/unsuccessful")
 		return
 	}
 
-	c.JSON(http.StatusOK, "payment successful")
+	c.Redirect(http.StatusOK, "https://oja-ecommerce.herokuapp.com/api/v1/buyer/payment/successful")
+	return
 }

@@ -78,7 +78,7 @@ type Mailer interface {
 //Paystack interface
 type Paystack interface {
 	InitializePayment(info []byte) (string, error)
-	Callback(reference string) (*http.Response, error)
+	VerifyReference(reference string) (*http.Response, error)
 	PayStackDecodeToken(token, secret string) (jwt.MapClaims, error)
 }
 
