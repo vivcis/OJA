@@ -30,6 +30,9 @@ func (pdb *PostgresDb) Init(host, user, password, dbName, port string) error {
 
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Africa/Lagos", host, user, password, dbName, port)
 	var err error
+	if os.Getenv("DATABASE_URL") != "" {
+		dsn = os.Getenv("DATABASE_URL")
+	}
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return err
@@ -156,7 +159,6 @@ func (pdb *PostgresDb) PrePopulateTables() error {
 		pdb.DB.Create(&product2)
 		pdb.DB.Create(&Product3)
 	}
-
 	return nil
 
 }
@@ -962,7 +964,7 @@ func (pdb *PostgresDb) FindCartProductSeller(sellerID, productID uint) (*models.
 
 func (pdb *PostgresDb) DeleteAllSellerProducts(sellerID uint) error {
 	product := models.Product{}
-	err := pdb.DB.Where("id = ?", sellerID).Delete(&product).Error
+	err := pdb.DB.Where("seller_id = ?", sellerID).Delete(&product).Error
 	if err != nil {
 		return err
 	}
