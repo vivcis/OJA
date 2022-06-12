@@ -66,7 +66,7 @@ func (h *Handler) Pay(c *gin.Context) {
 		FirstName:   user.FirstName,
 		LastName:    user.LastName,
 		Email:       user.Email,
-		CallBackUrl: "https://shoparena-frontend-phi.vercel.app",
+		CallBackUrl: "https://shoparena-frontend-phi.vercel.app/callback",
 		Reference:   *token,
 	}
 	m, err := json.Marshal(transaction)
@@ -119,14 +119,15 @@ func (h *Handler) Callback(c *gin.Context) {
 		fmt.Printf("error converting stringed cartID to int")
 		return
 	}
-
+	log.Println("got here 1")
 	err = h.DB.DeletePaidFromCart(uint(cartID))
 	if err != nil {
 		log.Println(err)
 		c.Redirect(http.StatusBadRequest, "https://shoparena-frontend-phi.vercel.app/buyer/payment/unsuccessful")
 		return
 	}
-
+	log.Println("got here 2")
 	c.Redirect(http.StatusOK, "https://shoparena-frontend-phi.vercel.app/buyer/payment/successful")
+	log.Println("got here 3")
 	return
 }
