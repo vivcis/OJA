@@ -127,6 +127,6 @@ func (h *Handler) Callback(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(http.StatusOK, "https://shoparena-frontend-phi.vercel.app/")
+	c.Redirect(http.StatusOK, "https://oja-ecommerce.herokuapp.com/api/v1/")
 	return
 }
