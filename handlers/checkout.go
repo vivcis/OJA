@@ -93,7 +93,7 @@ func (h *Handler) Callback(c *gin.Context) {
 	_, err := h.Paystack.VerifyReference(reference)
 	if err != nil {
 		log.Println(err)
-		c.Redirect(http.StatusBadRequest, "https://oja-ecommerce.herokuapp.com/api/v1/buyer/payment/unsuccessful")
+		c.Redirect(http.StatusBadRequest, "https://shoparena-frontend-phi.vercel.app/buyer/payment/unsuccessful")
 		return
 	}
 
@@ -103,7 +103,7 @@ func (h *Handler) Callback(c *gin.Context) {
 	secret := os.Getenv("JWT_SECRET")
 	claims, err := h.Paystack.PayStackDecodeToken(reference, secret)
 	if err != nil {
-		c.Redirect(http.StatusBadRequest, "https://oja-ecommerce.herokuapp.com/api/v1/buyer/payment/unsuccessful")
+		c.Redirect(http.StatusBadRequest, "https://shoparena-frontend-phi.vercel.app/buyer/payment/unsuccessful")
 		return
 	}
 
@@ -116,17 +116,17 @@ func (h *Handler) Callback(c *gin.Context) {
 
 	cartID, err := strconv.Atoi(ID)
 	if err != nil {
-		c.Redirect(http.StatusBadRequest, "https://oja-ecommerce.herokuapp.com/api/v1/buyer/payment/unsuccessful")
+		fmt.Printf("error converting stringed cartID to int")
 		return
 	}
 
 	err = h.DB.DeletePaidFromCart(uint(cartID))
 	if err != nil {
 		log.Println(err)
-		c.Redirect(http.StatusBadRequest, "https://oja-ecommerce.herokuapp.com/api/v1/buyer/payment/unsuccessful")
+		c.Redirect(http.StatusBadRequest, "https://shoparena-frontend-phi.vercel.app/buyer/payment/unsuccessful")
 		return
 	}
 
-	c.Redirect(http.StatusOK, "https://oja-ecommerce.herokuapp.com/api/v1/buyer/payment/successful")
+	c.Redirect(http.StatusOK, "https://shoparena-frontend-phi.vercel.app/buyer/payment/successful")
 	return
 }
