@@ -93,7 +93,7 @@ func (h *Handler) Callback(c *gin.Context) {
 	_, err := h.Paystack.VerifyReference(reference)
 	if err != nil {
 		log.Println(err)
-		c.Redirect(http.StatusBadRequest, "https://shoparena-frontend-phi.vercel.app/buyer/payment/unsuccessful")
+		c.Redirect(http.StatusFound, "https://shoparena-frontend-phi.vercel.app/buyer/payment/unsuccessful")
 		return
 	}
 
@@ -103,7 +103,7 @@ func (h *Handler) Callback(c *gin.Context) {
 	secret := os.Getenv("JWT_SECRET")
 	claims, err := h.Paystack.PayStackDecodeToken(reference, secret)
 	if err != nil {
-		c.Redirect(http.StatusBadRequest, "https://shoparena-frontend-phi.vercel.app/buyer/payment/unsuccessful")
+		c.Redirect(http.StatusFound, "https://shoparena-frontend-phi.vercel.app/buyer/payment/unsuccessful")
 		return
 	}
 
@@ -123,10 +123,10 @@ func (h *Handler) Callback(c *gin.Context) {
 	err = h.DB.DeletePaidFromCart(uint(cartID))
 	if err != nil {
 		log.Println(err)
-		c.Redirect(http.StatusBadRequest, "https://shoparena-frontend-phi.vercel.app/buyer/payment/unsuccessful")
+		c.Redirect(http.StatusFound, "https://shoparena-frontend-phi.vercel.app/buyer/payment/unsuccessful")
 		return
 	}
 
-	c.Redirect(http.StatusOK, "https://oja-ecommerce.herokuapp.com/api/v1/")
+	c.Redirect(http.StatusFound, "https://shoparena-frontend-phi.vercel.app/buyer/payment/successful")
 	return
 }
