@@ -26,7 +26,7 @@ type PostgresDb struct {
 
 // Init sets up the mongodb instance
 func (pdb *PostgresDb) Init(host, user, password, dbName, port string) error {
-	fmt.Println("connecting to Database.....")
+	fmt.Println("Connecting to Database...")
 
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Africa/Lagos", host, user, password, dbName, port)
 	var err error
@@ -41,7 +41,7 @@ func (pdb *PostgresDb) Init(host, user, password, dbName, port string) error {
 	if db == nil {
 		return fmt.Errorf("database was not initialized")
 	} else {
-		fmt.Println("Connected to Database")
+		fmt.Println("connection secured")
 	}
 
 	pdb.DB = db
